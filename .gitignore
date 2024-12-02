@@ -1,0 +1,46 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.pdb
+*.log
+
+# Entornos virtuales de Python
+env/
+venv/
+.venv/
+
+# Dependencias
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# PostgreSQL
+*.db
+*.sql
+*.sqlite
+*.bak
+pgdata/
+
+# Archivos de configuración del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración locales
+.env
+*.env
+
+*.log
+*.tmp
+
+
+.vscode/
+.idea/
+
+alembic/
