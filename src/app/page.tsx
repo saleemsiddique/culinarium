@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="bg-[var(--background)]">
+    <div className="h-screen w-full bg-[var(--background)]">
       <section>Proximamente</section>
     </div>
   );

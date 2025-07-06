@@ -11,7 +11,6 @@ interface HeaderProps {
 export default function Header({ isLoggedIn }: HeaderProps) {
   const pathname = usePathname();
 
-  // Navigation links: Home always + CTA or Profile
   const links: { label: string; path: string; isButton?: boolean }[] = [
     { label: 'Home', path: isLoggedIn ? '/kitchen' : '/' },
     isLoggedIn
@@ -29,26 +28,42 @@ export default function Header({ isLoggedIn }: HeaderProps) {
           {/* Navigation */}
           <nav>
             <ul className="flex items-center space-x-6">
-              {links.map(({ label, path, isButton }) => (
-                <li key={label}>
-                  <Link href={path}>
-                    {isButton ? (
-                      <button
-                        className="px-6 py-2 rounded-2xl text-lg font-semibold text-[var(--text2)] transition hover:opacity-90 bg-[var(--highlight)]">
-                        {label}
-                      </button>
-                    ) : (
-                      <span
-                        className={`text-[var(--text2)] hover:text-primary transition-colors duration-200 ${
-                          pathname === path ? 'font-semibold' : ''
-                        }`}
-                      >
-                        {label}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
+              {links.map(({ label, path, isButton }) => {
+                const isActive = pathname === path;
+                return (
+                  <li key={label}>
+                    <Link href={path}>
+                      {isButton ? (
+                        <button
+                          className={`
+                            px-6 py-2
+                            rounded-2xl
+                            text-lg font-semibold
+                            text-[var(--text2)]
+                            transition hover:opacity-90
+                            bg-[var(--highlight)]
+                          `}
+                        >
+                          {label}
+                        </button>
+                      ) : (
+                        <span
+                          className={`
+                            text-[var(--text2)]
+                            hover:text-[var(--highlight)]
+                            transition-colors duration-200
+                            ${isActive
+                              ? 'text-[var(--highlight)] underline decoration-[var(--highlight)]'
+                              : ''}
+                          `}
+                        >
+                          {label}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </div>
