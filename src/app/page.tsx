@@ -2,6 +2,7 @@ import ButtonPrimary from "@/components/buttonPrimary";
 import ButtonSecondary from "@/components/buttonSecondary";
 import InfoBox from "@/components/infoBox";
 import PricingCard from "@/components/pricingCard";
+import FAQ from "@/components/faq";
 
 export default function Home() {
   const pricingData = [
@@ -43,17 +44,19 @@ export default function Home() {
   ];
 
   return (
-    <main className="h-screen w-full bg-[var(--background)]">
+    <main className="h-full w-full bg-[var(--background)]">
       {/*Video Introduction*/}
-      <section className="relative flex justify-center items-center pt-32 min-h-[600px] md:min-h-[720px]">
+      <section className="relative flex justify-center items-center pt-32 min-h-[600px] md:min-h-[820px]">
         <video
-          className="absolute top-15 left-0 w-full h-full object-cover z-0"
+          className="absolute top-15 left-0 w-full h-full object-cover z-0 "
           autoPlay
           muted
           loop
         >
           <source src="/test-video.mp4" type="video/mp4" />
         </video>
+        <div className="absolute top-15 left-0 w-full h-full bg-black opacity-50 z-5"></div>
+        
         <div className="relative text-center z-10 text-white px-4">
           <div className="font-bold font-mono text-4xl md:text-6xl">
             WELCOME TO CULINARIUM
@@ -70,15 +73,13 @@ export default function Home() {
 
       {/* Key Features */}
 
-      <section className="flex flex-col justify-evenly items-center pt-20 py-20 px-4 md:px-8 md:flex-row">
-        <InfoBox></InfoBox>
-        <InfoBox></InfoBox>
+      <section className="flex justify-center items-center w-full">
         <InfoBox></InfoBox>
       </section>
 
       {/* Pricing */}
 
-      <section className="flex flex-col justify-between items-center py-20 px-4 md:px-8">
+      <section className="flex flex-col justify-between items-center py-30 px-4 md:px-8">
         <div className="text-center">
           <div className="font-bold font-mono text-xl md:text-2xl">PRICING</div>
           <div className="font-bold font-mono text-2xl md:text-4xl">
@@ -91,6 +92,11 @@ export default function Home() {
             <PricingCard key={index} {...plan}/>
           ))}
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section>
+        <FAQ/>
       </section>
     </main>
   );

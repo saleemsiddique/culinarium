@@ -17,22 +17,6 @@
   --muted: #6b7280;      /* gris medio */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --text: #ccc;
-    --text2: #333333;
-
-    --primary: #3b82f6;    /* azul claro */
-    --secondary: #a78bfa;  /* púrpura más suave */
-    --highlight: #fbbf24;  /* amarillo dorado */
-
-    --accent: #34d399;     /* verde claro */
-    --muted: #9ca3af;      /* gris claro */
-  }
-}
-
 
 body {
   background: var(--background);

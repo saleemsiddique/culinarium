@@ -19,30 +19,30 @@ export default function PricingCard({
   features,
 }: PricingCardProps) {
   return (
-    <div className="text-center flex flex-col border px-10 py-5 bg-gray-600 h-[500px] rounded-lg">
-      {/* Header */}
-      <div className="pb-5">
-        <div className="font-semibold text-3xl">{title}</div>
-        <div className="text-sm">{description}</div>
+    <div className="w-[250px] max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8 dark:bg-gray-800 dark:border-gray-700 h-[700px]">
+      <h5 className="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400 text-center">
+        {title}
+      </h5>
+      <div className="flex flex-col items-center text-gray-900 dark:text-white">
+        <span className="text-3xl font-semibold line-through text-gray-400">
+          {originalPrice}
+        </span>
+        <span className="text-5xl font-extrabold tracking-tight">
+          {discountedPrice}
+        </span>
       </div>
 
-      {/* Pricing */}
-      <div>
-        <p className="line-through text-5xl pb-2">{originalPrice}</p>
-        <p className="text-4xl">{discountedPrice}</p>
-      </div>
-
-      {/* Button */}
-      <div className="py-5">
+      <div className=" mt-10 justify-center w-full text-center">
         <ButtonPrimary />
       </div>
 
-      {/* Feature List */}
-      <ul className="list-none space-y-2">
+      <ul role="list" className="space-y-3 my-7">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-2">
-            <FaCheck className="text-green-500 mt-1" />
-            {feature}
+          <li key={index} className="flex items-center min-h-[40px]">
+            <FaCheck className="shrink-0 w-4 h-4 text-blue-700 dark:text-blue-500" />
+            <span className="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">
+              {feature}
+            </span>
           </li>
         ))}
       </ul>
