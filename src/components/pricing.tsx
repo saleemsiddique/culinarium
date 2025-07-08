@@ -50,7 +50,7 @@ export default function Pricing() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-10 mt-10 md:flex-row md:gap-6">
+      <div className="flex flex-col items-center gap-10 mt-10 md:flex-row md:gap-14">
         {pricingData.map((plan, index) => (
           <PricingCard key={index} {...plan} />
         ))}

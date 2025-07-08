@@ -8,19 +8,18 @@ export default function Home() {
 
   return (
     <main className="h-full w-full bg-[var(--background)]">
+      
       {/*Video Introduction*/}
       <section className="relative flex justify-center items-center pt-32 min-h-[600px] md:min-h-[820px]">
         <HeroSection/>
       </section>
 
       {/* Key Features */}
-
       <section className="flex justify-center items-center w-full">
         <InfoBox></InfoBox>
       </section>
 
       {/* Pricing */}
-
       <section className="flex flex-col justify-between items-center py-30 px-4 md:px-8">
         <Pricing/>
       </section>
@@ -29,6 +28,7 @@ export default function Home() {
       <section>
         <FAQ/>
       </section>
+
     </main>
   );
 }
