@@ -9,10 +9,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased flex flex-col h-screen">
         <Header isLoggedIn={true} />
-        {children}
-        <Footer/>
+        
+        {/* Contenedor que crece */}
+        <div className="flex-1 flex overflow-hidden">
+          {children}
+        </div>
+
+        <Footer />
       </body>
     </html>
   );
