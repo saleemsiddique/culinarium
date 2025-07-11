@@ -12,7 +12,7 @@ export default function KitchenLayout({ children }: KitchenLayoutProps) {
       <SideMenu />
 
       {/* Contenido principal con scroll si desborda */}
-      <main className="ml-20 h-full w-full overflow-auto">
+      <main className="w-full h-full overflow-auto md:ml-20">
         {children}
       </main>
     </div>
