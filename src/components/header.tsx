@@ -19,7 +19,7 @@ const buttonClasses =
     { label: 'Home', path: isLoggedIn ? '/kitchen' : '/' },
     isLoggedIn
       ? { label: 'My Profile', path: '/profile' }
-      : { label: 'Empezar', path: '/login', isButton: true },
+      : { label: 'Empezar', path: 'auth/login', isButton: true },
   ];
 
   return (

@@ -13,7 +13,7 @@ export default function RootLayout({
         <Header isLoggedIn={false} />
         
         {/* Contenedor que crece */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex">
           {children}
         </div>
 
