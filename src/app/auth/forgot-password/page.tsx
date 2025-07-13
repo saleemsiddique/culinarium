@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="h-full w-full bg-[var(--background)] flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 w-full max-w-md border border-gray-200 dark:border-gray-800">
         <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-2">
           Forgotten your password?

@@ -7,7 +7,7 @@ export default function LoginPage() {
     // Simula una carga lenta de 2 segundos
     // await new Promise(res => setTimeout(res, 2000));
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+    <main className="h-full w-full bg-[var(--background)] flex items-center justify-center bg-gray-50">
       <section className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md flex flex-col items-center">
         <h1 className="text-2xl font-bold mb-1">Welcome Back</h1>
         <p className="text-gray-600 mb-6 text-sm">Please log in to continue</p>

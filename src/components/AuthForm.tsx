@@ -51,7 +51,7 @@ export function AuthForm({
             <Checkbox id="remember" />
             <label htmlFor="remember" className="select-none text-gray-600">Remember me</label>
           </div>
-          <Link href="#" className="text-blue-500 hover:underline">Forgot Password?</Link>
+          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline">Forgot Password?</Link>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-600">
