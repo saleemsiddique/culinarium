@@ -1,10 +1,47 @@
 "use client";
-import Link from 'next/link'; /* THIS IS A TEST TO NAVIGATE DELETE LATER */
+import { useRouter } from "next/navigation";
 
-export default function ButtonPrimary() {
+interface ButtonPrimaryProps {
+  route: string;
+  description: string;
+}
+
+export default function ButtonPrimary({
+  route,
+  description,
+}: ButtonPrimaryProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(route);
+  };
+
   return (
-    <Link href="/kitchen" className="bg-amber-400 text-black px-4 py-2 rounded shadow hover:bg-amber-600">
-      Primary Action
-    </Link >
+    <button
+  onClick={handleClick}
+  className="
+    bg-orange-500 
+    hover:bg-orange-600  
+    active:bg-orange-700
+    text-white 
+    font-bold 
+    px-6 py-3 
+    rounded-lg 
+    shadow-md 
+    hover:shadow-lg 
+    transition-all 
+    duration-200 
+    transform 
+    hover:scale-105
+    border border-orange-600
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-orange-400
+    
+    cursor-pointer
+  "
+>
+  {description}
+</button>
   );
 }

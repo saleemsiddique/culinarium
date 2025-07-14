@@ -32,13 +32,13 @@ export default function PricingCard({
       </div>
 
       <div className=" mt-10 justify-center w-full text-center">
-        <ButtonPrimary />
+        <ButtonPrimary route={"/auth/login"} description={"Start Free"}/>
       </div>
 
       <ul role="list" className="space-y-3 my-7">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center min-h-[40px]">
-            <FaCheck className="shrink-0 w-4 h-4 text-blue-700 dark:text-blue-500" />
+            <FaCheck className="shrink-0 w-4 h-4 text-orange-500   dark:text-blue-500" />
             <span className="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 ms-3">
               {feature}
             </span>

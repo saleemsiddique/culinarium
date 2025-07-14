@@ -47,7 +47,7 @@ export default function FAQ() {
     <div className="pb-24 sm:pb-32 w-full">
       <div className="mx-auto max-w-4xl px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-base/7 font-semibold text-indigo-600">
+          <h2 className="text-base/7 font-semibold text-orange-600  ">
             Preguntas frecuentes
           </h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-black sm:text-5xl">
@@ -73,7 +73,7 @@ export default function FAQ() {
                   {faq.question}
                 </h3>
                 {openIndex === index ? (
-                  <ChevronUp className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+                  <ChevronUp className="h-5 w-5 text-orange-600   flex-shrink-0" />
                 ) : (
                   <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
                 )}
@@ -89,7 +89,7 @@ export default function FAQ() {
         </div>
         
         <div className=" mt-10 justify-center w-full text-center">
-          <ButtonPrimary />
+          <ButtonPrimary route={"/auth/login"} description={"Get Started"}/>
         </div>
 
         <div className="mt-16 text-center">
@@ -97,7 +97,7 @@ export default function FAQ() {
             ¿No encuentras la respuesta que buscas?{" "}
             <a
               href="#"
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-orange-600 hover:text-indigo-700 font-medium"
             >
               Contáctanos
             </a>

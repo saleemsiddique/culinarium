@@ -23,8 +23,9 @@ export default function HeroSection() {
           Tu proxima receta, a un clic de distancia
         </div>
         <div className="mt-6 space-x-4">
-          <ButtonPrimary />
-          <ButtonSecondary />
+          <ButtonPrimary route={"/auth/login"} description={"Get Started"}/>
+          <ButtonSecondary route={"#pricing"} description={"See Pricing"}/>
+          
         </div>
       </div>
     </>

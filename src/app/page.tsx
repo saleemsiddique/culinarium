@@ -20,7 +20,7 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section className="flex flex-col justify-between items-center py-30 px-4 md:px-8">
+      <section id="pricing" className="flex flex-col justify-between items-center py-30 px-4 md:px-8">
         <Pricing/>
       </section>
 
