@@ -2,6 +2,7 @@
 
 import { FaCheck } from "react-icons/fa";
 import ButtonPrimary from "./buttonPrimary";
+import EmbeddedCheckoutButton from "./EmbeddedCheckoutForm";
 
 interface PricingCardProps {
   title: string;
@@ -9,6 +10,7 @@ interface PricingCardProps {
   originalPrice: string;
   discountedPrice: string;
   features: string[];
+  priceId: string;
 }
 
 export default function PricingCard({
@@ -16,6 +18,7 @@ export default function PricingCard({
   originalPrice,
   discountedPrice,
   features,
+  priceId,
 }: PricingCardProps) {
   return (
     <div className="w-[250px] max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8 dark:bg-gray-800 dark:border-gray-700 h-[650px]">
@@ -32,7 +35,7 @@ export default function PricingCard({
       </div>
 
       <div className=" mt-10 justify-center w-full text-center">
-        <ButtonPrimary route={"/auth/login"} description={"Start Free"}/>
+        <EmbeddedCheckoutButton priceId={priceId} />
       </div>
 
       <ul role="list" className="space-y-3 my-7">
