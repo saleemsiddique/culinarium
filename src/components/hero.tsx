@@ -19,7 +19,7 @@ export default function HeroSection() {
         <div className="font-bold font-mono text-4xl md:text-6xl">
           WELCOME TO CULINARIUM
         </div>
-        <div className="text-sm font-semibold mt-2">
+        <div className="text-md font-semibold mt-2">
           Tu proxima receta, a un clic de distancia
         </div>
         <div className="mt-6 space-x-4">
