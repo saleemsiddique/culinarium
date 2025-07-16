@@ -42,7 +42,7 @@ export default function EmbeddedCheckoutButton({ priceId }: { priceId: string })
         Elegir este plan
       </button>
       <dialog ref={modalRef} className="modal ">
-        <div className="modal-box w-full max-w-2xl">
+        <div className="modal-box w-full max-w-6xl">
           <h3 className="font-bold text-lg">Pago seguro con Stripe</h3>
           <div className="py-4">
             {showCheckout && (
