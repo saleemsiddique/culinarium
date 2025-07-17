@@ -18,7 +18,7 @@ export default function EmbeddedCheckoutButton({ priceId }: { priceId: string })
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ priceId }),
+      body: JSON.stringify({ priceId, /*userId*/ }), //TODO Agregar userId
     })
       .then((res) => res.json())
       .then((data) => data.client_secret);

@@ -17,6 +17,9 @@ export async function POST(request: Request) {
             ],
             mode: 'subscription',
             return_url: `${request.headers.get('origin')}/return?session_id={CHECKOUT_SESSION_ID}`,
+            metadata:{
+                userId: body.userId,
+            }
         });
 
         return NextResponse.json({ id: session.id, client_secret: session.client_secret });
