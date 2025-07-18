@@ -12,13 +12,16 @@ export default function EmbeddedCheckoutButton({ priceId }: { priceId: string })
   const [showCheckout, setShowCheckout] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
+  //PRUEBA
+  const userId = "NQIkKuYz2ljtPU2ekXUV";
+
   const fetchClientSecret = useCallback(() => {
     return fetch("/api/embedded-checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ priceId, /*userId*/ }), //TODO Agregar userId
+      body: JSON.stringify({ priceId: priceId, userId: userId }), 
     })
       .then((res) => res.json())
       .then((data) => data.client_secret);
