@@ -13,7 +13,7 @@ export default function EmbeddedCheckoutButton({ priceId }: { priceId: string })
   const modalRef = useRef<HTMLDialogElement>(null);
 
   //PRUEBA
-  const userId = "NQIkKuYz2ljtPU2ekXUV";
+  const userId = "Sgnx6XwmBFXEY7EbzOkB";
 
   const fetchClientSecret = useCallback(() => {
     return fetch("/api/embedded-checkout", {

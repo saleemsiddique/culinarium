@@ -24,7 +24,7 @@ export default function Pricing() {
             "Third Item",
             "Third Item",
           ],
-          priceId: "price_1RlA0F2LSjDC5txTJFx3ulMv"
+          priceId: "price_1Rmt5k2LSjDC5txTl2pH8pgb"
         },
         {
           title: "Pesado",
@@ -40,7 +40,7 @@ export default function Pricing() {
             "Third Item",
             "Third Item",
           ],
-          priceId: "price_1RlA0R2LSjDC5txTmkLRnvkH"
+          priceId: "price_1Rmt692LSjDC5txTxvuaRW7M"
         },
       ];
       
