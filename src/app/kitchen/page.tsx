@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IoCloseCircleOutline, IoAddCircleOutline, IoChevronDownCircleOutline, IoChevronUpCircleOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice } from 'react-icons/gi';
 import { MdOutlineFastfood } from 'react-icons/md';
+import { useRouter } from 'next/navigation'; // Importa useRouter
 
 // Import Firebase client-side auth
 import { auth } from '@/lib/firebase'; // Ensure this path is correct for your client-side Firebase setup
@@ -37,6 +38,8 @@ const Tag: React.FC<TagProps> = ({ label, onRemove }) => (
 );
 
 const CulinariumForm: React.FC = () => {
+  const router = useRouter(); // Inicializa el router
+
   // Firebase User State
   const [user, setUser] = useState<FirebaseUser | null>(null); // State to hold Firebase user object
   const [loadingUser, setLoadingUser] = useState(true); // State to track user loading
@@ -258,6 +261,13 @@ const CulinariumForm: React.FC = () => {
 
       setStatus('success');
       setToastMessage("¡Receta generada y guardada exitosamente!");
+
+      // --- CAMBIO IMPORTANTE AQUÍ ---
+      // Guarda la receta en sessionStorage y navega
+      if (typeof window !== 'undefined') { // Asegúrate de que estás en el lado del cliente
+        sessionStorage.setItem('generatedRecipe', JSON.stringify(recipeDataFromAI.receta));
+      }
+      router.push('/kitchen/recipes'); // Navega a la página de la receta
 
     } catch (err: any) {
       console.error('❌ Error general en el proceso:', err);

@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const {
       ingredients,
       availableTime,
-      mealTime,
+      mealTime, // mealTime is already extracted here
       diners,
       dietaryRestrictions,
       excludedIngredients,
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         {
           "receta": {
             "titulo": string,
-            "descripcion": string, // Nueva clave para la descripción
+            "descripcion": string,
             "ingredientes": [
               { "nombre": string, "cantidad": string, "unidad": string|null }
             ],
@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
             "porciones": number,
             "estilo": string|null,
             "restricciones": [string...],
-            "excluidos": [string...]
+            "excluidos": [string...],
+            "momento_del_dia": string|null, // <-- NUEVA CLAVE AQUÍ
+            "img_url": ''
           }
         }
         \`\`\`
@@ -60,7 +62,9 @@ export async function POST(request: NextRequest) {
                 "porciones": 0,
                 "estilo": null,
                 "restricciones": [],
-                "excluidos": []
+                "excluidos": [],
+                "momento_del_dia": null, // <-- Asegúrate de que sea null en caso de error
+                "img_url": ''
               }
             }
             \`\`\`
@@ -95,8 +99,12 @@ export async function POST(request: NextRequest) {
         * Si 'porciones' no puede determinarse o es inválido, usa **1**.
         * Las listas ('ingredientes', 'instrucciones', 'restricciones', 'excluidos') deben ser vacías si no hay datos válidos.
         * Asegúrate de que el JSON de salida sea **siempre válido** (comillas dobles para claves y valores de string, comas correctas, corchetes y llaves balanceados).
+        * Deja la url_img vacia, de momento se le añadira en otro proceso mas tarde.
+        
+    7.  **Momento del Día ('momento_del_dia'):**
+        * Este campo debe contener el valor de 'mealTime' proporcionado en los datos de entrada del usuario. Si 'mealTime' no está presente o es nulo, este campo debe ser null.
 
-    7.  **Datos de Entrada (Objeto Recibido del Usuario):**
+    8.  **Datos de Entrada (Objeto Recibido del Usuario):**
     \`\`\`json
     ${JSON.stringify(body, null, 2)}
     \`\`\`
