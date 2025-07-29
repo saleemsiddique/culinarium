@@ -8,93 +8,135 @@ import {
   ReactNode,
 } from "react";
 import {
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  signInWithPopup,
-  GoogleAuthProvider,
-  updateProfile,
-} from "firebase/auth";
-import { auth } from "@/lib/db";
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  setDoc,
+  Timestamp,
+} from "firebase/firestore";
+import { db, auth } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { v4 as uuidv4 } from 'uuid';
 
-// Tipos
-interface UserContextType {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+interface CustomUser {
+  email: string;
+  created_at: Timestamp;
+  password?: string;
+  extra_tokens: number;
+  isSubscribed: boolean;
+  lastRenewal: Timestamp;
+  monthly_tokens: number;
+  stripeCustomerId: string;
+  subscriptionId: string;
+  subscriptionStatus: string;
+  tokens_reset_date: Timestamp;
 }
 
-// Crear el contexto
+interface UserContextType {
+  user: CustomUser | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Provider del contexto
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<CustomUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    setLoading(false);
   }, []);
 
-  // Función de login
   const login = async (email: string, password: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al iniciar sesión";
-      throw new Error(message);
-    }
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) throw new Error("Usuario no encontrado");
+
+    const docData = snapshot.docs[0].data() as CustomUser;
+
+    const match = await bcrypt.compare(password, docData.password || "");
+    if (!match) throw new Error("Contraseña incorrecta");
+
+    setUser(docData);
   };
 
-  // Función de registro
-  const register = async (email: string, password: string, firstName?: string, lastName?: string) => {
-    try {
-      console.log("registerrrr", email, password, firstName, lastName);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      console.log("userCredential", userCredential);
-      // Actualizar el perfil del usuario con nombre completo
-      if (firstName || lastName) {
-        const displayName = `${firstName || ''} ${lastName || ''}`.trim();
-        await updateProfile(userCredential.user, {
-          displayName
-        });
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al registrarse";
-      throw new Error(message);
-    }
+  const register = async (email: string, password: string) => {
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) throw new Error("El usuario ya existe");
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser: CustomUser = {
+      email,
+      password: hashedPassword,
+      created_at: Timestamp.now(),
+      extra_tokens: 0,
+      isSubscribed: false,
+      lastRenewal: Timestamp.now(),
+      monthly_tokens: 30,
+      stripeCustomerId: "",
+      subscriptionId: "",
+      subscriptionStatus: "",
+      tokens_reset_date: Timestamp.now(),
+    };
+    const id = uuidv4();
+    const docRef = doc(db, "user", id);
+    await setDoc(docRef, newUser);
+    setUser(newUser);
   };
 
-  // Función de logout
-  const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al cerrar sesión";
-      throw new Error(message);
-    }
-  };
-
-  // Función de login con Google
   const loginWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al iniciar sesión con Google";
-      throw new Error(message);
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const userInfo = result.user;
+
+    const email = userInfo.email;
+    if (!email) throw new Error("No se pudo obtener el email");
+
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+
+    let userData: CustomUser;
+
+    if (snapshot.empty) {
+      // Nuevo usuario con Google, creamos copia en Firestore
+      userData = {
+        email: email,
+        created_at: Timestamp.now(),
+        extra_tokens: 0,
+        isSubscribed: false,
+        lastRenewal: Timestamp.now(),
+        monthly_tokens: 30,
+        stripeCustomerId: "",
+        subscriptionId: "",
+        subscriptionStatus: "",
+        tokens_reset_date: Timestamp.now(),
+      };
+
+      const docRef = doc(db, "user", userInfo.uid);
+      await setDoc(docRef, userData);
+    } else {
+      userData = snapshot.docs[0].data() as CustomUser;
     }
+
+    setUser(userData);
+  };
+
+  const logout = async () => {
+    setUser(null);
   };
 
   const value: UserContextType = {
@@ -102,8 +144,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     loading,
     login,
     register,
-    logout,
     loginWithGoogle,
+    logout,
   };
 
   return (
@@ -113,7 +155,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook para usar el contexto
 export function useUser() {
   const context = useContext(UserContext);
   if (context === undefined) {
