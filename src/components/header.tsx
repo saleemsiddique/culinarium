@@ -1,25 +1,26 @@
+
 "use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@/context/user-context';
 
-interface HeaderProps {
-  isLoggedIn: boolean;
-}
-
-export default function Header({ isLoggedIn }: HeaderProps) {
+export default function Header() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const isLoggedIn = !!user;
   const isMobileHidden = pathname !== '/';
+
 
 const buttonClasses =
   "px-6 py-2 rounded-full text-lg font-semibold bg-gradient-to-r from-[var(--highlight)] to-yellow-400 text-[var(--text2)] shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer";
 
-  const desktopLinks: { label: string; path: string; isButton?: boolean }[] = [
+  const desktopLinks: { label: string; path?: string; onClick?: () => void; isButton?: boolean }[] = [
     { label: 'Home', path: isLoggedIn ? '/kitchen' : '/' },
     isLoggedIn
-      ? { label: 'My Profile', path: '/profile' }
-      : { label: 'Empezar', path: 'auth/login', isButton: true },
+      ? { label: 'My Profile', path: '/profile', isButton: true }
+      : { label: 'Empezar', path: '/auth/login', isButton: true },
   ];
 
   return (
@@ -38,25 +39,34 @@ const buttonClasses =
           <nav>
             {/* Escritorio */}
             <ul className="hidden md:flex items-center gap-6">
-              {desktopLinks.map(({ label, path, isButton }) => {
+              {desktopLinks.map(({ label, path, onClick, isButton }) => {
                 const isActive = pathname === path;
                 return (
                   <li key={label}>
-                    <Link href={path}>
-                      {isButton ? (
-                        <button className={buttonClasses}>
-                          {label}
-                        </button>
-                      ) : (
-                        <span
-                          className={`text-[var(--text2)] hover:text-[var(--highlight)] font-medium transition-colors duration-200 ${
-                            isActive ? 'underline decoration-[var(--highlight)]' : ''
-                          }`}
-                        >
-                          {label}
-                        </span>
-                      )}
-                    </Link>
+                    {path ? (
+                      <Link href={path}>
+                        {isButton ? (
+                          <button className={buttonClasses}>
+                            {label}
+                          </button>
+                        ) : (
+                          <span
+                            className={`text-[var(--text2)] hover:text-[var(--highlight)] font-medium transition-colors duration-200 ${
+                              isActive ? 'underline decoration-[var(--highlight)]' : ''
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        )}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={onClick}
+                        className={isButton ? buttonClasses : `text-[var(--text2)] hover:text-[var(--highlight)] font-medium transition-colors duration-200`}
+                      >
+                        {label}
+                      </button>
+                    )}
                   </li>
                 );
               })}
@@ -65,7 +75,7 @@ const buttonClasses =
             {/* Móvil */}
             <div className="flex md:hidden">
               {!isLoggedIn && pathname === '/' && (
-                <Link href="/login">
+                <Link href="/auth/login">
                   <button className={buttonClasses}>Empezar</button>
                 </Link>
               )}

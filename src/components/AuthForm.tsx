@@ -2,10 +2,12 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useUser } from "@/context/user-context";
 import Link from "next/link";
 
 export function AuthForm({
@@ -14,26 +16,103 @@ export function AuthForm({
   type: "login" | "register";
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    rememberMe: false,
+    acceptTerms: false,
+  });
+
+  const { login, register } = useUser();
+  const router = useRouter();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type: inputType, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: inputType === "checkbox" ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      if (type === "login") {
+        await login(formData.email, formData.password);
+        router.push("/kitchen");
+      } else {
+        // Validación para registro
+        if (!formData.acceptTerms) {
+          throw new Error("Debes aceptar los términos y condiciones");
+        }
+        console.log("formData", formData);
+        
+        await register(
+          formData.email, 
+          formData.password, 
+          formData.firstName, 
+          formData.lastName
+        );
+        console.log("funciona");
+        router.push("/kitchen");
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Ha ocurrido un error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <form className="space-y-4">
-      {type === "register" && (
-        <div className="flex gap-2">
-          <Input placeholder="First Name" name="firstName" required />
-          <Input placeholder="Last Name" name="lastName" required />
+    <form className="space-y-4" onSubmit={handleSubmit}>
+      {error && (
+        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+          {error}
         </div>
       )}
+      
+      {type === "register" && (
+        <div className="flex gap-2">
+          <Input 
+            placeholder="Nombre" 
+            name="firstName" 
+            value={formData.firstName}
+            onChange={handleInputChange}
+            required 
+          />
+          <Input 
+            placeholder="Apellido" 
+            name="lastName" 
+            value={formData.lastName}
+            onChange={handleInputChange}
+            required 
+          />
+        </div>
+      )}
+      
       <Input
         placeholder="Email"
         type="email"
         name="email"
+        value={formData.email}
+        onChange={handleInputChange}
         required
       />
+      
       <div className="relative">
         <Input
-          placeholder="Password"
+          placeholder="Contraseña"
           type={showPassword ? "text" : "password"}
           name="password"
+          value={formData.password}
+          onChange={handleInputChange}
           required
         />
         <button
@@ -45,24 +124,56 @@ export function AuthForm({
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
+      
       {type === "login" ? (
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            <Checkbox id="remember" />
-            <label htmlFor="remember" className="select-none text-gray-600">Remember me</label>
+            <Checkbox 
+              id="remember" 
+              name="rememberMe"
+              checked={formData.rememberMe}
+              onCheckedChange={(checked) => 
+                setFormData(prev => ({ ...prev, rememberMe: checked as boolean }))
+              }
+            />
+            <label htmlFor="remember" className="select-none text-gray-600">
+              Recordarme
+            </label>
           </div>
-          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline">Forgot Password?</Link>
+          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline">
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-600">
-          <Checkbox id="terms" required />
+          <Checkbox 
+            id="terms" 
+            name="acceptTerms"
+            checked={formData.acceptTerms}
+            onCheckedChange={(checked) => 
+              setFormData(prev => ({ ...prev, acceptTerms: checked as boolean }))
+            }
+            required 
+          />
           <label htmlFor="terms">
             Acepto los <Link href="#" className="text-blue-500 hover:underline">Términos y Condiciones</Link>
           </label>
         </div>
       )}
-      <Button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded">
-        {type === "login" ? "Log In" : "Button Text"}
+      
+      <Button 
+        type="submit"
+        className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded"
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {type === "login" ? "Iniciando sesión..." : "Registrando..."}
+          </>
+        ) : (
+          type === "login" ? "Iniciar Sesión" : "Registrarse"
+        )}
       </Button>
     </form>
   );

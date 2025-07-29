@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,4 +18,30 @@ const app = initializeApp(firebaseConfig);
 // Firebase Analytics solo se puede usar en el cliente (browser)
 const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 
-export { app, analytics };
+// Firebase Auth
+const auth = getAuth(app);
+
+// Firestore Database
+const db = getFirestore(app);
+
+// Connect to emulators in development (opcional)
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  // Emulator connections only run once
+  try {
+    if (!auth._delegate._config.emulator) {
+      connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    }
+  } catch {
+    // Emulator already connected
+  }
+  
+  try {
+    if (!db._delegate._databaseId.projectId.includes('demo-')) {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+    }
+  } catch {
+    // Emulator already connected
+  }
+}
+
+export { app, analytics, auth, db };
