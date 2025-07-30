@@ -238,7 +238,7 @@ const RecipePage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                   <span className="mr-3 text-purple-500 text-4xl">👨‍🍳</span> Instrucciones
                 </h2>
-                <ol className="list-decimal list-inside space-y-4 list-none">
+                <ol className="list-decimal list-inside space-y-4">
                   {recipe.instrucciones.map((instruction, index) => (
                     <motion.li
                       key={index}
