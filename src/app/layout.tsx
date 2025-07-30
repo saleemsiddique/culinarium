@@ -3,6 +3,7 @@
 import Footer from "@/components/footer";
 import "./globals.css";
 import Header from "@/components/header";
+import { UserProvider } from "@/context/user-context";
 
 export default function RootLayout({
   children,
@@ -10,14 +11,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased flex flex-col h-screen">
-        <Header isLoggedIn={false} />
-        
-        {/* Contenedor que crece */}
-        <div className="flex-1 flex">
-          {children}
-        </div>
+        <UserProvider>
+          <Header />
+          
+          {/* Contenedor que crece */}
+          <div className="flex-1 flex">
+            {children}
+          </div>
 
-        <Footer />
+          <Footer />
+        </UserProvider>
       </body>
     </html>
   );

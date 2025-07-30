@@ -1,7 +1,8 @@
 // lib/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,7 +21,30 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Firebase Analytics can only be used on the client (browser)
 const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 
-// Get the Auth instance for client-side authentication
+// Firebase Auth
 const auth = getAuth(app);
 
-export { app, analytics, auth };
+// Firestore Database
+const db = getFirestore(app);
+
+// Connect to emulators in development (opcional)
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  // Emulator connections only run once
+  try {
+    if (!auth._delegate._config.emulator) {
+      connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    }
+  } catch {
+    // Emulator already connected
+  }
+  
+  try {
+    if (!db._delegate._databaseId.projectId.includes('demo-')) {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+    }
+  } catch {
+    // Emulator already connected
+  }
+}
+
+export { app, analytics, auth, db };
