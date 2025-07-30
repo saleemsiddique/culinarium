@@ -7,7 +7,6 @@ import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantO
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
-import Image from "next/image";
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
@@ -152,16 +151,15 @@ const RecipePage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-8"
           >
-            <Image
+            <img
               src={recipe.img_url || placeholderImageUrl}
               alt={recipe.titulo}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = placeholderImageUrl; // Esto ya no funciona con <Image />
+                // Fallback to placeholder if image fails to load
+                e.currentTarget.src = placeholderImageUrl;
               }}
             />
-
           </motion.div>
 
           {/* Metadata Section */}
