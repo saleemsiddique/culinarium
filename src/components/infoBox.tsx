@@ -20,7 +20,7 @@ export default function InfoBox() {
     <div className="bg-white pt-24 sm:pt-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base/7 font-semibold text-indigo-600">Cocina inteligente</h2>
+          <h2 className="text-base/7 font-semibold text-orange-600">Cocina inteligente</h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-black sm:text-5xl">
                 Una nueva forma de crear y disfrutar recetas
               </p>
@@ -34,7 +34,7 @@ export default function InfoBox() {
             {features.map((feature) => (
               <div key={feature.name} className="relative pl-16">
                 <dt className="text-base/7 font-semibold text-gray-900">
-                  <div className="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-indigo-600">
+                  <div className="absolute top-0 left-0 flex size-10 items-center justify-center rounded-lg bg-orange-600">
                     <feature.icon aria-hidden="true" className="size-6 text-white" />
                   </div>
                   {feature.name}

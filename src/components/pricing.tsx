@@ -10,6 +10,7 @@ export default function Pricing() {
           originalPrice: "7,99€",
           discountedPrice: "3,99€",
           features: ["First Item", "Second Item", "Third Item"],
+          priceId: "price_1Rl9zm2LSjDC5txTe2rXn5LE"
         },
         {
           title: "Medio",
@@ -23,6 +24,7 @@ export default function Pricing() {
             "Third Item",
             "Third Item",
           ],
+          priceId: "price_1Rmt5k2LSjDC5txTl2pH8pgb"
         },
         {
           title: "Pesado",
@@ -38,6 +40,7 @@ export default function Pricing() {
             "Third Item",
             "Third Item",
           ],
+          priceId: "price_1Rmt692LSjDC5txTxvuaRW7M"
         },
       ];
       
@@ -52,7 +55,7 @@ export default function Pricing() {
 
       <div className="flex flex-col items-center gap-10 mt-10 md:flex-row md:gap-14">
         {pricingData.map((plan, index) => (
-          <PricingCard key={index} {...plan} />
+          <PricingCard key={index} {...plan}/>
         ))}
       </div>
     </>
