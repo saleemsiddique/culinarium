@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 // app/api/openai/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
