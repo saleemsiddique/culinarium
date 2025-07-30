@@ -57,8 +57,8 @@ export function AuthForm({
         await register(
           formData.email, 
           formData.password, 
-          //formData.firstName, 
-          //formData.lastName
+          formData.firstName, 
+          formData.lastName
         );
         console.log("funciona");
         router.push("/kitchen");
