@@ -1,4 +1,5 @@
 import { stripe } from "@/lib/stripe";
+import Link from "next/link";
 
 type Props = {
   searchParams: Promise<{
@@ -12,11 +13,9 @@ async function getSession(sessionId: string) {
 }
 
 export default async function CheckoutReturn({ searchParams }: Props) {
-  // Await searchParams antes de usar sus propiedades
   const params = await searchParams;
   const sessionId = params.session_id;
 
-  // Verificar si sessionId existe
   if (!sessionId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -37,12 +36,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Pago fallido</h1>
             <p className="text-gray-600 mt-2">El pago no se completó correctamente.</p>
-            <a 
-              href="/" 
+            <Link
+              href="/"
               className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
             >
               Volver al inicio
-            </a>
+            </Link>
           </div>
         </div>
       );
@@ -59,12 +58,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
                 {session.customer as string}
               </span>
             </p>
-            <a 
-              href="/" 
+            <Link
+              href="/"
               className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
             >
               Ir al Dashboard
-            </a>
+            </Link>
           </div>
         </div>
       );
@@ -78,9 +77,8 @@ export default async function CheckoutReturn({ searchParams }: Props) {
         </div>
       </div>
     );
-
   } catch (error) {
-    console.error('Error retrieving session:', error);
+    console.error("Error retrieving session:", error);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -88,12 +86,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
           <p className="text-gray-600 mt-2">
             Hubo un problema al verificar tu pago. Contacta con soporte.
           </p>
-          <a 
-            href="/" 
+          <Link
+            href="/"
             className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );

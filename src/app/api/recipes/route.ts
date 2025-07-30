@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // app/api/recipes/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db, auth, admin } from '@/lib/firebase-admin'; // Import 'admin' for FieldValue
