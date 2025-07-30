@@ -9,8 +9,6 @@ import { getAuth, Auth } from 'firebase-admin/auth'; // Importar getAuth para la
 import * as admin from 'firebase-admin';
 
 let firebaseAdminApp: App;
-let dbInstance: Firestore;
-let authInstance: Auth;
 
 // Verificar si la aplicación ya ha sido inicializada para evitar errores en Next.js (hot-reloading)
 if (getApps().length === 0) {
@@ -20,7 +18,7 @@ if (getApps().length === 0) {
     const missingVars = [];
     if (!process.env.FIREBASE_PROJECT_ID) missingVars.push('FIREBASE_PROJECT_ID');
     if (!process.env.FIREBASE_CLIENT_EMAIL) missingVars.push('FIREBASE_CLIENT_EMAIL');
-    // Check if privateKey is empty after replacement, not just undefined
+    // Verificar si privateKey está vacío después del reemplazo, no solo si es undefined
     if (!process.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').trim() === '') {
       missingVars.push('FIREBASE_PRIVATE_KEY');
     }
@@ -37,11 +35,15 @@ if (getApps().length === 0) {
       }),
     });
     console.log('Firebase Admin SDK initialized successfully.');
-  } catch (initError: any) {
-    console.error('ERROR: Failed to initialize Firebase Admin SDK:', initError.message);
+  } catch (initError: unknown) { // Cambiado 'any' a 'unknown' para mayor seguridad de tipos
+    let errorMessage = 'An unknown error occurred during Firebase Admin SDK initialization.';
+    if (initError instanceof Error) {
+        errorMessage = initError.message;
+    }
+    console.error('ERROR: Failed to initialize Firebase Admin SDK:', errorMessage);
     console.error('Full initialization error details:', initError);
-    // Re-throw the error to ensure the server doesn't start with a broken Firebase Admin setup
-    throw new Error(`Firebase Admin SDK initialization failed: ${initError.message}`);
+    // Volver a lanzar el error para asegurar que el servidor no se inicie con una configuración de Firebase Admin rota
+    throw new Error(`Firebase Admin SDK initialization failed: ${errorMessage}`);
   }
 } else {
   // Si ya está inicializada, obtener la primera instancia
@@ -50,10 +52,9 @@ if (getApps().length === 0) {
 }
 
 // Obtener las instancias de Firestore y Auth del Admin SDK
-dbInstance = getFirestore(firebaseAdminApp);
-authInstance = getAuth(firebaseAdminApp);
+// Asignamos directamente a las exportaciones para usar 'const' y evitar el error 'prefer-const'
+export const db: Firestore = getFirestore(firebaseAdminApp);
+export const auth: Auth = getAuth(firebaseAdminApp);
 
-// Exportar las instancias y el módulo admin completo
-export const db = dbInstance;
-export const auth = authInstance;
-export { admin }; // Exportar el módulo 'admin' completo para FieldValue, etc.
+// Exportar el módulo 'admin' completo para FieldValue, etc.
+export { admin };

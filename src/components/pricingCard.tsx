@@ -1,7 +1,6 @@
 "use client";
 
 import { FaCheck } from "react-icons/fa";
-import ButtonPrimary from "./buttonPrimary";
 import EmbeddedCheckoutButton from "./EmbeddedCheckoutForm";
 
 interface PricingCardProps {
