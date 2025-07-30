@@ -16,7 +16,7 @@ import {
   setDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db, auth } from "@/lib/db";
+import { db, auth } from "@/lib/firebase";
 import bcrypt from "bcryptjs";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { v4 as uuidv4 } from 'uuid';

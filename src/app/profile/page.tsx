@@ -35,9 +35,6 @@ function ProfileContent() {
           <div className="space-y-4 mb-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Nombre</p>
-              <p className="text-lg font-semibold">
-                {user?.displayName || "No especificado"}
-              </p>
             </div>
             
             <div className="p-4 bg-gray-50 rounded-lg">
@@ -47,9 +44,6 @@ function ProfileContent() {
             
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Cuenta verificada</p>
-              <p className="text-lg font-semibold">
-                {user?.emailVerified ? "Sí ✅" : "No ❌"}
-              </p>
             </div>
           </div>
           
