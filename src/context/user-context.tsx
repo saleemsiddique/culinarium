@@ -23,6 +23,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface CustomUser {
   email: string;
+  firstName: string;
+  lastName: string;
   created_at: Timestamp;
   password?: string;
   extra_tokens: number;
@@ -39,7 +41,7 @@ interface UserContextType {
   user: CustomUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string, surname: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -69,7 +71,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUser(docData);
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, firstName: string, lastName: string) => {
     const usersRef = collection(db, "user");
     const q = query(usersRef, where("email", "==", email));
     const snapshot = await getDocs(q);
@@ -80,6 +82,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const newUser: CustomUser = {
       email,
+      firstName,
+      lastName,
       password: hashedPassword,
       created_at: Timestamp.now(),
       extra_tokens: 0,
@@ -115,6 +119,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       // Nuevo usuario con Google, creamos copia en Firestore
       userData = {
         email: email,
+        firstName: userInfo.displayName?.split(' ')[0] || '',
+        lastName: userInfo.displayName?.split(' ').slice(1).join(' ') || '',
         created_at: Timestamp.now(),
         extra_tokens: 0,
         isSubscribed: false,
