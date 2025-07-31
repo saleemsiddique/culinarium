@@ -18,10 +18,14 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import bcrypt from "bcryptjs";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { v4 as uuidv4 } from 'uuid';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { v4 as uuidv4 } from "uuid";
 
-interface CustomUser {
+export interface CustomUser {
   email: string;
   firstName: string;
   lastName: string;
@@ -41,7 +45,12 @@ interface UserContextType {
   user: CustomUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, surname: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    surname: string
+  ) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -53,7 +62,26 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser?.email) {
+        const usersRef = collection(db, "user");
+        const q = query(usersRef, where("email", "==", firebaseUser.email));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          const docData = snapshot.docs[0].data() as CustomUser;
+          setUser(docData);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -71,7 +99,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setUser(docData);
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => {
     const usersRef = collection(db, "user");
     const q = query(usersRef, where("email", "==", email));
     const snapshot = await getDocs(q);
@@ -119,8 +152,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       // Nuevo usuario con Google, creamos copia en Firestore
       userData = {
         email: email,
-        firstName: userInfo.displayName?.split(' ')[0] || '',
-        lastName: userInfo.displayName?.split(' ').slice(1).join(' ') || '',
+        firstName: userInfo.displayName?.split(" ")[0] || "",
+        lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
         created_at: Timestamp.now(),
         extra_tokens: 0,
         isSubscribed: false,
@@ -154,11 +187,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     logout,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {

@@ -31,23 +31,25 @@ function ProfileContent() {
       <section className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-6">Mi Perfil</h1>
-          
+
           <div className="space-y-4 mb-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Nombre</p>
+              <p className="text-lg font-semibold">{user?.firstName}</p>
             </div>
-            
+
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Email</p>
               <p className="text-lg font-semibold">{user?.email}</p>
             </div>
-            
+
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Cuenta verificada</p>
+              <p className="text-lg font-semibold">{user?.isSubscribed ? "Si" : "No"}</p>
             </div>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={handleLogout}
             className="w-full bg-red-500 hover:bg-red-600 text-white"
           >

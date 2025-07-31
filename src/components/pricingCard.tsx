@@ -35,7 +35,7 @@ export default function PricingCard({
       </div>
 
       <div className=" mt-10 justify-center w-full text-center">
-        <EmbeddedCheckoutButton priceId={priceId} />
+        {/* <EmbeddedCheckoutButton priceId={priceId} /> */}
       </div>
 
       <ul role="list" className="space-y-3 my-7">
