@@ -1,4 +1,5 @@
 import { stripe } from "@/lib/stripe";
+import Link from "next/link";
 
 type Props = {
   searchParams: Promise<{
@@ -37,12 +38,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Pago fallido</h1>
             <p className="text-gray-600 mt-2">El pago no se completó correctamente.</p>
-            <a 
+            <Link 
               href="/" 
               className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
             >
               Volver al inicio
-            </a>
+            </Link>
           </div>
         </div>
       );
@@ -59,12 +60,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
                 {session.customer as string}
               </span>
             </p>
-            <a 
+            <Link 
               href="/" 
               className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
             >
               Ir al Dashboard
-            </a>
+            </Link>
           </div>
         </div>
       );
@@ -88,12 +89,12 @@ export default async function CheckoutReturn({ searchParams }: Props) {
           <p className="text-gray-600 mt-2">
             Hubo un problema al verificar tu pago. Contacta con soporte.
           </p>
-          <a 
+          <Link 
             href="/" 
             className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );

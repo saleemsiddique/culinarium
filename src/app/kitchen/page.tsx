@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client"
 // pages/culinarium-form.tsx
 import React, { useState, useEffect } from 'react';

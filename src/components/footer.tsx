@@ -3,10 +3,7 @@
 import Link from 'next/link';
 import {
   FaYoutube,
-  FaFacebook,
-  FaTwitter,
   FaInstagram,
-  FaLinkedin,
   FaTiktok,
 } from 'react-icons/fa';
 
