@@ -35,6 +35,10 @@ const RecipePage: React.FC = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
 
+  // 👇 Mover aquí para evitar error de Hooks
+  const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
+  const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
+
   // Helper to get cuisine style icon
   const getCuisineIcon = (style: string | null) => {
     switch (style) {
@@ -61,16 +65,14 @@ const RecipePage: React.FC = () => {
     }
   };
 
-  // Placeholder image URL
-  const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedRecipe = sessionStorage.getItem('generatedRecipe');
       if (storedRecipe) {
-        setRecipe(JSON.parse(storedRecipe));
+        const parsedRecipe: Recipe = JSON.parse(storedRecipe);
+        setRecipe(parsedRecipe);
+        setImageSrc(parsedRecipe.img_url || placeholderImageUrl); // ✅ Aquí se actualiza de forma segura
       } else {
-        // If no recipe found, redirect back to the form
         router.push('/kitchen');
       }
       setLoadingRecipe(false);
@@ -100,7 +102,6 @@ const RecipePage: React.FC = () => {
 
   // Determine if it's an error recipe
   const isErrorRecipe = recipe.titulo.startsWith('ERROR:');
-  const [imageSrc, setImageSrc] = useState(recipe.img_url || placeholderImageUrl);
 
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-green-50 to-blue-100 py-10 flex items-center justify-center font-sans">
