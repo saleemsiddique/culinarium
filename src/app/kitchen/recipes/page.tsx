@@ -7,6 +7,7 @@ import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantO
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
+import Image from "next/image";
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
@@ -34,6 +35,10 @@ const RecipePage: React.FC = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
 
+  // 👇 Mover aquí para evitar error de Hooks
+  const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
+  const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
+
   // Helper to get cuisine style icon
   const getCuisineIcon = (style: string | null) => {
     switch (style) {
@@ -60,16 +65,14 @@ const RecipePage: React.FC = () => {
     }
   };
 
-  // Placeholder image URL
-  const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedRecipe = sessionStorage.getItem('generatedRecipe');
       if (storedRecipe) {
-        setRecipe(JSON.parse(storedRecipe));
+        const parsedRecipe: Recipe = JSON.parse(storedRecipe);
+        setRecipe(parsedRecipe);
+        setImageSrc(parsedRecipe.img_url || placeholderImageUrl); // ✅ Aquí se actualiza de forma segura
       } else {
-        // If no recipe found, redirect back to the form
         router.push('/kitchen');
       }
       setLoadingRecipe(false);
@@ -151,14 +154,12 @@ const RecipePage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-8"
           >
-            <img
-              src={recipe.img_url || placeholderImageUrl}
+            <Image
+              src={imageSrc}
               alt={recipe.titulo}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                e.currentTarget.src = placeholderImageUrl;
-              }}
+              fill
+              className="object-cover"
+              onError={() => setImageSrc(placeholderImageUrl)}
             />
           </motion.div>
 
