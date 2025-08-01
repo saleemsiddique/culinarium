@@ -27,7 +27,7 @@ export const DesktopSideMenu: React.FC<DesktopSideMenuProps> = ({ onOpenTokens, 
       </div>
 
       <div className="border-t border-gray-200 pt-4 flex flex-col items-center space-y-3">
-        <button onClick={onOpenPremium} className={`w-16 h-16 flex items-center justify-center border-2 rounded-lg hover:bg-gray-100 transition ${user?.isSubscribed ? "bg-gradient-to-r from-amber-400 to-orange-500 shadow-lg" : "bg-gray-50 border-dashed border-amber-400 hover:bg-amber-50"}`}>
+        <button onClick={onOpenPremium} className={`cursor-pointer w-16 h-16 flex items-center justify-center border-2 rounded-lg hover:bg-gray-100 transition ${user?.isSubscribed ? "bg-gradient-to-r from-amber-400 to-orange-500 shadow-lg" : "bg-gray-50 border-dashed border-amber-400 hover:bg-amber-50"}`}>
           <Crown className={`w-6 h-6 ${user?.isSubscribed ? "text-white" : "text-amber-500"}`} />
         </button>
         <button onClick={onOpenTokens} className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex flex-col items-center justify-center relative group">

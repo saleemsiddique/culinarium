@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
 
       const PRICE_TO_TOKENS = {
         //One Tier Sub
-        price_1Rl9zm2LSjDC5txTe2rXn5LE: {
+        price_1RrJVF2LSjDC5txTR6lOQslg: {
           type: "subscription",
-          tokens: 1000,
-          name: "Subscripcion Mensual",
+          tokens: 300,
+          name: "Culinarium premium",
           isSubscription: true,
         },
         //Extra Tokens
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
           
           // RESETEAR tokens mensuales (no acumular) - funciona para primer pago y renovaciones
           await userDoc.ref.update({
-            monthly_tokens: 1000, // RESETEAR a 1000, no incrementar
+            monthly_tokens: 300, // RESETEAR a 300, no incrementar
             tokens_reset_date: new Date(),
             lastRenewal: new Date(),
           });
@@ -199,9 +199,9 @@ export async function POST(request: NextRequest) {
           }
 
           if (isFirstPayment) {
-            console.log("✅ Primer pago: 1000 tokens mensuales asignados");
+            console.log("✅ Primer pago: 300 tokens mensuales asignados");
           } else {
-            console.log("✅ Renovación: tokens mensuales reseteados a 1000");
+            console.log("✅ Renovación: tokens mensuales reseteados a 300");
           }
         }
       } else {

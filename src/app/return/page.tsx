@@ -51,17 +51,14 @@ export default async function CheckoutReturn({ searchParams }: Props) {
 
     if (session?.status === "complete") {
       return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className=" w-full flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-green-600">¡Pago exitoso!</h1>
             <p className="text-gray-600 mt-2">
-              Gracias por tu compra. Tu ID de cliente de Stripe es:{" "}
-              <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                {session.customer as string}
-              </span>
+              Gracias por tu compra. Vuelve a refrescar el dashboard para ver tus cambios.
             </p>
             <Link 
-              href="/" 
+              href="/kitchen" 
               className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
             >
               Ir al Dashboard
