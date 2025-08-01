@@ -66,13 +66,21 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
             </button>
             <Link
               href="/profile"
-              className="cursor-pointer flex items-center justify-center py-3 px-3 border-2 border-neutral-800 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300">
+              className="cursor-pointer flex items-center justify-center py-3 px-3 border-2 border-neutral-800 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300"
+            >
               Gestionar Suscripción
             </Link>
           </div>
         ) : (
           <div className="flex items-center justify-center space-x-3">
-            <div></div>
+            <div>
+              <button
+                onClick={onClose}
+                className="cursor-pointer flex-1 py-3 p-5 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
             <EmbeddedCheckoutButton
               priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
               user={user}

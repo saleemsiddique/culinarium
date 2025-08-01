@@ -63,16 +63,40 @@ export async function POST(request: NextRequest) {
           isSubscription: true,
         },
         //Extra Tokens
-        price_1Rmt5k2LSjDC5txTl2pH8pgb: {
+        price_1RrL5F2LSjDC5txTL3uBh13K: {
           type: "tokens",
-          tokens: 2500,
-          name: "Pack 2500 tokens",
+          tokens: 30,
+          name: "Pack 30 tokens",
           isSubscription: false,
         },
-        price_1Rmt692LSjDC5txTxvuaRW7M: {
+        price_1RrL6V2LSjDC5txT4rjhvL16: {
           type: "tokens",
-          tokens: 5000,
-          name: "Pack 5000 Tokens",
+          tokens: 60,
+          name: "Pack 60 Tokens",
+          isSubscription: false,
+        },
+        price_1RrL7H2LSjDC5txTqcpnGZYE: {
+          type: "tokens",
+          tokens: 120,
+          name: "Pack 120 Tokens",
+          isSubscription: false,
+        },
+        price_1RrL7b2LSjDC5txTUKbWlDO5: {
+          type: "tokens",
+          tokens: 250,
+          name: "Pack 250 Tokens",
+          isSubscription: false,
+        },
+        price_1RrL7r2LSjDC5txTy0i2I8MY: {
+          type: "tokens",
+          tokens: 600,
+          name: "Pack 600 Tokens",
+          isSubscription: false,
+        },
+        price_1RrL8A2LSjDC5txT9vjD59AH: {
+          type: "tokens",
+          tokens: 1200,
+          name: "Pack 1200 Tokens",
           isSubscription: false,
         },
       };

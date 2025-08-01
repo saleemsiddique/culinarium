@@ -30,9 +30,9 @@ export const DesktopSideMenu: React.FC<DesktopSideMenuProps> = ({ onOpenTokens, 
         <button onClick={onOpenPremium} className={`cursor-pointer w-16 h-16 flex items-center justify-center border-2 rounded-lg hover:bg-gray-100 transition ${user?.isSubscribed ? "bg-gradient-to-r from-amber-400 to-orange-500 shadow-lg" : "bg-gray-50 border-dashed border-amber-400 hover:bg-amber-50"}`}>
           <Crown className={`w-6 h-6 ${user?.isSubscribed ? "text-white" : "text-amber-500"}`} />
         </button>
-        <button onClick={onOpenTokens} className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex flex-col items-center justify-center relative group">
+        <button onClick={onOpenTokens} className="cursor-pointer w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex flex-col items-center justify-center relative group">
           <Zap className="w-6 h-6 text-white mb-0.5" />
-          <span className="text-xs font-bold text-white">{user?.isSubscribed ? "∞" : remainingTokens}</span>
+          <span className="text-xs font-bold text-white">{remainingTokens}</span>
           {!user?.isSubscribed && remainingTokens <= 5 && (
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
           )}

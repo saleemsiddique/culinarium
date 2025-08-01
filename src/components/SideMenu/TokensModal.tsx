@@ -1,7 +1,7 @@
 import React from "react";
 import { Zap } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
-
+import  TokenPurchaseCards from "@/components/TokenPurchaseCards";
 
 interface TokensModalProps {
   onClose: () => void;
@@ -23,28 +23,14 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
           <p className="text-gray-600">Tokens actuales: {extra} extra + {monthly} mensuales</p>
         </div>
 
-        <div className="space-y-3 mb-6">
-          {[{count:10, price:4.99, color:"blue", label:"Ideal para uso regular"},
-            {count:25, price:9.99, color:"purple", label:"Mejor valor", popular:true},
-            {count:50, price:14.99, color:"green", label:"Para usuarios frecuentes"}
-          ].map(({count, price, color, label, popular}) => (
-            <div key={count} onClick={onClose} className={`border-2 border-${color}-200 rounded-lg p-4 hover:border-${color}-400 cursor-pointer transition-all relative`}>
-              {popular && (
-                <div className="absolute -top-2 -right-2 bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-bold">POPULAR</div>
-              )}
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="font-bold text-lg">{count} Tokens</span>
-                  <p className="text-sm text-gray-600">{label}</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-2xl font-bold text-${color}-600`}>€{price}</span>
-                  <p className="text-xs text-gray-500">€{(price/count).toFixed(2)}/token</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TokenPurchaseCards user={user} count={30} price={0.99} color="blue" label="Uso puntual (3 recetas)" priceId="price_1RrL5F2LSjDC5txTL3uBh13K" />
+        <TokenPurchaseCards user={user} count={60} price={1.99} color="purple" label="Uso ocasional (6 recetas)" priceId="price_1RrL6V2LSjDC5txT4rjhvL16" />
+        <TokenPurchaseCards user={user} count={120} price={3.99} color="green" label="Uso semanal (12 recetas)" priceId="price_1RrL7H2LSjDC5txTqcpnGZYE" />
+        <TokenPurchaseCards user={user} count={250} price={6.99} color="orange" label="Uso frecuente (25 recetas)" priceId="price_1RrL7b2LSjDC5txTUKbWlDO5" />
+        <TokenPurchaseCards user={user} count={600} price={13.99} color="red" label="Uso intensivo (60 recetas)" priceId="price_1RrL7r2LSjDC5txTy0i2I8MY" />
+        <TokenPurchaseCards user={user} count={1200} price={24.99} color="blue" label="Uso profesional (120 recetas)" priceId="price_1RrL8A2LSjDC5txT9vjD59AH" />
+
+        
 
         <div className="flex space-x-3">
           <button onClick={onClose} className="flex-1 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all">
