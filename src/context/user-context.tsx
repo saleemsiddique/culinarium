@@ -26,6 +26,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 export interface CustomUser {
+  uid: string; // ✅ Añadido el campo uid
   email: string;
   firstName: string;
   lastName: string;
@@ -70,6 +71,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         if (!snapshot.empty) {
           const docData = snapshot.docs[0].data() as CustomUser;
+          // ✅ Añadir el ID del documento
+          docData.uid = snapshot.docs[0].id;
           setUser(docData);
         } else {
           setUser(null);
@@ -92,6 +95,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (snapshot.empty) throw new Error("Usuario no encontrado");
 
     const docData = snapshot.docs[0].data() as CustomUser;
+    // ✅ Añadir el ID del documento
+    docData.uid = snapshot.docs[0].id;
 
     const match = await bcrypt.compare(password, docData.password || "");
     if (!match) throw new Error("Contraseña incorrecta");
@@ -112,8 +117,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!snapshot.empty) throw new Error("El usuario ya existe");
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const id = uuidv4();
 
     const newUser: CustomUser = {
+      uid: id, // ✅ Incluir el uid en el objeto
       email,
       firstName,
       lastName,
@@ -128,7 +135,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       subscriptionStatus: "",
       tokens_reset_date: Timestamp.now(),
     };
-    const id = uuidv4();
+
     const docRef = doc(db, "user", id);
     await setDoc(docRef, newUser);
     setUser(newUser);
@@ -151,6 +158,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (snapshot.empty) {
       // Nuevo usuario con Google, creamos copia en Firestore
       userData = {
+        uid: userInfo.uid, // ✅ Usar el uid de Firebase Auth
         email: email,
         firstName: userInfo.displayName?.split(" ")[0] || "",
         lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
@@ -169,6 +177,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       await setDoc(docRef, userData);
     } else {
       userData = snapshot.docs[0].data() as CustomUser;
+      // ✅ Añadir el ID del documento
+      userData.uid = snapshot.docs[0].id;
     }
 
     setUser(userData);

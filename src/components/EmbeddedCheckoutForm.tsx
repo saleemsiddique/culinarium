@@ -14,8 +14,7 @@ export default function EmbeddedCheckoutButton({ priceId, user }: { priceId: str
   const [showCheckout, setShowCheckout] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const auth = getAuth();
-  const userId = auth.currentUser?.uid;//No es correcto
+  const userId = user?.uid;
 
   const fetchClientSecret = useCallback(() => {
     return fetch("/api/embedded-checkout", {
