@@ -11,6 +11,7 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   query,
   where,
   setDoc,
@@ -39,7 +40,9 @@ export interface CustomUser {
   stripeCustomerId: string;
   subscriptionId: string;
   subscriptionStatus: string;
+  subscriptionCanceled: boolean;
   tokens_reset_date: Timestamp;
+  subscriptionEndDate?: Date | null;
 }
 
 interface UserContextType {
@@ -63,30 +66,45 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser?.email) {
-        const usersRef = collection(db, "user");
-        const q = query(usersRef, where("email", "==", firebaseUser.email));
-        const snapshot = await getDocs(q);
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser?.email) {
+      const usersRef = collection(db, "user");
+      const q = query(usersRef, where("email", "==", firebaseUser.email));
+      const snapshot = await getDocs(q);
 
-        if (!snapshot.empty) {
-          const docData = snapshot.docs[0].data() as CustomUser;
-          // ✅ Añadir el ID del documento
-          docData.uid = snapshot.docs[0].id;
-          setUser(docData);
-        } else {
-          setUser(null);
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data() as CustomUser;
+        docData.uid = snapshot.docs[0].id;
+        
+        // ✅ Obtener datos de suscripción
+        try {
+          const subscriptionDocRef = doc(db, 'user', docData.uid, 'subscripcion', 'current');
+          const subscriptionDoc = await getDoc(subscriptionDocRef);
+          
+          if (subscriptionDoc.exists()) {
+            const subscriptionData = subscriptionDoc.data();
+            docData.subscriptionEndDate = subscriptionData?.endsAt?.toDate() || null;
+          } else {
+            docData.subscriptionEndDate = null;
+          }
+        } catch (error) {
+          console.error('Error obteniendo suscripción:', error);
+          docData.subscriptionEndDate = null;
         }
+        
+        setUser(docData);
       } else {
         setUser(null);
       }
+    } else {
+      setUser(null);
+    }
 
-      setLoading(false);
-    });
+    setLoading(false);
+  });
 
-    return () => unsubscribe();
-  }, []);
-
+  return () => unsubscribe();
+}, []);
   const login = async (email: string, password: string) => {
     const usersRef = collection(db, "user");
     const q = query(usersRef, where("email", "==", email));
@@ -133,6 +151,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       stripeCustomerId: "",
       subscriptionId: "",
       subscriptionStatus: "",
+      subscriptionCanceled: false,
       tokens_reset_date: Timestamp.now(),
     };
 
@@ -170,6 +189,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "",
+        subscriptionCanceled: false,
         tokens_reset_date: Timestamp.now(),
       };
 

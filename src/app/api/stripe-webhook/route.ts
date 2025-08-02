@@ -117,6 +117,10 @@ export async function POST(request: NextRequest) {
               .collection("subscripcion");
             const existingSub = await subsRef.limit(1).get();
 
+            const now = new Date();
+            const oneMonthLater = new Date(now);
+            oneMonthLater.setMonth(now.getMonth() + 1);
+
             const subscriptionData = {
               subscriptionId: session.subscription,
               status: "active",
@@ -124,6 +128,7 @@ export async function POST(request: NextRequest) {
               tokensIncluded: productConfig.tokens,
               sessionId: session.id,
               updatedAt: new Date(),
+              endsAt: oneMonthLater,
             };
 
             if (!existingSub.empty) {
@@ -142,16 +147,20 @@ export async function POST(request: NextRequest) {
               isSubscribed: true,
               subscriptionStatus: "active",
               subscriptionId: session.subscription,
-              stripeCustomerId: session.customer, 
+              stripeCustomerId: session.customer,
             });
-            console.log("✅ Usuario configurado para suscripción - esperando invoice");
+            console.log(
+              "✅ Usuario configurado para suscripción - esperando invoice"
+            );
           } else {
             if (productConfig.tokens > 0) {
               const userRef = db.collection("user").doc(userId);
               await userRef.update({
-                extra_tokens: FieldValue.increment(productConfig.tokens), 
+                extra_tokens: FieldValue.increment(productConfig.tokens),
               });
-              console.log(`✅ ${productConfig.tokens} tokens extra añadidos (acumulativos)`);
+              console.log(
+                `✅ ${productConfig.tokens} tokens extra añadidos (acumulativos)`
+              );
             }
 
             // Registrar la transacción de tokens extra
@@ -173,12 +182,69 @@ export async function POST(request: NextRequest) {
     }
 
     // =============================================
+    // En tu webhook, agregar este nuevo evento
+    // =============================================
+    if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object;
+
+      // Solo procesar si se marcó para cancelar al final del período
+      if (subscription.cancel_at_period_end === true) {
+        const customerId = subscription.customer;
+
+        console.log(
+          "⏰ Suscripción marcada para cancelar al final del período:",
+          customerId
+        );
+
+        // Buscar usuario por stripeCustomerId
+        const usersQuery = await db
+          .collection("user")
+          .where("stripeCustomerId", "==", customerId)
+          .limit(1)
+          .get();
+
+        if (!usersQuery.empty) {
+          const userDoc = usersQuery.docs[0];
+          const userId = userDoc.id;
+
+          // ✅ Marcar como cancelada pero mantener acceso hasta el final
+          await userDoc.ref.update({
+            subscriptionCanceled: true, // Marcar que está cancelada
+            subscriptionStatus: "cancel_at_period_end",
+            // NO cambiar isSubscribed hasta que realmente se cancele
+          });
+
+          // Actualizar subcolección
+          const subsRef = db
+            .collection("user")
+            .doc(userId)
+            .collection("subscripcion");
+          const existingSub = await subsRef.limit(1).get();
+
+          if (!existingSub.empty) {
+            await existingSub.docs[0].ref.update({
+              status: "cancel_at_period_end",
+              updatedAt: new Date(),
+              endsAt: subscription.ended_at
+                ? new Date(subscription.ended_at * 1000)
+                : null,
+            });
+          }
+
+          console.log(
+            "✅ Usuario marcado para cancelación al final del período"
+          );
+        }
+      }
+    }
+
+    // =============================================
     // PAGO DE SUSCRIPCIÓN (PRIMER PAGO Y RENOVACIONES)
     // =============================================
     if (event.type === "invoice.payment_succeeded") {
       const invoice = event.data.object;
       const customerId = invoice.customer;
-      
+
       console.log("🔄 Pago exitoso para customer:", customerId);
 
       // Buscar usuario por customerId (Stripe customer ID)
@@ -198,8 +264,9 @@ export async function POST(request: NextRequest) {
         // Solo procesar si tiene suscripción activa
         if (userData.subscriptionStatus === "active") {
           // Verificar si es el primer pago o renovación
-          const isFirstPayment = !userData.monthly_tokens || userData.monthly_tokens === 0;
-          
+          const isFirstPayment =
+            !userData.monthly_tokens || userData.monthly_tokens === 0;
+
           // RESETEAR tokens mensuales (no acumular) - funciona para primer pago y renovaciones
           await userDoc.ref.update({
             monthly_tokens: 300, // RESETEAR a 300, no incrementar
@@ -255,10 +322,10 @@ export async function POST(request: NextRequest) {
 
         // Actualizar estado del usuario
         await userDoc.ref.update({
+          subscriptionCanceled: false,
           isSubscribed: false,
           subscriptionStatus: "cancelled",
-          monthly_tokens: 0, // Al cancelar, eliminar tokens mensuales
-          cancelledAt: new Date(),
+          monthly_tokens: 30, // Al cancelar, eliminar tokens mensuales
         });
 
         // Actualizar estado en subcolección
@@ -271,12 +338,13 @@ export async function POST(request: NextRequest) {
         if (!existingSub.empty) {
           await existingSub.docs[0].ref.update({
             status: "cancelled",
-            cancelledAt: new Date(),
             updatedAt: new Date(),
           });
         }
 
-        console.log("✅ Usuario marcado como no suscrito, tokens mensuales eliminados");
+        console.log(
+          "✅ Usuario marcado como no suscrito, tokens mensuales eliminados"
+        );
       }
     }
 
