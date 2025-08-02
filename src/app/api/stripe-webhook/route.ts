@@ -110,17 +110,6 @@ export async function POST(request: NextRequest) {
 
         if (productConfig) {
           if (productConfig.isSubscription) {
-            const subscriptionId = session.subscription as string;
-            const stripeSubscription = await stripe.subscriptions.retrieve(
-              subscriptionId
-            );
-
-            const currentPeriodStart =
-              stripeSubscription.items.data[0]?.current_period_start ||
-              stripeSubscription.created;
-            const currentPeriodEnd =
-              stripeSubscription.items.data[0]?.current_period_end || null;
-
             // NUEVA SUSCRIPCIÓN - Solo configurar, NO dar tokens aún
             const subsRef = db
               .collection("user")
@@ -134,11 +123,6 @@ export async function POST(request: NextRequest) {
               planName: productConfig.name,
               tokensIncluded: productConfig.tokens,
               sessionId: session.id,
-              currentPeriodStart: new Date(currentPeriodStart * 1000),
-              currentPeriodEnd: currentPeriodEnd
-                ? new Date(currentPeriodEnd * 1000)
-                : null,
-              cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
               updatedAt: new Date(),
             };
 
@@ -158,24 +142,16 @@ export async function POST(request: NextRequest) {
               isSubscribed: true,
               subscriptionStatus: "active",
               subscriptionId: session.subscription,
-              subscriptionEndDate: currentPeriodEnd
-                ? new Date(currentPeriodEnd * 1000)
-                : null,
-              subscriptionCanceled: stripeSubscription.cancel_at_period_end,
-              stripeCustomerId: session.customer,
+              stripeCustomerId: session.customer, 
             });
-            console.log(
-              "✅ Usuario configurado para suscripción - esperando invoice"
-            );
+            console.log("✅ Usuario configurado para suscripción - esperando invoice");
           } else {
             if (productConfig.tokens > 0) {
               const userRef = db.collection("user").doc(userId);
               await userRef.update({
-                extra_tokens: FieldValue.increment(productConfig.tokens),
+                extra_tokens: FieldValue.increment(productConfig.tokens), 
               });
-              console.log(
-                `✅ ${productConfig.tokens} tokens extra añadidos (acumulativos)`
-              );
+              console.log(`✅ ${productConfig.tokens} tokens extra añadidos (acumulativos)`);
             }
 
             // Registrar la transacción de tokens extra
@@ -197,84 +173,12 @@ export async function POST(request: NextRequest) {
     }
 
     // =============================================
-    // MANEJAR ACTUALIZACIONES DE SUSCRIPCIÓN
-    // =============================================
-    if (event.type === "customer.subscription.updated") {
-      const subscription = event.data.object;
-      console.log("🔄 Suscripción actualizada:", subscription.id);
-
-      try {
-        // Buscar el usuario por subscriptionId
-        const usersRef = db.collection("user");
-        const userQuery = await usersRef
-          .where("subscriptionId", "==", subscription.id)
-          .get();
-
-        if (userQuery.empty) {
-          console.error(
-            "Usuario no encontrado para subscription:",
-            subscription.id
-          );
-          return NextResponse.json(
-            { error: "Usuario no encontrado" },
-            { status: 404 }
-          );
-        }
-
-        const userDoc = userQuery.docs[0];
-        const userId = userDoc.id;
-
-        // Obtener el período actual del primer item de suscripción
-        const currentPeriodStart =
-          subscription.items?.data[0]?.current_period_start ||
-          subscription.created;
-        const currentPeriodEnd =
-          subscription.items?.data[0]?.current_period_end || null;
-
-        // Actualizar información del usuario
-        await userDoc.ref.update({
-          subscriptionStatus: subscription.status,
-          subscriptionEndDate: currentPeriodEnd
-            ? new Date(currentPeriodEnd * 1000)
-            : null,
-          subscriptionCanceled: subscription.cancel_at_period_end || false,
-          updatedAt: new Date(),
-        });
-
-        // Actualizar información en la subcolección de suscripción
-        const subsRef = db
-          .collection("user")
-          .doc(userId)
-          .collection("subscripcion");
-        const subQuery = await subsRef
-          .where("subscriptionId", "==", subscription.id)
-          .get();
-
-        if (!subQuery.empty) {
-          await subQuery.docs[0].ref.update({
-            status: subscription.status,
-            currentPeriodStart: new Date(currentPeriodStart * 1000),
-            currentPeriodEnd: currentPeriodEnd
-              ? new Date(currentPeriodEnd * 1000)
-              : null,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-            updatedAt: new Date(),
-          });
-        }
-
-        console.log("✅ Suscripción actualizada en la base de datos");
-      } catch (error) {
-        console.error("Error actualizando suscripción:", error);
-      }
-    }
-
-    // =============================================
     // PAGO DE SUSCRIPCIÓN (PRIMER PAGO Y RENOVACIONES)
     // =============================================
     if (event.type === "invoice.payment_succeeded") {
       const invoice = event.data.object;
       const customerId = invoice.customer;
-
+      
       console.log("🔄 Pago exitoso para customer:", customerId);
 
       // Buscar usuario por customerId (Stripe customer ID)
@@ -294,9 +198,8 @@ export async function POST(request: NextRequest) {
         // Solo procesar si tiene suscripción activa
         if (userData.subscriptionStatus === "active") {
           // Verificar si es el primer pago o renovación
-          const isFirstPayment =
-            !userData.monthly_tokens || userData.monthly_tokens === 0;
-
+          const isFirstPayment = !userData.monthly_tokens || userData.monthly_tokens === 0;
+          
           // RESETEAR tokens mensuales (no acumular) - funciona para primer pago y renovaciones
           await userDoc.ref.update({
             monthly_tokens: 300, // RESETEAR a 300, no incrementar
@@ -352,14 +255,10 @@ export async function POST(request: NextRequest) {
 
         // Actualizar estado del usuario
         await userDoc.ref.update({
-          monthly_tokens: 30,
           isSubscribed: false,
-          subscriptionStatus: "canceled",
-          subscriptionCanceled: true,
-          subscriptionEndDate: subscription.ended_at
-            ? new Date(subscription.ended_at * 1000)
-            : new Date(),
-          updatedAt: new Date(),
+          subscriptionStatus: "cancelled",
+          monthly_tokens: 0, // Al cancelar, eliminar tokens mensuales
+          cancelledAt: new Date(),
         });
 
         // Actualizar estado en subcolección
@@ -371,20 +270,18 @@ export async function POST(request: NextRequest) {
 
         if (!existingSub.empty) {
           await existingSub.docs[0].ref.update({
-            status: "canceled",
-            endedAt: subscription.ended_at ? new Date(subscription.ended_at * 1000) : new Date(),
+            status: "cancelled",
+            cancelledAt: new Date(),
             updatedAt: new Date(),
           });
         }
 
-        console.log(
-          "✅ Usuario marcado como no suscrito, tokens mensuales eliminados"
-        );
+        console.log("✅ Usuario marcado como no suscrito, tokens mensuales eliminados");
       }
     }
 
     // =============================================
-    // PAGO FALLIDO
+    // PAGO FALLIDO (OPCIONAL)
     // =============================================
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;

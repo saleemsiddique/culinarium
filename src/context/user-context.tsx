@@ -39,9 +39,6 @@ export interface CustomUser {
   stripeCustomerId: string;
   subscriptionId: string;
   subscriptionStatus: string;
-  subscriptionCanceled?: boolean;
-  subscriptionEndDate?: Timestamp; 
-  subscriptionCancelDate?: Timestamp; 
   tokens_reset_date: Timestamp;
 }
 
@@ -136,7 +133,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       stripeCustomerId: "",
       subscriptionId: "",
       subscriptionStatus: "",
-      subscriptionCanceled: false,
       tokens_reset_date: Timestamp.now(),
     };
 
@@ -174,7 +170,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "",
-        subscriptionCanceled: false,
         tokens_reset_date: Timestamp.now(),
       };
 
