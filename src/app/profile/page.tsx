@@ -20,6 +20,7 @@ function ProfileContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showReactivateDialog, setShowReactivateDialog] = useState(false);
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
 
@@ -65,6 +66,43 @@ function ProfileContent() {
     } finally {
       setIsLoading(false);
       setShowCancelDialog(false);
+      setShowReactivateDialog(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/subscription/reactivate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.uid,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al reactivar la suscripción');
+      }
+
+      const data = await response.json();
+      
+      // Actualizar el contexto del usuario con la nueva información
+      // Aquí deberías actualizar el contexto del usuario
+      alert('Suscripción reactivada exitosamente..');
+      
+      // Opcional: recargar la página o actualizar el estado
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al reactivar la suscripción. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
+      setShowCancelDialog(false);
+      setShowReactivateDialog(false);
     }
   };
 
@@ -161,7 +199,17 @@ function ProfileContent() {
                       {user?.subscriptionEndDate ? formatDate(user.subscriptionEndDate) : 'final del período'}
                     </p>
                   </div>
+                  <div className="mt-4 text-center">
+                    <Button
+                    onClick={() => setShowReactivateDialog(true)}
+                    variant="outline"
+                    className="cursor-pointer border-green-200 text-white bg-green-400 hover:bg-green-50 hover:text-green-600"
+                  >
+                    Reactivar Suscripción
+                  </Button>
+                  </div>
                 </div>
+                
               )}
             </div>
           )}
@@ -217,6 +265,40 @@ function ProfileContent() {
                   disabled={isLoading}
                 >
                   {isLoading ? 'Cancelando...' : 'Confirmar Cancelación'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de reactivación */}
+      {showReactivateDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">¿Reactivar Suscripción?</h3>
+              <p className="text-gray-600 mb-6">
+                Tu suscripción se reactivará y tendrás acceso a todas las funciones Premium
+                nuevamente.
+              </p>
+              
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => setShowReactivateDialog(false)}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleReactivateSubscription}
+                  className="flex-1 bg-red-500 hover:bg-red-600"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Cancelando...' : 'Confirmar Reactivación'}
                 </Button>
               </div>
             </div>

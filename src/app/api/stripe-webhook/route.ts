@@ -186,32 +186,28 @@ export async function POST(request: NextRequest) {
     // =============================================
     if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object;
+      const customerId = subscription.customer;
 
-      // Solo procesar si se marcó para cancelar al final del período
-      if (subscription.cancel_at_period_end === true) {
-        const customerId = subscription.customer;
+      // Buscar usuario por stripeCustomerId (común para ambos casos)
+      const usersQuery = await db
+        .collection("user")
+        .where("stripeCustomerId", "==", customerId)
+        .limit(1)
+        .get();
 
-        console.log(
-          "⏰ Suscripción marcada para cancelar al final del período:",
-          customerId
-        );
+      if (!usersQuery.empty) {
+        const userDoc = usersQuery.docs[0];
+        const userId = userDoc.id;
 
-        // Buscar usuario por stripeCustomerId
-        const usersQuery = await db
-          .collection("user")
-          .where("stripeCustomerId", "==", customerId)
-          .limit(1)
-          .get();
+        if (subscription.cancel_at_period_end === true) {
+          console.log(
+            "⏰ Suscripción marcada para cancelar al final del período:",
+            customerId
+          );
 
-        if (!usersQuery.empty) {
-          const userDoc = usersQuery.docs[0];
-          const userId = userDoc.id;
-
-          // ✅ Marcar como cancelada pero mantener acceso hasta el final
           await userDoc.ref.update({
             subscriptionCanceled: true, // Marcar que está cancelada
             subscriptionStatus: "cancel_at_period_end",
-            // NO cambiar isSubscribed hasta que realmente se cancele
           });
 
           // Actualizar subcolección
@@ -225,16 +221,47 @@ export async function POST(request: NextRequest) {
             await existingSub.docs[0].ref.update({
               status: "cancel_at_period_end",
               updatedAt: new Date(),
-              endsAt: subscription.ended_at
-                ? new Date(subscription.ended_at * 1000)
-                : null,
             });
           }
 
           console.log(
             "✅ Usuario marcado para cancelación al final del período"
           );
+        } else if (subscription.cancel_at_period_end === false) {
+          const userData = userDoc.data();
+
+          // Solo procesar si previamente estaba marcada para cancelar
+          if (
+            userData.subscriptionCanceled === true ||
+            userData.subscriptionStatus === "cancel_at_period_end"
+          ) {
+            console.log("🔄 Suscripción reactivada:", customerId);
+
+            await userDoc.ref.update({
+              subscriptionCanceled: false, // Marcar que está cancelada
+              subscriptionStatus: "active",
+              // NO cambiar isSubscribed hasta que realmente se cancele
+            });
+
+            // Actualizar subcolección
+            const subsRef = db
+              .collection("user")
+              .doc(userId)
+              .collection("subscripcion");
+            const existingSub = await subsRef.limit(1).get();
+
+            if (!existingSub.empty) {
+              await existingSub.docs[0].ref.update({
+                status: "active",
+                updatedAt: new Date(),
+              });
+            }
+
+            console.log("✅ Usuario reactivado exitosamente");
+          }
         }
+      } else {
+        console.log("❌ Usuario no encontrado para customerId:", customerId);
       }
     }
 
