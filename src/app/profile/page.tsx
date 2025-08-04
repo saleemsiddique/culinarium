@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CreditCard, Calendar, AlertTriangle, Check } from "lucide-react";
+import { useSubscription } from "@/context/subscription-context";
 
 export default function ProfilePage() {
   return (
@@ -17,6 +18,7 @@ export default function ProfilePage() {
 
 function ProfileContent() {
   const { user, logout } = useUser();
+  const { subscription } = useSubscription();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -181,8 +183,8 @@ function ProfileContent() {
                   <div className="flex items-center justify-center">
                     <Calendar className="h-4 w-4 mr-1" />
                     <p className="text-lg font-semibold">
-                      {user?.subscriptionEndDate
-                        ? formatDate(user.subscriptionEndDate)
+                      {subscription?.endsAt
+                        ? formatDate(subscription.endsAt.toDate())
                         : "N/A"}
                     </p>
                   </div>
@@ -217,8 +219,8 @@ function ProfileContent() {
                     <p className="text-sm text-orange-700">
                       Tu suscripción ha sido cancelada pero seguirás teniendo
                       acceso hasta el{" "}
-                      {user?.subscriptionEndDate
-                        ? formatDate(user.subscriptionEndDate)
+                      {subscription?.endsAt
+                        ? formatDate(subscription.endsAt.toDate())
                         : "final del período"}
                     </p>
                   </div>
