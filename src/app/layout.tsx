@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import { UserProvider } from "@/context/user-context";
 import { SubscriptionProvider } from "@/context/subscription-context";
+import { TokenPurchasesProvider } from "@/context/tokenpurchases-context";
 
 export default function RootLayout({
   children,
@@ -14,14 +15,16 @@ export default function RootLayout({
       <body className="antialiased flex flex-col h-screen">
         <UserProvider>
           <SubscriptionProvider>
-          <Header />
-          
-          {/* Contenedor que crece */}
-          <div className="flex-1 flex">
-            {children}
-          </div>
-
-          <Footer />
+            <TokenPurchasesProvider>
+              <Header />
+              
+              {/* Contenedor que crece */}
+              <div className="flex-1 flex">
+                {children}
+              </div>
+      
+              <Footer />
+            </TokenPurchasesProvider>
           </SubscriptionProvider>
         </UserProvider>
       </body>
