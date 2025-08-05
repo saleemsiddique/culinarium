@@ -208,6 +208,13 @@ export async function POST(request: NextRequest) {
       if (!usersQuery.empty) {
         const userDoc = usersQuery.docs[0];
         const userId = userDoc.id;
+        const userData = userDoc.data();
+
+        const subsRef = db
+          .collection("user")
+          .doc(userId)
+          .collection("subscripcion");
+        const existingSub = await subsRef.limit(1).get();
 
         if (subscription.cancel_at_period_end === true) {
           console.log(
@@ -216,16 +223,9 @@ export async function POST(request: NextRequest) {
           );
 
           await userDoc.ref.update({
-            subscriptionCanceled: true, // Marcar que está cancelada
+            subscriptionCanceled: true,
             subscriptionStatus: "cancel_at_period_end",
           });
-
-          // Actualizar subcolección
-          const subsRef = db
-            .collection("user")
-            .doc(userId)
-            .collection("subscripcion");
-          const existingSub = await subsRef.limit(1).get();
 
           if (!existingSub.empty) {
             await existingSub.docs[0].ref.update({
@@ -237,28 +237,22 @@ export async function POST(request: NextRequest) {
           console.log(
             "✅ Usuario marcado para cancelación al final del período"
           );
-        } else if (subscription.cancel_at_period_end === false) {
-          const userData = userDoc.data();
-
-          // Solo procesar si previamente estaba marcada para cancelar
-          if (
+        } else {
+          // Esto incluye tanto la reactivación como cambios que mantienen la suscripción activa
+          const wasCanceled =
             userData.subscriptionCanceled === true ||
-            userData.subscriptionStatus === "cancel_at_period_end"
-          ) {
-            console.log("🔄 Suscripción reactivada:", customerId);
+            userData.subscriptionStatus === "cancel_at_period_end";
+
+          if (wasCanceled || userData.subscriptionStatus !== "active") {
+            console.log(
+              "🔄 Suscripción reactivada o actualizada a activa:",
+              customerId
+            );
 
             await userDoc.ref.update({
-              subscriptionCanceled: false, // Marcar que está cancelada
+              subscriptionCanceled: false,
               subscriptionStatus: "active",
-              // NO cambiar isSubscribed hasta que realmente se cancele
             });
-
-            // Actualizar subcolección
-            const subsRef = db
-              .collection("user")
-              .doc(userId)
-              .collection("subscripcion");
-            const existingSub = await subsRef.limit(1).get();
 
             if (!existingSub.empty) {
               await existingSub.docs[0].ref.update({
@@ -267,7 +261,7 @@ export async function POST(request: NextRequest) {
               });
             }
 
-            console.log("✅ Usuario reactivado exitosamente");
+            console.log("✅ Usuario actualizado a suscripción activa");
           }
         }
       } else {
@@ -282,6 +276,10 @@ export async function POST(request: NextRequest) {
       const invoice = event.data.object;
       const customerId = invoice.customer;
 
+      const now = new Date();
+      const oneMonthLater = new Date(now);
+      oneMonthLater.setMonth(now.getMonth() + 1);
+
       console.log("🔄 Pago exitoso para customer:", customerId);
 
       // Buscar usuario por customerId (Stripe customer ID)
@@ -295,11 +293,14 @@ export async function POST(request: NextRequest) {
         const userDoc = usersQuery.docs[0];
         const userId = userDoc.id;
         const userData = userDoc.data();
-
+        console.log("-------------------------");
         console.log("Usuario encontrado:", userId);
+        console.log("Estado de suscripción:", userData.subscriptionStatus);
 
         // Solo procesar si tiene suscripción activa
         if (userData.subscriptionStatus === "active") {
+          console.log("✅ Usuario con suscripción activa:", userId);
+          console.log("-------------------------");
           // Verificar si es el primer pago o renovación
           const isFirstPayment =
             !userData.monthly_tokens || userData.monthly_tokens === 0;
@@ -323,6 +324,7 @@ export async function POST(request: NextRequest) {
               status: "active",
               lastRenewal: new Date(),
               updatedAt: new Date(),
+              endsAt: oneMonthLater,
             });
           }
 

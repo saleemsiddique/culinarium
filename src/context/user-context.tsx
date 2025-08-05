@@ -23,6 +23,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -90,60 +93,52 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
+const login = async (email: string, password: string) => {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  const firebaseUser = result.user;
 
-    if (snapshot.empty) throw new Error("Usuario no encontrado");
+  const usersRef = collection(db, "user");
+  const q = query(usersRef, where("email", "==", firebaseUser.email));
+  const snapshot = await getDocs(q);
 
-    const docData = snapshot.docs[0].data() as CustomUser;
-    // ✅ Añadir el ID del documento
-    docData.uid = snapshot.docs[0].id;
+  if (snapshot.empty) throw new Error("Usuario no encontrado");
 
-    const match = await bcrypt.compare(password, docData.password || "");
-    if (!match) throw new Error("Contraseña incorrecta");
+  const docData = snapshot.docs[0].data() as CustomUser;
+  docData.uid = snapshot.docs[0].id;
 
-    setUser(docData);
-  };
+  setUser(docData);
+};
 
   const register = async (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => {
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string
+) => {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  const firebaseUser = result.user;
 
-    if (!snapshot.empty) throw new Error("El usuario ya existe");
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const id = uuidv4();
-
-    const newUser: CustomUser = {
-      uid: id, // ✅ Incluir el uid en el objeto
-      email,
-      firstName,
-      lastName,
-      password: hashedPassword,
-      created_at: Timestamp.now(),
-      extra_tokens: 0,
-      isSubscribed: false,
-      lastRenewal: Timestamp.now(),
-      monthly_tokens: 30,
-      stripeCustomerId: "",
-      subscriptionId: "",
-      subscriptionStatus: "",
-      subscriptionCanceled: false,
-      tokens_reset_date: Timestamp.now(),
-    };
-
-    const docRef = doc(db, "user", id);
-    await setDoc(docRef, newUser);
-    setUser(newUser);
+  const newUser: CustomUser = {
+    uid: firebaseUser.uid,
+    email,
+    firstName,
+    lastName,
+    created_at: Timestamp.now(),
+    extra_tokens: 0,
+    isSubscribed: false,
+    lastRenewal: Timestamp.now(),
+    monthly_tokens: 30,
+    stripeCustomerId: "",
+    subscriptionId: "",
+    subscriptionStatus: "",
+    subscriptionCanceled: false,
+    tokens_reset_date: Timestamp.now(),
   };
+
+  const docRef = doc(db, "user", firebaseUser.uid);
+  await setDoc(docRef, newUser);
+  setUser(newUser);
+};
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -190,6 +185,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    await signOut(auth);
     setUser(null);
   };
 
