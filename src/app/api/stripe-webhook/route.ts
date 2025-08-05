@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
           tokens: 300,
           name: "Culinarium premium",
           isSubscription: true,
+          price: 7.99,
         },
         //Extra Tokens
         price_1RrL5F2LSjDC5txTL3uBh13K: {
@@ -68,36 +69,42 @@ export async function POST(request: NextRequest) {
           tokens: 30,
           name: "Pack 30 tokens",
           isSubscription: false,
+          price: 0.99,
         },
         price_1RrL6V2LSjDC5txT4rjhvL16: {
           type: "tokens",
           tokens: 60,
           name: "Pack 60 Tokens",
           isSubscription: false,
+          price: 1.99,
         },
         price_1RrL7H2LSjDC5txTqcpnGZYE: {
           type: "tokens",
           tokens: 120,
           name: "Pack 120 Tokens",
           isSubscription: false,
+          price: 3.99,
         },
         price_1RrL7b2LSjDC5txTUKbWlDO5: {
           type: "tokens",
           tokens: 250,
           name: "Pack 250 Tokens",
           isSubscription: false,
+          price: 6.99,
         },
         price_1RrL7r2LSjDC5txTy0i2I8MY: {
           type: "tokens",
           tokens: 600,
           name: "Pack 600 Tokens",
           isSubscription: false,
+          price: 13.99,
         },
         price_1RrL8A2LSjDC5txT9vjD59AH: {
           type: "tokens",
           tokens: 1200,
           name: "Pack 1200 Tokens",
           isSubscription: false,
+          price: 24.99,
         },
       };
 
@@ -125,6 +132,7 @@ export async function POST(request: NextRequest) {
               subscriptionId: session.subscription,
               status: "active",
               planName: productConfig.name,
+              price: productConfig.price,
               tokensIncluded: productConfig.tokens,
               sessionId: session.id,
               updatedAt: new Date(),
@@ -173,6 +181,8 @@ export async function POST(request: NextRequest) {
                 tokensAmount: productConfig.tokens,
                 sessionId: session.id,
                 priceId: priceId,
+                price: productConfig.price,
+                status: "Completed",
                 createdAt: new Date(),
               });
             console.log("✅ Compra de tokens extra registrada");

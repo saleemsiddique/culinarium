@@ -20,7 +20,7 @@ export default function PaymentDashboard() {
     return <div className="p-8 text-center">Inicia sesión para ver tu historial</div>;
   }
 
-  const totalSpent = purchases.reduce((sum, p) => sum + p.tokensAmount, 0);
+  const totalSpent = purchases.reduce((sum: number, p) => sum + Number(p.price), 0);
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: (i: number) => ({
@@ -61,9 +61,9 @@ export default function PaymentDashboard() {
             <div className="p-8 space-y-6">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="flex items-center space-x-4">
-                  <span className="text-2xl font-semibold">🔄 {subscription.planName}</span>
-                  <span className="px-4 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
-                    {subscription.planName}
+                  <span className="text-2xl font-semibold">🔄 Suscripción Premium</span>
+                  <span className="px-4 py-1 bg-green-500 text-white rounded-full text-sm font-bold">
+                    {subscription.status.toUpperCase()}
                   </span>
                 </div>
                 <button className="mt-4 md:mt-0 px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition">
@@ -84,12 +84,8 @@ export default function PaymentDashboard() {
                 <div>
                   <div className="text-sm text-gray-600">Monto Mensual</div>
                   <div className="text-lg font-semibold text-gray-800">
-                    €{subscription.endsAt.toDate().getTime()}
+                    €{subscription.price}
                   </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Método de Pago</div>
-                  <div className="text-lg font-semibold text-gray-800">{subscription.planName}</div>
                 </div>
               </div>
             </div>
@@ -123,24 +119,24 @@ export default function PaymentDashboard() {
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-800">
-                    {row.tokensAmount}
+                    {formatDate(row.createdAt.toDate())}
                   </span>
                   <span className="text-lg font-bold text-green-500">
-                    €{row.productName}
+                    €{row.price}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-600">
                   <div>
                     <div className="text-xs uppercase text-gray-400">Tokens</div>
-                    <div className="font-medium">{row.tokensAmount} tokens</div>
+                    <div className="font-medium">{row.tokensAmount}</div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase text-gray-400">Método</div>
-                    <div className="font-medium">{row.tokensAmount}</div>
+                    <div className="text-xs uppercase text-gray-400">Paquete</div>
+                    <div className="font-medium">{row.productName}</div>
                   </div>
                   <div>
                     <div className="text-xs uppercase text-gray-400">Estado</div>
-                    <div className="font-medium">{row.tokensAmount}</div>
+                    <div className="font-medium">{row.status}</div>
                   </div>
                 </div>
               </motion.div>

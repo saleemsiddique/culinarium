@@ -7,6 +7,9 @@ import { useUser } from "./user-context";
 interface TokenPurchase {
   tokensAmount: number;
   productName: string;
+  createdAt: Timestamp;
+  price: string;
+  status: string;
 }
 
 interface TokenPurchasesContextType {

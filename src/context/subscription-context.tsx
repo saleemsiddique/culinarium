@@ -7,6 +7,8 @@ import { useUser } from "./user-context";
 interface Subscription {
   endsAt: Timestamp;
   planName: string;
+  status: string;
+  price: string;
 }
 
 interface SubscriptionContextType {
