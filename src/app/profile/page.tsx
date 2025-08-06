@@ -25,6 +25,7 @@ function ProfileContent() {
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
+  const customerPortalLink = "https://billing.stripe.com/p/login/test_fZu00c7Dz0T31RZg4QcQU00";
 
   const handleLogout = async () => {
     try {
@@ -42,6 +43,10 @@ function ProfileContent() {
       console.error("Error al entrar en payment history:", error);
     }
   };
+
+  const handleCustomerPortal = async () => {
+    window.location.href = customerPortalLink + "?prefilled_email=" + user?.email;
+  }
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
@@ -256,6 +261,9 @@ function ProfileContent() {
             </div>
           )}
           {/* Botón de historial de pagos */}
+          <Button onClick={handleCustomerPortal} className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white mb-5">
+            Billing
+          </Button>
           <Button
             onClick={handlePaymentHistory}
             className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white mb-5"

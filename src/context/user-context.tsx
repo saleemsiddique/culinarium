@@ -130,7 +130,7 @@ const login = async (email: string, password: string) => {
     monthly_tokens: 30,
     stripeCustomerId: "",
     subscriptionId: "",
-    subscriptionStatus: "",
+    subscriptionStatus: "cancelled",
     subscriptionCanceled: false,
     tokens_reset_date: Timestamp.now(),
   };
@@ -168,7 +168,7 @@ const login = async (email: string, password: string) => {
         monthly_tokens: 30,
         stripeCustomerId: "",
         subscriptionId: "",
-        subscriptionStatus: "",
+        subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
         tokens_reset_date: Timestamp.now(),
       };
