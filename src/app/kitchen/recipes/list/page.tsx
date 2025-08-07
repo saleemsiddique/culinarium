@@ -89,7 +89,7 @@ const RecipeListPage: React.FC = () => {
   }, [user, userLoading]); // Re-ejecutar cuando el usuario o el estado de carga del usuario cambien
 
   return (
-    <div className="min-h-screen bg-[var(--background)] py-16 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[var(--background)] py-24 px-4 sm:px-6 lg:px-8 font-sans">
       <Head>
         <title>Mis Recetas - Culinarium</title>
         <meta name="description" content="Tus recetas generadas y guardadas en Culinarium." />
@@ -195,15 +195,21 @@ const RecipeListPage: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <NextLink href={`/kitchen/recipes/${recipe.id}`} passHref>
-                    <motion.button
-                      className="w-full py-2 rounded-lg text-[var(--text2)] font-semibold
+                  <NextLink
+                    href={{
+                      pathname: '/kitchen/recipes',
+                      query: { id: recipe.id },
+                    }}
+                    passHref
+                  >                    
+                  <motion.button
+                    className="w-full py-2 rounded-lg text-[var(--text2)] font-semibold
                                  bg-gradient-to-r from-[var(--primary)] to-[var(--foreground)]
                                  hover:from-[var(--foreground)] hover:to-[var(--primary)] transition-colors duration-300
                                  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                       Ver Receta
                     </motion.button>
                   </NextLink>
