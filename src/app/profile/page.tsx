@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CreditCard, Calendar, AlertTriangle, Check } from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";
+import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutForm";
 
 export default function ProfilePage() {
   return (
@@ -252,12 +253,10 @@ function ProfileContent() {
               <p className="text-gray-600 mb-4">
                 Actualiza a Premium para obtener más funciones
               </p>
-              <Button
-                onClick={() => router.push("/subscription")}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Actualizar a Premium
-              </Button>
+              <EmbeddedCheckoutButton
+                            priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
+                            user={user}
+                          />
             </div>
           )}
           {/* Botón de historial de pagos */}

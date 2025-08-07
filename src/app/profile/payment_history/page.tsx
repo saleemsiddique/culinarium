@@ -110,7 +110,7 @@ export default function PaymentDashboard() {
           <div className="space-y-4">
             {purchases.map((row, i) => (
               <motion.div
-                key={row.tokensAmount}
+                key={i}
                 custom={i}
                 initial="hidden"
                 animate="visible"
