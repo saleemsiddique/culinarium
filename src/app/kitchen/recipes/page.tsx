@@ -67,17 +67,69 @@ const RecipePage: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      console.log('[RecipePage] useEffect:init - leyendo sessionStorage.generatedRecipe');
       const storedRecipe = sessionStorage.getItem('generatedRecipe');
       if (storedRecipe) {
+        console.log('[RecipePage] Receta encontrada en sessionStorage.');
         const parsedRecipe: Recipe = JSON.parse(storedRecipe);
         setRecipe(parsedRecipe);
+        console.log('[RecipePage] Imagen inicial de receta:', parsedRecipe.img_url);
         setImageSrc(parsedRecipe.img_url || placeholderImageUrl); // ✅ Aquí se actualiza de forma segura
       } else {
+        console.warn('[RecipePage] No hay receta en sessionStorage. Redirigiendo a /kitchen');
         router.push('/kitchen');
       }
       setLoadingRecipe(false);
     }
-  }, [router]);
+  }, [router, placeholderImageUrl]);
+
+  // Generar imagen hiperrealista con OpenAI si no existe aún
+  useEffect(() => {
+    const generateImage = async () => {
+      if (!recipe) return;
+      const isError = recipe.titulo?.startsWith('ERROR:');
+      console.log('[RecipePage] generateImage: receta cargada', { titulo: recipe.titulo, estilo: recipe.estilo });
+      if (isError) {
+        console.warn('[RecipePage] generateImage: receta de error. No se genera imagen.');
+        return;
+      }
+      if (recipe.img_url && recipe.img_url.startsWith('data:image')) {
+        console.log('[RecipePage] generateImage: ya hay img_url base64. No se regenera.');
+        return;
+      }
+
+      try {
+        console.log('[RecipePage] generateImage: solicitando /api/recipe-image ...');
+        const res = await fetch('/api/recipe-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipe })
+        });
+        console.log('[RecipePage] generateImage: respuesta status', res.status);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.error('[RecipePage] generateImage: error de servidor', errBody);
+          return;
+        }
+        const data = await res.json();
+        console.log('[RecipePage] generateImage: payload', data);
+        if (data?.img_url) {
+          setImageSrc(data.img_url);
+          const updated = { ...recipe, img_url: data.img_url } as Recipe;
+          setRecipe(updated);
+          if (typeof window !== 'undefined') {
+            console.log('[RecipePage] generateImage: guardando receta con img_url en sessionStorage');
+            sessionStorage.setItem('generatedRecipe', JSON.stringify(updated));
+          }
+        }
+      } catch (e) {
+        // Mantener placeholder si falla
+        console.error('[RecipePage] generateImage: excepción lanzada', e);
+      }
+    };
+
+    generateImage();
+  }, [recipe]);
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
@@ -152,13 +204,14 @@ const RecipePage: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-8"
+            className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-8"
           >
             <Image
               src={imageSrc}
               alt={recipe.titulo}
               fill
               className="object-cover"
+              unoptimized
               onError={() => setImageSrc(placeholderImageUrl)}
             />
           </motion.div>
