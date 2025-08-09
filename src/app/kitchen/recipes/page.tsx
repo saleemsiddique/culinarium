@@ -93,7 +93,8 @@ const RecipePage: React.FC = () => {
         console.warn('[RecipePage] generateImage: receta de error. No se genera imagen.');
         return;
       }
-      if (recipe.img_url && recipe.img_url.startsWith('data:image')) {
+      if (recipe.img_url) {
+        console.log(recipe.img_url);
         console.log('[RecipePage] generateImage: ya hay img_url base64. No se regenera.');
         return;
       }

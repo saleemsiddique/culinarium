@@ -30,13 +30,18 @@ if (getApps().length === 0) {
   }
 
   try {
+    const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
     firebaseAdminApp = initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       }),
+      ...(storageBucket ? { storageBucket } : {}),
     });
+    if (!storageBucket) {
+      console.warn('WARN: FIREBASE_STORAGE_BUCKET no está configurado. Storage usará el bucket por defecto si existe.');
+    }
     console.log('Firebase Admin SDK initialized successfully.');
   } catch (initError: any) {
     console.error('ERROR: Failed to initialize Firebase Admin SDK:', initError.message);

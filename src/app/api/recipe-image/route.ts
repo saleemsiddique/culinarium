@@ -49,12 +49,12 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
     
     let b64: string | undefined;
     try {
-      console.log('[API /api/recipe-image] intentando con dall-e-3');
+      console.log('[API /api/recipe-image] intentando con dall-e-3 (512x512)');
       const result = await openai.images.generate({
         model: 'dall-e-3',
         prompt,
         size: '1024x1024',
-        quality: 'hd',
+        quality: 'standard',
         n: 1,
         response_format: 'b64_json',
       } as any);
@@ -66,7 +66,7 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
         const fallback = await openai.images.generate({
           model: 'gpt-image-1',
           prompt,
-          size: '1024x1024',
+          size: '512x512',
           quality: 'high',
           n: 1,
           response_format: 'b64_json',
@@ -85,6 +85,7 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
     const dataUrl = `data:image/png;base64,${b64}`;
 
     console.log('[API /api/recipe-image] imagen generada (base64 length):', b64?.length || 0);
+    // Devolvemos SIEMPRE base64 (sin usar Storage)
     return NextResponse.json({ img_url: dataUrl });
   } catch (error: any) {
     console.error('Error en /api/recipe-image:', error);
