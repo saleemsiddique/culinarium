@@ -1,7 +1,7 @@
 // components/AuthForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,17 @@ export function AuthForm({
     }));
   };
 
+    useEffect(() => {
+    if (type === "register") {
+      const consentVersion = localStorage.getItem("consent_version");
+      const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "0";
+      if (consentVersion === POLICY_VERSION) {
+        setFormData(prev => ({ ...prev, acceptTerms: true }));
+      }
+    }
+  }, [type]);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -52,15 +63,32 @@ export function AuthForm({
         if (!formData.acceptTerms) {
           throw new Error("Debes aceptar los términos y condiciones");
         }
+
         console.log("formData", formData);
-        
+
+        // 1. Registrar usuario
         await register(
-          formData.email, 
-          formData.password, 
-          formData.firstName, 
+          formData.email,
+          formData.password,
+          formData.firstName,
           formData.lastName
         );
-        console.log("funciona");
+
+        // 2. Guardar consentimiento (asumiendo que POLICY_VERSION está en el .env)
+        await fetch("/api/consent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accepted: true,
+            version: process.env.NEXT_PUBLIC_POLICY_VERSION,
+            acceptedAt: new Date().toISOString(),
+            user_id: userId,
+          })
+        });
+
+        console.log("Usuario registrado y consentimiento guardado");
+
+        // 3. Redirigir
         router.push("/kitchen");
       }
     } catch (error) {
@@ -77,26 +105,26 @@ export function AuthForm({
           {error}
         </div>
       )}
-      
+
       {type === "register" && (
         <div className="flex gap-2">
-          <Input 
-            placeholder="Nombre" 
-            name="firstName" 
+          <Input
+            placeholder="Nombre"
+            name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
-            required 
+            required
           />
-          <Input 
-            placeholder="Apellido" 
-            name="lastName" 
+          <Input
+            placeholder="Apellido"
+            name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
-            required 
+            required
           />
         </div>
       )}
-      
+
       <Input
         placeholder="Email"
         type="email"
@@ -105,7 +133,7 @@ export function AuthForm({
         onChange={handleInputChange}
         required
       />
-      
+
       <div className="relative">
         <Input
           placeholder="Contraseña"
@@ -124,15 +152,15 @@ export function AuthForm({
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
-      
+
       {type === "login" ? (
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            <Checkbox 
-              id="remember" 
+            <Checkbox
+              id="remember"
               name="rememberMe"
               checked={formData.rememberMe}
-              onCheckedChange={(checked) => 
+              onCheckedChange={(checked) =>
                 setFormData(prev => ({ ...prev, rememberMe: checked as boolean }))
               }
             />
@@ -146,22 +174,22 @@ export function AuthForm({
         </div>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-600">
-          <Checkbox 
-            id="terms" 
+          <Checkbox
+            id="terms"
             name="acceptTerms"
             checked={formData.acceptTerms}
-            onCheckedChange={(checked) => 
+            onCheckedChange={(checked) =>
               setFormData(prev => ({ ...prev, acceptTerms: checked as boolean }))
             }
-            required 
+            required
           />
           <label htmlFor="terms">
             Acepto los <Link href="#" className="text-blue-500 hover:underline">Términos y Condiciones</Link>
           </label>
         </div>
       )}
-      
-      <Button 
+
+      <Button
         type="submit"
         className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded"
         disabled={loading}
