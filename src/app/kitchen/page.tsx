@@ -2,17 +2,104 @@
 
 "use client"
 // pages/culinarium-form.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoCloseCircleOutline, IoAddCircleOutline, IoChevronDownCircleOutline, IoChevronUpCircleOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice } from 'react-icons/gi';
 import { MdOutlineFastfood } from 'react-icons/md';
-import { useRouter } from 'next/navigation'; // Importa useRouter
+import { useRouter, useSearchParams } from 'next/navigation'; // Importa useRouter
 
 // Import Firebase client-side auth
 import { auth } from '@/lib/firebase'; // Ensure this path is correct for your client-side Firebase setup
 import { onAuthStateChanged, User as FirebaseUser, signInAnonymously } from 'firebase/auth';
+
+// --- Helpers de imagen (compresión a <1MB en el cliente) ---
+async function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+    img.src = dataUrl;
+  });
+}
+
+function getScaledDimensions(
+  srcWidth: number,
+  srcHeight: number,
+  maxWidth: number,
+  maxHeight: number
+): { width: number; height: number } {
+  const widthRatio = maxWidth / srcWidth;
+  const heightRatio = maxHeight / srcHeight;
+  const scale = Math.min(1, widthRatio, heightRatio);
+  return { width: Math.round(srcWidth * scale), height: Math.round(srcHeight * scale) };
+}
+
+function estimateBytesFromDataUrl(dataUrl: string): number {
+  const base64 = dataUrl.split(',')[1] || '';
+  const len = base64.length;
+  const padding = (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
+  return Math.max(0, Math.floor((len * 3) / 4) - padding);
+}
+
+async function compressDataUrlToJpeg(
+  inputDataUrl: string,
+  options?: { maxBytes?: number; maxWidth?: number; maxHeight?: number; initialQuality?: number; minQuality?: number }
+): Promise<string> {
+  const {
+    maxBytes = 1000_000,
+    maxWidth = 1024,
+    maxHeight = 1024,
+    initialQuality = 0.88,
+    minQuality = 0.5,
+  } = options || {};
+
+  // Si ya está por debajo del límite, devolver tal cual
+  if (estimateBytesFromDataUrl(inputDataUrl) <= maxBytes) return inputDataUrl;
+
+  const img = await loadImageFromDataUrl(inputDataUrl);
+
+  let currentMaxWidth = maxWidth;
+  let currentMaxHeight = maxHeight;
+  let quality = initialQuality;
+
+  // Intentos acotados: reduce calidad y, si no basta, reduce dimensiones
+  for (let pass = 0; pass < 8; pass++) {
+    const { width, height } = getScaledDimensions(img.naturalWidth, img.naturalHeight, currentMaxWidth, currentMaxHeight);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('No se pudo obtener el contexto de canvas');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // Bucle de calidad descendente en este tamaño
+    for (let qStep = 0; qStep < 5; qStep++) {
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      if (estimateBytesFromDataUrl(dataUrl) <= maxBytes) {
+        return dataUrl;
+      }
+      quality = Math.max(minQuality, quality - 0.1);
+      if (quality <= minQuality) break;
+    }
+
+    // Si no cabemos, reducimos dimensiones y reintentamos
+    currentMaxWidth = Math.max(512, Math.floor(currentMaxWidth * 0.85));
+    currentMaxHeight = Math.max(512, Math.floor(currentMaxHeight * 0.85));
+    quality = Math.max(minQuality, initialQuality - 0.1 * (pass + 1));
+  }
+
+  // Último intento a calidad mínima
+  const { width: finalW, height: finalH } = getScaledDimensions(img.naturalWidth, img.naturalHeight, Math.max(512, Math.floor(maxWidth * 0.6)), Math.max(512, Math.floor(maxHeight * 0.6)));
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = finalW;
+  finalCanvas.height = finalH;
+  const finalCtx = finalCanvas.getContext('2d');
+  if (!finalCtx) throw new Error('No se pudo obtener el contexto de canvas');
+  finalCtx.drawImage(img, 0, 0, finalW, finalH);
+  return finalCanvas.toDataURL('image/jpeg', 0.5);
+}
 
 // Componente para las etiquetas (tags)
 type TagProps = {
@@ -41,6 +128,8 @@ const Tag: React.FC<TagProps> = ({ label, onRemove }) => (
 
 const CulinariumForm: React.FC = () => {
   const router = useRouter(); // Inicializa el router
+  const searchParams = useSearchParams();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   // Firebase User State
   const [user, setUser] = useState<FirebaseUser | null>(null); // State to hold Firebase user object
@@ -74,6 +163,7 @@ const CulinariumForm: React.FC = () => {
   const [cuisineStyle, setCuisineStyle] = useState<string | null>(null);
   const [showDietaryRestrictions, setShowDietaryRestrictions] = useState(false);
   const [showCuisineStyle, setShowCuisineStyle] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState<boolean>(false);
 
   const mealTimes = [
     { label: 'Desayuno', value: 'breakfast' },
@@ -221,6 +311,12 @@ const CulinariumForm: React.FC = () => {
     try {
       // 1. Call OpenAI API to generate recipe
       const formData = { ingredients, mealTime, diners, dietaryRestrictions, excludedIngredients, cuisineStyle, availableTime };
+      // Guardar último formulario para autogeneración futura
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('lastFormData', JSON.stringify(formData));
+        } catch {}
+      }
       const openaiRes = await fetch('/api/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -240,16 +336,36 @@ const CulinariumForm: React.FC = () => {
         throw new Error(recipeDataFromAI.receta.descripcion || "La IA no pudo generar una receta válida con los ingredientes proporcionados.");
       }
 
-      // 2. Get user's ID token for authentication with your /api/recipes route
-      const idToken = await user.getIdToken();
+      // 2. Generar imagen y COMPRIMIR a <1MB antes de guardar
+      try {
+        const imageRes = await fetch('/api/recipe-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipe: recipeDataFromAI.receta })
+        });
+        console.log('📸 Solicitud /api/recipe-image status:', imageRes.status);
+        const imageData = await imageRes.json().catch(() => ({}));
+        console.log('📸 Respuesta /api/recipe-image:', imageData);
+        if (imageRes.ok && imageData?.img_url) {
+          // Comprimir a JPEG y limitar tamaño
+          const compressedDataUrl = await compressDataUrlToJpeg(imageData.img_url, {
+            maxBytes: 1000_000,
+            maxWidth: 1024,
+            maxHeight: 1024,
+          });
+          recipeDataFromAI.receta.img_url = compressedDataUrl;
+        } else {
+          console.warn('No se pudo generar la imagen; se guardará la receta sin imagen.');
+        }
+      } catch (imgErr) {
+        console.error('❌ Error generando/comprimiendo imagen:', imgErr);
+      }
 
-      // 3. Call your new /api/recipes to save the recipe to Firestore
+      // 3. Obtener token y guardar la receta (incluyendo img_url si está)
+      const idToken = await user.getIdToken();
       const saveRecipeRes = await fetch('/api/recipes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // No need for Authorization header here as idToken is in the body for POST
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recipe: recipeDataFromAI.receta, idToken }),
       });
 
@@ -264,12 +380,11 @@ const CulinariumForm: React.FC = () => {
       setStatus('success');
       setToastMessage("¡Receta generada y guardada exitosamente!");
 
-      // --- CAMBIO IMPORTANTE AQUÍ ---
-      // Guarda la receta en sessionStorage y navega
-      if (typeof window !== 'undefined') { // Asegúrate de que estás en el lado del cliente
+      // 4. Persistir en sessionStorage y navegar
+      if (typeof window !== 'undefined') {
         sessionStorage.setItem('generatedRecipe', JSON.stringify(recipeDataFromAI.receta));
       }
-      router.push('/kitchen/recipes'); // Navega a la página de la receta
+      router.push('/kitchen/recipes');
 
     } catch (err: any) {
       console.error('❌ Error general en el proceso:', err);
@@ -280,6 +395,36 @@ const CulinariumForm: React.FC = () => {
       setIsLoadingOverlayVisible(false); // Hide loading overlay in all cases (success or error)
     }
   };
+
+  // Auto-generar una receta si venimos con ?auto=1 usando el último formulario guardado
+  useEffect(() => {
+    if (loadingUser) return;
+    const auto = searchParams.get('auto');
+    if (auto === '1' && !autoTriggered) {
+      const stored = typeof window !== 'undefined' ? sessionStorage.getItem('lastFormData') : null;
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : []);
+          setMealTime(typeof data.mealTime === 'string' || data.mealTime === null ? data.mealTime : null);
+          setDiners(typeof data.diners === 'number' ? data.diners : 1);
+          setDietaryRestrictions(Array.isArray(data.dietaryRestrictions) ? data.dietaryRestrictions : []);
+          setExcludedIngredients(Array.isArray(data.excludedIngredients) ? data.excludedIngredients : []);
+          setCuisineStyle(typeof data.cuisineStyle === 'string' || data.cuisineStyle === null ? data.cuisineStyle : null);
+          setAvailableTime(typeof data.availableTime === 'string' ? data.availableTime : '30');
+        } catch {
+          // Si falla el parseo, evitamos bucles
+        }
+        setAutoTriggered(true);
+        // Permite que React aplique los estados antes de enviar
+        setTimeout(() => {
+          formRef.current?.requestSubmit();
+        }, 0);
+      } else {
+        setAutoTriggered(true);
+      }
+    }
+  }, [loadingUser, searchParams, autoTriggered]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-green-50 to-blue-100 py-10 flex items-center justify-center font-sans">
@@ -294,7 +439,7 @@ const CulinariumForm: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-4 md:py-8 max-w-screen-2xl mx-auto"
       >
-        <form onSubmit={handleSubmit} className="space-y-10">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-10">
           {/* Contenedor principal del formulario con grid para 3 columnas en pantallas grandes */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}
