@@ -172,7 +172,46 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    const userInfo = result.user;
+
+    const email = userInfo.email;
+    if (!email) throw new Error("No se pudo obtener el email");
+
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
+
+    let userData: CustomUser;
+
+    if (snapshot.empty) {
+      // Nuevo usuario con Google, creamos copia en Firestore
+      userData = {
+        uid: userInfo.uid, // ✅ Usar el uid de Firebase Auth
+        email: email,
+        firstName: userInfo.displayName?.split(" ")[0] || "",
+        lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
+        created_at: Timestamp.now(),
+        extra_tokens: 0,
+        isSubscribed: false,
+        lastRenewal: Timestamp.now(),
+        monthly_tokens: 30,
+        stripeCustomerId: "",
+        subscriptionId: "",
+        subscriptionStatus: "cancelled",
+        subscriptionCanceled: false,
+        tokens_reset_date: Timestamp.now(),
+      };
+
+      const docRef = doc(db, "user", userInfo.uid);
+      await setDoc(docRef, userData);
+    } else {
+      userData = snapshot.docs[0].data() as CustomUser;
+      // ✅ Añadir el ID del documento
+      userData.uid = snapshot.docs[0].id;
+    }
+
+    setUser(userData);
   };
 
   const logout = async () => {
