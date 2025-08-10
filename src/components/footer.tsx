@@ -27,9 +27,9 @@ export default function Footer() {
         whileInView="animate"
         viewport={{ once: true, amount: 0.3 }}
         variants={footerVariants}
-        className="w-screen bg-gray-950 text-gray-300 border-t border-gray-800"
+        className="bg-gray-950 text-gray-300 border-t border-gray-800"
       >
-        <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 lg:py-16">
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-32 py-10 lg:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-6 items-center">
             {/* Socials and Brand */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">

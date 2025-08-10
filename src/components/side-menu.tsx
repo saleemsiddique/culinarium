@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Plus, BookOpen, Menu, X, User, Hammer } from 'lucide-react';
+import { Plus, BookOpen, Menu, X, User, Hammer, Crown, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, CustomUser } from '@/context/user-context';
 import { TokensModal } from "./SideMenu/TokensModal";
@@ -77,6 +77,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
   const { user } = useUser(); // CustomUser | null
 
   const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
+  const remainingTokens = totalTokens;
+  const onOpenPremium = () => setShowPremium(true);
+  const onOpenTokens = () => setShowTokens(true);
 
   return (
     <>
@@ -118,7 +121,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
           <MobileMenuItem href="/kitchen" icon={<Plus />} label="Nueva Receta" onClick={() => setDrawerOpen(false)} />
           <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Mis Recetas" onClick={() => setDrawerOpen(false)} />
           <MobileMenuItem href="/profile" icon={<User />} label="Mi Perfil" onClick={() => setDrawerOpen(false)} />
-          <MobileMenuItem href="/settings" icon={<Hammer />} label="Ajustes" onClick={() => setDrawerOpen(false)} />
 
           {/* Sección de Tokens en Móvil */}
           {user && (
@@ -140,17 +142,22 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
               <p className="text-sm italic mb-4">
                 Total: <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
               </p>
-              <Link href="/buy-tokens" passHref>
-                <motion.button
-                  className="w-full py-3 rounded-full text-lg font-bold shadow-lg transition-all duration-300
-                             bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                             hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)]"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  ¡Comprar Más Tokens!
-                </motion.button>
-              </Link>
+
+              {/* Botón para abrir el modal de tokens */}
+              <motion.button
+                onClick={() => {
+                  onOpenTokens();
+                  setDrawerOpen(false); // Cierra el cajón al abrir el modal
+                }}
+                className="w-full py-3 rounded-full text-lg font-bold shadow-lg transition-all duration-300
+                            bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
+                            hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)] text-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                role="button"
+              >
+                ¡Comprar Más Tokens!
+              </motion.button>
             </motion.div>
           )}
         </div>
@@ -178,33 +185,46 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
         <div className="w-full px-3 space-y-4">
           {user ? (
             <>
-              <button
-                onClick={() => setShowTokens(true)}
-                className="w-full py-2 rounded-lg text-sm font-semibold shadow-inner bg-[var(--primary)] hover:bg-[var(--primary)]/90 transition"
-                title="Ver Tokens"
-              >
-                Tokens: {totalTokens}
-              </button>
+              {/* Botones con el estilo que pediste */}
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={onOpenPremium}
+                  className={`cursor-pointer w-16 h-16 flex items-center justify-center rounded-lg hover:bg-gray-100 transition
+                    ${user?.isSubscribed ? "bg-gradient-to-r from-orange-500 to-yellow-400 shadow-lg border-transparent" : "bg-gray-50 border-dashed border-amber-400 hover:bg-amber-50"}
+                  `}
+                  title="Premium"
+                  aria-label="Abrir Premium"
+                >
+                  <Crown className={`w-6 h-6 ${user?.isSubscribed ? "text-white" : "text-amber-500"}`} />
+                </button>
 
-              <button
-                onClick={() => setShowPremium(true)}
-                className="w-full py-2 rounded-lg text-sm font-semibold shadow bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)] hover:opacity-95 transition"
-                title="Premium"
-              >
-                Premium
-              </button>
+                <button
+                  onClick={onOpenTokens}
+                  className="cursor-pointer w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex flex-col items-center justify-center relative group"
+                  title="Ver Tokens"
+                  aria-label="Ver Tokens"
+                >
+                  <Zap className="w-6 h-6 text-white mb-0.5" />
+                  {!user?.isSubscribed && remainingTokens <= 5 && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                  )}
+                </button>
+              </div>
 
-              <Link href="/profile" passHref>
-                <a className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--background)] border border-[var(--primary)] hover:bg-[var(--primary)]/5 transition">
-                  Perfil
-                </a>
+              {/* Perfil como Link sin <a> dentro */}
+              <Link
+                href="/profile"
+                className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--background)] border border-[var(--primary)] hover:bg-[var(--primary)]/5 transition"
+              >
+                Perfil
               </Link>
             </>
           ) : (
-            <Link href="/login" passHref>
-              <a className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--highlight)] text-[var(--text2)] hover:opacity-95 transition">
-                Entrar
-              </a>
+            <Link
+              href="/login"
+              className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--highlight)] text-[var(--text2)] hover:opacity-95 transition"
+            >
+              Entrar
             </Link>
           )}
         </div>
