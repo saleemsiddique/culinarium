@@ -1,4 +1,3 @@
-// components/AuthForm.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,6 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUser } from "@/context/user-context";
 import Link from "next/link";
+import { emitConsentUpdated } from "@/lib/consent-events";
+
+// Definimos los tipos de consentimiento que el usuario debe aceptar
+const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
 export function AuthForm({
   type = "login",
@@ -27,6 +30,7 @@ export function AuthForm({
     acceptTerms: false,
   });
 
+  // Obtenemos las funciones de login y register del contexto
   const { login, register } = useUser();
   const router = useRouter();
 
@@ -38,7 +42,7 @@ export function AuthForm({
     }));
   };
 
-    useEffect(() => {
+  useEffect(() => {
     if (type === "register") {
       const consentVersion = localStorage.getItem("consent_version");
       const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "0";
@@ -49,6 +53,10 @@ export function AuthForm({
   }, [type]);
 
 
+  // Nota: este handleSubmit asume que tienes disponible `register` y `login` desde tu contexto (useUser)
+  // y que, tras register, el usuario queda autenticado en el cliente (firebase auth).
+  // Si usas Firebase v9, importa: `import { getAuth } from "firebase/auth";`
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -58,45 +66,141 @@ export function AuthForm({
       if (type === "login") {
         await login(formData.email, formData.password);
         router.push("/kitchen");
-      } else {
-        // Validación para registro
-        if (!formData.acceptTerms) {
-          throw new Error("Debes aceptar los términos y condiciones");
-        }
-
-        console.log("formData", formData);
-
-        // 1. Registrar usuario
-        await register(
-          formData.email,
-          formData.password,
-          formData.firstName,
-          formData.lastName
-        );
-
-        // 2. Guardar consentimiento (asumiendo que POLICY_VERSION está en el .env)
-        await fetch("/api/consent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accepted: true,
-            version: process.env.NEXT_PUBLIC_POLICY_VERSION,
-            acceptedAt: new Date().toISOString(),
-            user_id: userId,
-          })
-        });
-
-        console.log("Usuario registrado y consentimiento guardado");
-
-        // 3. Redirigir
-        router.push("/kitchen");
+        return;
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Ha ocurrido un error");
+
+      // Registro
+      if (!formData.acceptTerms) {
+        throw new Error(
+          "Debes aceptar los términos y condiciones, política de privacidad y de cookies."
+        );
+      }
+
+      // 1) Crear usuario
+      const newUserId = await register(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
+
+      if (!newUserId) {
+        throw new Error("No se pudo obtener el ID del usuario tras el registro.");
+      }
+
+      // 2) Preparar payload único con todos los consentimientos
+      const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
+      const clientTimestamp = new Date().toISOString();
+
+      // Mapa corto de detalles (puedes sustituir por el texto completo si quieres)
+      const POLICY_TEXTS: Record<string, string> = {
+        terms_of_service: "Aceptación de Términos y Condiciones (texto versión).",
+        privacy_policy: "Aceptación de Política de Privacidad (texto versión).",
+        cookies_policy: "Aceptación de Política de Cookies (texto versión).",
+      };
+
+      const accepted = CONSENT_TYPES.map((ct) => ({
+        type: ct,
+        version: POLICY_VERSION,
+        granted: !!formData.acceptTerms,
+        details: POLICY_TEXTS[ct] || null,
+      }));
+
+      const meta = {
+        path: typeof window !== "undefined" ? window.location.pathname : null,
+        origin: typeof window !== "undefined" ? window.location.origin : null,
+        ref: typeof document !== "undefined" ? document.referrer || null : null,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        language: typeof navigator !== "undefined" ? navigator.language || null : null,
+        platform: typeof navigator !== "undefined" ? navigator.platform || null : null,
+      };
+
+      const payload = {
+        accepted,
+        user_id: newUserId,
+        details: {
+          timestamp: clientTimestamp,
+          version: POLICY_VERSION,
+          meta,
+        },
+        origin: meta.origin,
+        ref: meta.ref,
+        path: meta.path,
+      };
+
+      // 3) Intentar obtener idToken (si register deja al usuario autenticado)
+      let token: string | null = null;
+      try {
+        // requiere: import { getAuth } from "firebase/auth";
+        const { getAuth } = await import("firebase/auth");
+        const auth = getAuth();
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (tokenErr) {
+        // no crítico: seguiremos intentando enviar sin token (backend acepta user_id)
+        console.warn("No se pudo obtener idToken en cliente:", tokenErr);
+      }
+
+      // 4) Enviar UN solo POST a /api/consent con todos los aceptados
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch("/api/consent", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        console.warn("/api/consent respondió con error:", res.status, await res.text());
+        // no tiramos error porque el usuario ya se ha registrado; seguimos
+      } else {
+        // Guardamos la versión localmente para uso anónimo/offline
+        localStorage.setItem("consent_version", POLICY_VERSION);
+
+        // Emitimos evento global para que AnalyticsGate y otras partes reaccionen
+        try {
+          // cookies_policy controla la analítica
+          emitConsentUpdated(!!formData.acceptTerms);
+        } catch (e) {
+          // noop
+        }
+      }
+
+      // 5) Si tenemos anonymous_user_id y token, pedimos link en backend
+      try {
+        const anonymousId = localStorage.getItem("anonymous_user_id");
+        if (anonymousId && token) {
+          const linkRes = await fetch("/api/consent/link", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ anonymous_id: anonymousId }),
+          });
+
+          if (linkRes.ok) {
+            // opcional: borrar anonymous id local una vez vinculado
+            localStorage.removeItem("anonymous_user_id");
+          } else {
+            console.warn("/api/consent/link respondió con error:", linkRes.status, await linkRes.text());
+          }
+        }
+      } catch (linkErr) {
+        console.warn("Error al intentar linkear consentimientos:", linkErr);
+      }
+
+      // 6) Redirigir al usuario
+      router.push("/kitchen");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ha ocurrido un error");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -184,7 +288,7 @@ export function AuthForm({
             required
           />
           <label htmlFor="terms">
-            Acepto los <Link href="#" className="text-blue-500 hover:underline">Términos y Condiciones</Link>
+            Acepto los <Link href="/terms" className="text-blue-500 hover:underline">Términos y Condiciones</Link>, <Link href="/privacy" className="text-blue-500 hover:underline">Política de Privacidad</Link> y <Link href="/cookies" className="text-blue-500 hover:underline">Política de Cookies</Link>.
           </label>
         </div>
       )}

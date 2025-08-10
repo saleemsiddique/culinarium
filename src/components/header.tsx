@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Header() {
   const pathname = usePathname();
-  const { user } = useUser();
+  const { user } = useUser(); // Ya no necesitamos la función de logout aquí
   const isLoggedIn = !!user;
   const isMobileHidden = pathname !== '/';
 
@@ -39,8 +39,8 @@ export default function Header() {
           {/* Logo / Título */}
           <Link href={isLoggedIn ? '/kitchen' : '/'}>
             <motion.h1
-              className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer" // Usa el color principal
-              whileHover={{ scale: 1.05, color: 'var(--highlight)' }} // Usa el color de resaltado al pasar el ratón
+              className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer"
+              whileHover={{ scale: 1.05, color: 'var(--highlight)' }}
               transition={{ duration: 0.2 }}
             >
               Culinarium
@@ -59,7 +59,7 @@ export default function Header() {
                       <motion.span
                         className={`text-[var(--foreground)] hover:text-[var(--highlight)] font-medium transition-colors duration-200 cursor-pointer
                           ${isActive ? 'underline decoration-[var(--highlight)] underline-offset-4' : ''
-                        }`} // Usa los colores de primer plano y resaltado
+                        }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -70,7 +70,6 @@ export default function Header() {
                 );
               })}
 
-              {/* Enlace "Mi Perfil" (si está logueado, ahora es un enlace normal) */}
               {isLoggedIn && (
                 <li>
                   <Link href="/profile" passHref>
@@ -88,7 +87,7 @@ export default function Header() {
               )}
             </ul>
 
-            {/* Botón "Empezar" (solo si NO está logueado, es el único botón especial) */}
+            {/* Botón "Empezar" (si NO está logueado) */}
             {!isLoggedIn && (
               <Link href="/auth/login" passHref>
                 <motion.button
@@ -101,11 +100,10 @@ export default function Header() {
               </Link>
             )}
 
-            {/* Visualización de Tokens para Usuarios Logueados (al final) */}
+            {/* Visualización de Tokens para Usuarios Logueados */}
             {isLoggedIn && (
               <motion.div
-                className="relative flex items-center bg-[var(--background)] p-2 rounded-full shadow-inner cursor-pointer
-                           border border-[var(--highlight)]" // Añadido borde para destacar
+                className="relative flex items-center bg-[var(--background)] p-2 rounded-full shadow-inner cursor-pointer border border-[var(--highlight)]"
                 onMouseEnter={() => setShowTokenDetails(true)}
                 onMouseLeave={() => setShowTokenDetails(false)}
                 whileHover={{ scale: 1.02 }}
@@ -115,7 +113,7 @@ export default function Header() {
                 <span className="text-[var(--foreground)] font-semibold text-sm md:text-base mr-2">
                   Tokens: <span className="text-[var(--highlight)] font-bold text-lg">{totalTokens}</span>
                 </span>
-                <span className="text-[var(--highlight)] text-xl">✨</span> {/* Icono más prominente */}
+                <span className="text-[var(--highlight)] text-xl">✨</span>
 
                 <AnimatePresence>
                   {showTokenDetails && (
@@ -124,29 +122,40 @@ export default function Header() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.9 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full mt-3 left-1/2 -translate-x-1/2
-                                 bg-gradient-to-br from-[var(--primary)] to-[var(--foreground)] text-[var(--text2)] p-5 rounded-xl shadow-2xl
-                                 whitespace-nowrap z-50 flex flex-col items-center border-2 border-[var(--highlight)]
-                                 transform origin-top-left" // Fondo con gradiente, más padding, borde más grueso, origen de transformación
+                      className="absolute top-full mt-4 left-1/2 -translate-x-1/2 p-6 rounded-2xl shadow-2xl z-50
+                                 bg-white backdrop-blur-2xl border border-white/80 text-[var(--foreground)]
+                                 w-64 max-w-sm"
                     >
-                      <div className="flex flex-col items-start w-full px-2">
-                        <p className="text-base mb-1 flex items-center">
-                          <span className="mr-2 text-yellow-300">🗓️</span> Mensuales: <span className="font-bold ml-1 text-lg">{user?.monthly_tokens || 0}</span>
-                        </p>
-                        <p className="text-base mb-3 flex items-center">
-                          <span className="mr-2 text-green-300">🎁</span> Extras: <span className="font-bold ml-1 text-lg">{user?.extra_tokens || 0}</span>
-                        </p>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold text-lg">Tus Tokens</p>
+                          <span className="text-2xl">✨</span>
+                        </div>
+                        <div className="flex flex-col gap-2 border-t pt-2 border-white/50">
+                          <div className="flex justify-between items-center text-sm text-[var(--foreground)]">
+                            <span>Mensuales</span>
+                            <span className="font-bold text-base text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm text-[var(--foreground)]">
+                            <span>Extras</span>
+                            <span className="font-bold text-base text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center font-bold text-lg border-t pt-3 mt-3 border-white/50">
+                          <span>Total</span>
+                          <span className="text-[var(--highlight)]">{totalTokens}</span>
+                        </div>
                       </div>
+                      
                       <Link href="/buy-tokens" passHref>
                         <motion.button
-                          className="mt-2 px-5 py-2 text-base rounded-full
-                                     bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                                     font-bold shadow-lg transition-all duration-300 transform
-                                     hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]" // Botón más pequeño y elegante
-                          whileHover={{ scale: 1.1 }} // Efecto de escala al pasar el ratón
-                          whileTap={{ scale: 0.9 }} // Efecto de escala al tocar
+                          className="w-full mt-4 py-3 text-sm rounded-xl font-bold transition-all duration-300
+                                     bg-[var(--highlight)] text-[var(--text2)] shadow-md
+                                     hover:bg-[var(--highlight-dark)] hover:shadow-lg"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          ¡Comprar más!
+                          ¡Comprar más tokens!
                         </motion.button>
                       </Link>
                     </motion.div>

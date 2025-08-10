@@ -4,8 +4,8 @@ import Footer from "@/components/footer";
 import "./globals.css";
 import Header from "@/components/header";
 import { UserProvider } from "@/context/user-context";
-import { Analytics } from '@vercel/analytics/react';
-import ConsentModal from "@/components/ConsentModal"; // <-- nuevo componente
+import ConsentModal from "@/components/ConsentModal";
+import AnalyticsGate from "@/components/AnalyticsGate";
 
 export default function RootLayout({
   children,
@@ -25,7 +25,8 @@ export default function RootLayout({
 
           <Footer />
         </UserProvider>
-        <Analytics />
+        {/* Analytics solo se monta si el usuario acepta analítica */}
+        <AnalyticsGate />
       </body>
     </html>
   );

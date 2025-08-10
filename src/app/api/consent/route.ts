@@ -4,9 +4,167 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import "@/lib/firebase-admin";
 
-const POLICY_VERSION = process.env.POLICY_VERSION || "1.0.0";
+const POLICY_VERSION =
+  process.env.POLICY_VERSION ||
+  process.env.NEXT_PUBLIC_POLICY_VERSION ||
+  "1.0.0";
+const POLICY_UPDATED_AT = process.env.POLICY_UPDATED_AT || null; // ISO string optional
+
+// Helper: permite versiones por tipo vía env vars como POLICY_VERSION_TERMS_OF_SERVICE
+function envPolicyVersionForType(type: string) {
+  try {
+    const key = "POLICY_VERSION_" + type.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+    return (process.env as any)[key] || POLICY_VERSION;
+  } catch {
+    return POLICY_VERSION;
+  }
+}
+
+// Anonimiza / enmascara una IP (server-side)
+function maskIp(rawIp: string | null): string | null {
+  if (!rawIp) return null;
+  // Si vienen varias IPs (x-forwarded-for), tomar la primera
+  const ip = rawIp.split(",")[0].trim();
+
+  // IPv4
+  if (ip.includes(".")) {
+    const parts = ip.split(".");
+    if (parts.length === 4) {
+      parts[3] = "0"; // último octeto a 0
+      return parts.join(".");
+    }
+    return ip;
+  }
+
+  // IPv6: mantener primeros bloques y truncar el resto
+  if (ip.includes(":")) {
+    const parts = ip.split(":");
+    const keep = parts.slice(0, 4); // conserva primeros 4 bloques
+    return keep.join(":") + "::";
+  }
+
+  return ip;
+}
 
 export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    // Soportamos dos formatos:
+    // 1) body.accepted = [{ type, version, granted? }]
+    // 2) compatibilidad: body.type + body.version + body.granted
+    let {
+      accepted,
+      type,
+      granted,
+      user_id: bodyUserId,
+      version = null,
+      details = null,
+      origin = null,
+      ref = null,
+      path = null,
+    } = body;
+
+    if (!accepted) {
+      if (!type || typeof granted !== "boolean" || !bodyUserId) {
+        console.error("Campos obligatorios faltantes (compat):", { type, granted, bodyUserId });
+        return NextResponse.json({ error: "Campos obligatorios faltantes" }, { status: 400 });
+      }
+      accepted = [{ type, version: version || envPolicyVersionForType(type), granted }];
+    } else {
+      // validamos estructura mínima
+      if (!Array.isArray(accepted) || accepted.length === 0) {
+        return NextResponse.json({ error: "accepted debe ser un array no vacío" }, { status: 400 });
+      }
+      // aseguramos que cada entrada tenga version y granted
+      accepted = accepted.map((a: any) => ({
+        type: a.type,
+        version: a.version || envPolicyVersionForType(a.type),
+        granted: typeof a.granted === "boolean" ? a.granted : true,
+        details: a.details || null,
+      }));
+    }
+
+    if (!bodyUserId) {
+      console.error("Falta user_id en el body");
+      return NextResponse.json({ error: "Falta user_id" }, { status: 400 });
+    }
+
+    let userId = bodyUserId;
+    let isUserAuthenticated = false;
+
+    const authHeader = req.headers.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split("Bearer ")[1];
+      try {
+        const decodedToken = await getAuth().verifyIdToken(token);
+        userId = decodedToken.uid;
+        isUserAuthenticated = true;
+      } catch (error) {
+        console.warn("Token de autorización no válido. Procediendo con user_id enviado (anónimo).");
+      }
+    }
+
+    // Obtener IP real desde cabeceras (por detrás de proxies)
+    const rawIp =
+      req.headers.get("x-forwarded-for") ||
+      req.headers.get("x-real-ip") ||
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("fastly-client-ip") ||
+      req.headers.get("true-client-ip") ||
+      req.headers.get("remote-addr") ||
+      null;
+
+    const ip_masked = maskIp(rawIp);
+
+    // user agent desde cabeceras (más fiable que lo que envíe cliente)
+    const serverUserAgent = req.headers.get("user-agent") || null;
+
+    // Si origin/ref/path no vienen en body, intentar obtener de cabeceras
+    const originHeader = req.headers.get("origin") || null;
+    const refererHeader = req.headers.get("referer") || req.headers.get("referrer") || null;
+
+    const resolvedOrigin = origin || originHeader || null;
+    const resolvedRef = ref || refererHeader || null;
+    const resolvedPath = path || null; // path típicamente lo envía el cliente
+
+    const db = getFirestore();
+
+    const acceptedTypes = (accepted as any[]).map((a) => a.type);
+
+    // Si el cliente mandó un timestamp dentro de details, lo conservamos como client_timestamp
+    const clientTimestamp =
+      (details && (details.timestamp || details.client_timestamp)) || null;
+
+    const consentData = {
+      user_id: userId,
+      accepted, // array de { type, version, granted, details? }
+      accepted_types: acceptedTypes, // para poder hacer array-contains en consultas por tipo
+      // server timestamp (no confiar solo en la del cliente)
+      timestamp: FieldValue.serverTimestamp(),
+      // conservar la fecha del cliente si la envía (opcional)
+      client_timestamp: clientTimestamp,
+      ip_masked,
+      user_agent: serverUserAgent,
+      meta: {
+        origin: resolvedOrigin,
+        ref: resolvedRef,
+        path: resolvedPath,
+      },
+      details: details || null,
+      created_by_authenticated: isUserAuthenticated || false,
+    };
+
+    const docRef = await db.collection("consents").add(consentData);
+
+    return NextResponse.json({ success: true, id: docRef.id });
+  } catch (error) {
+    console.error("Error en POST /api/consent:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
+
+export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,58 +175,64 @@ export async function POST(req: Request) {
     const decodedToken = await getAuth().verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    const body = await req.json();
+    const db = getFirestore();
+    const consentTypes = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
-    const {
-      type,       // ej: 'privacy_policy', 'terms', 'cookies'
-      version = POLICY_VERSION,
-      granted,
-      details = null,
-      origin = null,
-      ref = null,
-    } = body;
+    const consentStatus: Record<string, boolean> = {};
 
-    if (!type || typeof granted !== "boolean") {
-      return NextResponse.json({ error: "Campos obligatorios faltantes" }, { status: 400 });
+    for (const type of consentTypes) {
+      const consentsRef = db.collection("consents");
+      // buscamos el documento más reciente que contenga este tipo
+      const q = consentsRef
+        .where("user_id", "==", userId)
+        .where("accepted_types", "array-contains", type)
+        .orderBy("timestamp", "desc")
+        .limit(1);
+
+      const snapshot = await q.get();
+
+      if (snapshot.empty) {
+        consentStatus[type] = false;
+        continue;
+      }
+
+      const latestDoc = snapshot.docs[0].data();
+      // Encontramos dentro del array 'accepted' la entrada de este tipo
+      const acceptedArr: any[] = latestDoc.accepted || [];
+      const entry = acceptedArr.find((e) => e.type === type && e.granted === true);
+
+      if (!entry) {
+        consentStatus[type] = false;
+        continue;
+      }
+
+      const latestVersion = entry.version || null;
+      const latestTimestamp = latestDoc.timestamp || null; // Firestore Timestamp o null
+
+      // Comprueba si la versión coincide con la configuración actual (soporte por tipo)
+      const requiredVersion = envPolicyVersionForType(type);
+
+      let isUpToDate = false;
+      if (latestVersion && latestVersion === requiredVersion) {
+        isUpToDate = true;
+      } else if (POLICY_UPDATED_AT && latestTimestamp && typeof latestTimestamp.toMillis === "function") {
+        const consentMillis = latestTimestamp.toMillis();
+        const policyMillis = Date.parse(POLICY_UPDATED_AT);
+        if (!Number.isNaN(policyMillis) && consentMillis >= policyMillis) {
+          isUpToDate = true;
+        }
+      }
+
+      consentStatus[type] = !!isUpToDate;
     }
 
-    // Obtener IP y User-Agent de headers
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("remote_addr") || null;
-    const userAgent = req.headers.get("user-agent") || null;
-
-    const db = getFirestore();
-    const consentData = {
-      user_id: userId,
-      type,
-      version,
-      granted,
-      details,
-      timestamp: FieldValue.serverTimestamp(),
-      ip,
-      user_agent: userAgent,
-      meta: {
-        origin,
-        ref,
-      },
-    };
-
-    // Guardamos en colección "consents"
-    await db.collection("consents").add(consentData);
-
-    // También puedes actualizar la info de consentimiento en el doc user (opcional)
-    await db.collection("users").doc(userId).set(
-      {
-        last_consent_type: type,
-        last_consent_version: version,
-        last_consent_granted: granted,
-        last_consent_at: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      ...consentStatus,
+      policy_version: POLICY_VERSION,
+      policy_updated_at: POLICY_UPDATED_AT || null,
+    });
   } catch (error) {
-    console.error("Error en POST /api/consent:", error);
+    console.error("Error en GET /api/consent:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
