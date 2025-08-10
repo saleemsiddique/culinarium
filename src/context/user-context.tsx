@@ -15,6 +15,7 @@ import {
   query,
   where,
   setDoc,
+  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
@@ -59,6 +60,7 @@ interface UserContextType {
   ) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUserName: (newName: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -78,7 +80,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           const docData = snapshot.docs[0].data() as CustomUser;
           docData.uid = snapshot.docs[0].id;
 
-
           setUser(docData);
         } else {
           setUser(null);
@@ -93,52 +94,52 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-const login = async (email: string, password: string) => {
-  const result = await signInWithEmailAndPassword(auth, email, password);
-  const firebaseUser = result.user;
+  const login = async (email: string, password: string) => {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = result.user;
 
-  const usersRef = collection(db, "user");
-  const q = query(usersRef, where("email", "==", firebaseUser.email));
-  const snapshot = await getDocs(q);
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", firebaseUser.email));
+    const snapshot = await getDocs(q);
 
-  if (snapshot.empty) throw new Error("Usuario no encontrado");
+    if (snapshot.empty) throw new Error("Usuario no encontrado");
 
-  const docData = snapshot.docs[0].data() as CustomUser;
-  docData.uid = snapshot.docs[0].id;
+    const docData = snapshot.docs[0].data() as CustomUser;
+    docData.uid = snapshot.docs[0].id;
 
-  setUser(docData);
-};
-
-  const register = async (
-  email: string,
-  password: string,
-  firstName: string,
-  lastName: string
-) => {
-  const result = await createUserWithEmailAndPassword(auth, email, password);
-  const firebaseUser = result.user;
-
-  const newUser: CustomUser = {
-    uid: firebaseUser.uid,
-    email,
-    firstName,
-    lastName,
-    created_at: Timestamp.now(),
-    extra_tokens: 0,
-    isSubscribed: false,
-    lastRenewal: Timestamp.now(),
-    monthly_tokens: 30,
-    stripeCustomerId: "",
-    subscriptionId: "",
-    subscriptionStatus: "cancelled",
-    subscriptionCanceled: false,
-    tokens_reset_date: Timestamp.now(),
+    setUser(docData);
   };
 
-  const docRef = doc(db, "user", firebaseUser.uid);
-  await setDoc(docRef, newUser);
-  setUser(newUser);
-};
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUser = result.user;
+
+    const newUser: CustomUser = {
+      uid: firebaseUser.uid,
+      email,
+      firstName,
+      lastName,
+      created_at: Timestamp.now(),
+      extra_tokens: 0,
+      isSubscribed: false,
+      lastRenewal: Timestamp.now(),
+      monthly_tokens: 30,
+      stripeCustomerId: "",
+      subscriptionId: "",
+      subscriptionStatus: "cancelled",
+      subscriptionCanceled: false,
+      tokens_reset_date: Timestamp.now(),
+    };
+
+    const docRef = doc(db, "user", firebaseUser.uid);
+    await setDoc(docRef, newUser);
+    setUser(newUser);
+  };
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -189,6 +190,37 @@ const login = async (email: string, password: string) => {
     setUser(null);
   };
 
+  // 🆕 Nueva función para actualizar el nombre de usuario
+  const updateUserName = async (newName: string) => {
+    if (!user) {
+      throw new Error("No hay usuario autenticado");
+    }
+
+    if (!newName.trim()) {
+      throw new Error("El nombre no puede estar vacío");
+    }
+
+    try {
+      // Actualizar en Firestore
+      const userDocRef = doc(db, "user", user.uid);
+      await updateDoc(userDocRef, {
+        firstName: newName.trim(),
+      });
+
+      // Actualizar el estado local
+      setUser((prevUser) => {
+        if (!prevUser) return null;
+        return {
+          ...prevUser,
+          firstName: newName.trim(),
+        };
+      });
+    } catch (error) {
+      console.error("Error al actualizar el nombre:", error);
+      throw new Error("No se pudo actualizar el nombre");
+    }
+  };
+
   const value: UserContextType = {
     user,
     loading,
@@ -196,6 +228,7 @@ const login = async (email: string, password: string) => {
     register,
     loginWithGoogle,
     logout,
+    updateUserName,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

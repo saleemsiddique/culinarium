@@ -5,7 +5,15 @@ import { useUser } from "@/context/user-context";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CreditCard, Calendar, AlertTriangle, Check } from "lucide-react";
+import {
+  CreditCard,
+  Calendar,
+  AlertTriangle,
+  Check,
+  Edit,
+  Save,
+  X,
+} from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";
 import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutForm";
 
@@ -18,15 +26,21 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const { user, logout } = useUser();
+  const { user, logout, updateUserName } = useUser();
   const { subscription } = useSubscription();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
 
+  // Estados para editar nombre
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState(user?.firstName || "");
+  const [isSavingName, setIsSavingName] = useState(false);
+
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
-  const customerPortalLink = "https://billing.stripe.com/p/login/test_fZu00c7Dz0T31RZg4QcQU00";
+  const customerPortalLink =
+    "https://billing.stripe.com/p/login/test_fZu00c7Dz0T31RZg4QcQU00";
 
   const handleLogout = async () => {
     try {
@@ -37,7 +51,7 @@ function ProfileContent() {
     }
   };
 
-  const handlePaymentHistory= async () => {
+  const handlePaymentHistory = async () => {
     try {
       router.push("/profile/payment_history");
     } catch (error) {
@@ -46,8 +60,60 @@ function ProfileContent() {
   };
 
   const handleCustomerPortal = async () => {
-    window.location.href = customerPortalLink + "?prefilled_email=" + user?.email;
-  }
+    window.location.href =
+      customerPortalLink + "?prefilled_email=" + user?.email;
+  };
+
+  // Función para guardar el nuevo nombre
+  const handleSaveName = async () => {
+    if (!newName.trim()) {
+      alert("El nombre no puede estar vacío");
+      return;
+    }
+
+    setIsSavingName(true);
+    try {
+      // Si tienes una función updateUserName en tu contexto de usuario
+      if (updateUserName) {
+        await updateUserName(newName.trim());
+      } else {
+        // Alternativa: hacer la llamada directa a la API
+        const response = await fetch("/api/user/update-name", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.uid,
+            firstName: newName.trim(),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Error al actualizar el nombre");
+        }
+      }
+
+      setIsEditingName(false);
+      alert("Nombre actualizado exitosamente");
+
+      // Si no tienes la función updateUserName en el contexto, puedes recargar
+      if (!updateUserName) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al actualizar el nombre. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  // Función para cancelar la edición
+  const handleCancelEdit = () => {
+    setNewName(user?.firstName || "");
+    setIsEditingName(false);
+  };
 
   const handleCancelSubscription = async () => {
     setIsLoading(true);
@@ -68,13 +134,10 @@ function ProfileContent() {
 
       const data = await response.json();
 
-      // Actualizar el contexto del usuario con la nueva información
-      // Aquí deberías actualizar el contexto del usuario
       alert(
         "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual."
       );
 
-      // Opcional: recargar la página o actualizar el estado
       window.location.reload();
     } catch (error) {
       console.error("Error:", error);
@@ -105,11 +168,8 @@ function ProfileContent() {
 
       const data = await response.json();
 
-      // Actualizar el contexto del usuario con la nueva información
-      // Aquí deberías actualizar el contexto del usuario
       alert("Suscripción reactivada exitosamente..");
 
-      // Opcional: recargar la página o actualizar el estado
       window.location.reload();
     } catch (error) {
       console.error("Error:", error);
@@ -154,8 +214,54 @@ function ProfileContent() {
           {/* Información Personal */}
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">Nombre</p>
-              <p className="text-lg font-semibold">{user?.firstName}</p>
+              <p className="text-sm text-gray-600 mb-2">Nombre</p>
+              {!isEditingName ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <p className="text-lg font-semibold">{user?.firstName}</p>
+                  <Button
+                    onClick={() => setIsEditingName(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="p-1 h-6 w-6"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="w-full px-2 py-1 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ingresa tu nombre"
+                    disabled={isSavingName}
+                  />
+                  <div className="flex justify-center space-x-1">
+                    <Button
+                      onClick={handleSaveName}
+                      size="sm"
+                      className="px-2 py-1 h-7"
+                      disabled={isSavingName}
+                    >
+                      {isSavingName ? (
+                        "Guardando..."
+                      ) : (
+                        <Save className="h-3 w-3" />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                      className="px-2 py-1 h-7"
+                      disabled={isSavingName}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="p-4 bg-gray-50 rounded-lg">
@@ -254,13 +360,17 @@ function ProfileContent() {
                 Actualiza a Premium para obtener más funciones
               </p>
               <EmbeddedCheckoutButton
-                            priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
-                            user={user}
-                          />
+                priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
+                user={user}
+              />
             </div>
           )}
-          {/* Botón de historial de pagos */}
-          <Button onClick={handleCustomerPortal} className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white mb-5">
+
+          {/* Botones */}
+          <Button
+            onClick={handleCustomerPortal}
+            className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white mb-5"
+          >
             Billing
           </Button>
           <Button
@@ -269,7 +379,6 @@ function ProfileContent() {
           >
             Historial de Pagos
           </Button>
-          {/* Botón de cerrar sesión */}
           <Button
             onClick={handleLogout}
             className="cursor-pointer w-full bg-red-500 hover:bg-red-600 text-white"

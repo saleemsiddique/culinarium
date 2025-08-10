@@ -66,9 +66,6 @@ export default function PaymentDashboard() {
                     {subscription.status.toUpperCase()}
                   </span>
                 </div>
-                <button className="mt-4 md:mt-0 px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition">
-                  Gestionar Suscripción
-                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
