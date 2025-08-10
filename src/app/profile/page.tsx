@@ -347,7 +347,7 @@ function ProfileContent() {
 
               <div className="text-center mb-4">
                 <p className="text-sm text-[var(--text2)] opacity-80">Tokens restantes</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-2xl font-bold text-[var(--highlight)]">
                   {totalOfTokens}
                 </p>
               </div>
@@ -367,10 +367,10 @@ function ProfileContent() {
 
               {/* Mensaje para suscripciones ya canceladas */}
               {user?.isSubscribed && user?.subscriptionCanceled && (
-                <div className="bg-white bg-opacity-20 border border-white border-opacity-30 rounded-[var(--radius)] p-4">
+                <div className="bg-black/50 bg-opacity-20 border border-white border-opacity-30 rounded-[var(--radius)] p-4">
                   <div className="flex items-center justify-center">
                     <AlertTriangle className="h-5 w-5 text-[var(--highlight)] mr-2" />
-                    <p className="text-sm">
+                    <p className="text-sm font-bold">
                       Tu suscripción ha sido cancelada pero seguirás teniendo
                       acceso hasta el{" "}
                       {subscription?.endsAt
