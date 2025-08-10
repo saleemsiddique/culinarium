@@ -148,7 +148,7 @@ export default function TokenPurchaseCards({
 
       {/* Modal de checkout */}
       <dialog ref={modalRef} className="modal bg-black/50">
-        <div className="modal-box w-full max-w-lg p-6 rounded-2xl bg-white shadow-2xl text-center">
+        <div className="modal-box w-full max-h-[90vh] max-w-lg p-6 rounded-2xl bg-white shadow-2xl text-center">
           <p className="text-xl font-bold text-gray-800 mb-4">Finalizar compra</p>
           <p className="text-sm text-gray-600 mb-2">Pago seguro con Stripe</p>
           <div className="py-4">
