@@ -112,13 +112,13 @@ const Tag: React.FC<TagProps> = ({ label, onRemove }) => (
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.8 }}
-    className="flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mr-2 mb-2 shadow-sm"
+    className="flex items-center bg-[var(--primary)]/20 text-[var(--primary)] text-sm font-medium px-3 py-1 rounded-full mr-2 mb-2 shadow-sm"
   >
     <span>{label}</span>
     <button
       type="button"
       onClick={() => onRemove(label)}
-      className="ml-2 text-blue-500 hover:text-blue-700 focus:outline-none"
+      className="ml-2 text-[var(--primary)] hover:text-[var(--foreground)] focus:outline-none"
       aria-label={`Eliminar ${label}`}
     >
       <IoCloseCircleOutline className="w-4 h-4" />
@@ -427,7 +427,7 @@ const CulinariumForm: React.FC = () => {
   }, [loadingUser, searchParams, autoTriggered]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br pt-[5%] from-green-50 to-blue-100 py-10 flex items-center justify-center font-sans">
+    <div className="min-h-screen bg-gradient-to-br pt-[5%] from-[var(--background)] to-[var(--background)] py-10 flex items-center justify-center font-sans">
       <Head>
         <title>Culinarium - Encuentra tu Receta</title>
         <meta name="description" content="Encuentra tu receta ideal con el formulario interactivo de Culinarium." />
@@ -444,11 +444,11 @@ const CulinariumForm: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}
             <div className="lg:col-span-1 flex flex-col">
-              <section className={`bg-gray-50 p-6 rounded-2xl shadow-inner flex-grow ${ingredientError ? 'border-2 border-red-500' : ''}`}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2 text-blue-500 text-3xl">🍳</span> ¿Qué tienes a mano?
+              <section className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex-grow ${ingredientError ? 'border-2 border-[var(--highlight)]' : ''}`}>
+                <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4 flex items-center">
+                  <span className="mr-2 text-[var(--highlight)] text-3xl">🍳</span> ¿Qué tienes a mano?
                 </h2>
-                <p className="text-gray-600 mb-4 text-sm">
+                <p className="text-[var(--foreground)] mb-4 text-sm">
                   Escribe un ingrediente y presiona **Enter** para añadirlo. Toca para borrar.
                 </p>
                 <input
@@ -457,11 +457,11 @@ const CulinariumForm: React.FC = () => {
                   onChange={(e) => setCurrentIngredient(e.target.value)}
                   onKeyDown={handleAddIngredient}
                   placeholder="Ej: Pollo, arroz, tomate..."
-                  className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-transparent text-lg ${ingredientError ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${ingredientError ? 'border-[var(--highlight)]' : 'border-[var(--primary)]'}`}
                   aria-label="Añadir ingrediente"
                 />
                 {ingredientError && (
-                  <p className="text-red-500 text-sm mt-2">
+                  <p className="text-[var(--highlight)] text-sm mt-2">
                     ¡Por favor, añade al menos un ingrediente!
                   </p>
                 )}
@@ -471,21 +471,21 @@ const CulinariumForm: React.FC = () => {
                   </AnimatePresence>
                 </div>
                 {ingredients.length === 0 && !ingredientError && (
-                  <p className="text-gray-400 text-sm mt-2">
+                  <p className="text-[var(--muted)] text-sm mt-2">
                     ¡Empieza a añadir tus ingredientes!
                   </p>
                 )}
-                <p className="md:hidden text-blue-500 text-sm mt-2 flex items-center">
+                <p className="md:hidden text-[var(--highlight)] text-sm mt-2 flex items-center">
                   <IoAddCircleOutline className="w-5 h-5 mr-1" /> Toca los ingredientes para borrarlos.
                 </p>
 
                 {/* NUEVA SECCIÓN: Tiempo disponible */}
                 <section className="mt-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">¿Cuánto tiempo tienes?</h3>
+                  <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">¿Cuánto tiempo tienes?</h3>
                   <select
                     value={availableTime}
                     onChange={(e) => setAvailableTime(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-300 focus:border-transparent text-lg"
+                    className="w-full p-3 border border-[var(--primary)] rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg"
                     aria-label="Seleccionar tiempo disponible"
                   >
                     <option value="15">15 minutos</option>
@@ -502,11 +502,11 @@ const CulinariumForm: React.FC = () => {
             <div className="lg:col-span-1 flex flex-col space-y-6">
               {/* Sección de Momento del Día */}
               <section
-                className={`bg-gray-50 p-4 rounded-2xl shadow-inner flex flex-col justify-between ${mealTimeError ? 'border-2 border-red-500' : ''}`}
+                className={`bg-[var(--background)] p-4 rounded-2xl shadow-inner flex flex-col justify-between ${mealTimeError ? 'border-2 border-[var(--highlight)]' : ''}`}
                 style={{ minHeight: '250px', maxHeight: '350px' }}
               >
-                <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center justify-center">
-                  <span className="mr-2 text-orange-500 text-xl">☀️</span> ¿Para cuándo es?
+                <h2 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center justify-center">
+                  <span className="mr-2 text-[var(--highlight)] text-xl">☀️</span> ¿Para cuándo es?
                 </h2>
                 <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">
                   {mealTimes.map((time) => (
@@ -521,8 +521,8 @@ const CulinariumForm: React.FC = () => {
                       whileTap={{ scale: 0.95 }}
                       className={`flex flex-col items-center justify-center  p-2 rounded-xl border-2 transition-all duration-200
                         ${mealTime === time.value
-                          ? 'border-orange-500 bg-orange-100 text-orange-800 shadow-md'
-                          : 'border-gray-300 bg-white text-gray-700 hover:border-orange-300'
+                          ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
+                          : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
                         }`}
                     >
                       <span className="text-2xl mb-0.5">
@@ -538,16 +538,16 @@ const CulinariumForm: React.FC = () => {
                   ))}
                 </div>
                 {mealTimeError && (
-                  <p className="text-red-500 text-sm mt-2 text-center">
+                  <p className="text-[var(--highlight)] text-sm mt-2 text-center">
                     ¡Por favor, selecciona un momento del día!
                   </p>
                 )}
               </section>
 
               {/* Sección de Número de Personas */}
-              <section className="bg-gray-50 p-6 rounded-2xl shadow-inner flex flex-col justify-center h-full">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center">
-                  <span className="mr-2 text-purple-500 text-2xl">👨‍👩‍👧‍👦</span> ¿Cuántos van a comer?
+              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner flex flex-col justify-center h-full">
+                <h2 className="text-xl font-bold text-[var(--foreground)] mb-4 text-center flex items-center justify-center">
+                  <span className="mr-2 text-[var(--primary)] text-2xl">👨‍👩‍👧‍👦</span> ¿Cuántos van a comer?
                 </h2>
                 <div className="flex items-center justify-center space-x-4">
                   <motion.button
@@ -556,20 +556,20 @@ const CulinariumForm: React.FC = () => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     disabled={diners <= 1}
-                    className={`p-3 bg-purple-100 rounded-full text-purple-700 hover:bg-purple-200 transition-colors
+                    className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] hover:bg-[var(--primary)]/30 transition-colors
                       ${diners <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     aria-label="Disminuir número de comensales"
                   >
                     <IoCloseCircleOutline className="w-7 h-7" />
                   </motion.button>
-                  <span className="text-5xl font-bold text-purple-800 w-20 text-center">{diners}</span>
+                  <span className="text-5xl font-bold text-[var(--foreground)] w-20 text-center">{diners}</span>
                   <motion.button
                     type="button"
                     onClick={() => setDiners(Math.min(MAX_DINERS, diners + 1))}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     disabled={diners >= MAX_DINERS}
-                    className={`p-3 bg-purple-100 rounded-full text-purple-700 hover:bg-purple-200 transition-colors
+                    className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] hover:bg-[var(--primary)]/30 transition-colors
                       ${diners >= MAX_DINERS ? 'opacity-50 cursor-not-allowed' : ''}`}
                     aria-label="Aumentar número de comensales"
                   >
@@ -582,50 +582,50 @@ const CulinariumForm: React.FC = () => {
             {/* COLUMNA 3: Secciones Opcionales Colapsables */}
             <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar">
               {/* Sección de Restricciones y Exclusiones (colapsable) */}
-              <section className="bg-gray-50 p-6 rounded-2xl shadow-inner">
+              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
                 <button
                   type="button"
                   onClick={() => setShowDietaryRestrictions(!showDietaryRestrictions)}
-                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 hover:text-teal-600 transition-colors"
+                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
-                  <span className="flex items-center"><span className="mr-2 text-teal-500 text-3xl">🚫</span> ¿Alguna restricción?</span>
+                  <span className="flex items-center"><span className="mr-2 text-[var(--primary)] text-3xl">🚫</span> ¿Alguna restricción?</span>
                   <motion.span animate={{ rotate: showDietaryRestrictions ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                    {showDietaryRestrictions ? <IoChevronUpCircleOutline className="w-8 h-8 text-gray-500" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-gray-500" />}
+                    {showDietaryRestrictions ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
                   </motion.span>
                 </button>
                 <AnimatePresence>
                   {showDietaryRestrictions && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
-                      <p className="text-gray-600 mb-4 text-sm">Selecciona si hay alguna preferencia dietética.</p>
+                      <p className="text-[var(--foreground)] mb-4 text-sm">Selecciona si hay alguna preferencia dietética.</p>
                       <div className="flex flex-wrap gap-3 mb-6">{dietaryOptions.map(opt => (
-                        <motion.button key={opt.value} type="button" onClick={() => handleDietaryChange(opt.value)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${dietaryRestrictions.includes(opt.value) ? 'border-teal-500 bg-teal-100 text-teal-800 shadow-md' : 'border-gray-300 bg-white text-gray-700 hover:border-teal-300'}`}>{opt.label}</motion.button>))}</div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center"><span className="mr-2 text-red-500 text-2xl">⚠️</span> Ingredientes a evitar:</h3>
-                      <p className="text-gray-600 mb-2 text-sm">Escribe un ingrediente y presiona **Enter** para añadirlo.</p>
-                      <input type="text" value={currentExcluded} onChange={(e) => setCurrentExcluded(e.target.value)} onKeyDown={handleAddExcluded} placeholder="Ej: Cacahuetes, cilantro, champiñones..." className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-300 focus:border-transparent text-lg" aria-label="Añadir ingrediente a evitar" />
+                        <motion.button key={opt.value} type="button" onClick={() => handleDietaryChange(opt.value)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${dietaryRestrictions.includes(opt.value) ? 'border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md' : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]'}`}>{opt.label}</motion.button>))}</div>
+                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-3 flex items-center"><span className="mr-2 text-[var(--highlight)] text-2xl">⚠️</span> Ingredientes a evitar:</h3>
+                      <p className="text-[var(--foreground)] mb-2 text-sm">Escribe un ingrediente y presiona **Enter** para añadirlo.</p>
+                      <input type="text" value={currentExcluded} onChange={(e) => setCurrentExcluded(e.target.value)} onKeyDown={handleAddExcluded} placeholder="Ej: Cacahuetes, cilantro, champiñones..." className="w-full p-3 border border-[var(--primary)] rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg" aria-label="Añadir ingrediente a evitar" />
                       <div className="mt-4 flex flex-wrap min-h-[60px] max-h-[200px] overflow-y-auto custom-scrollbar">
                         <AnimatePresence>{excludedIngredients.map(ing => (<Tag key={ing} label={ing} onRemove={handleRemoveExcluded} />))}</AnimatePresence>
                       </div>
-                      {excludedIngredients.length === 0 && (<p className="text-gray-400 text-sm mt-2">¡Añade ingredientes que quieras evitar!</p>)}
+                      {excludedIngredients.length === 0 && (<p className="text-[var(--muted)] text-sm mt-2">¡Añade ingredientes que quieras evitar!</p>)}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </section>
 
               {/* Sección de Estilo de Comida (colapsable) */}
-              <section className="bg-gray-50 p-6 rounded-2xl shadow-inner">
+              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
                 <button
                   type="button"
                   onClick={() => setShowCuisineStyle(!showCuisineStyle)}
-                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 hover:text-indigo-600 transition-colors"
+                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--highlight)] transition-colors"
                 >
                   <span className="flex items-center">
-                    <span className="mr-2 text-indigo-500 text-3xl">🌍</span> ¿Qué estilo te apetece?
+                    <span className="mr-2 text-[var(--highlight)] text-3xl">🌍</span> ¿Qué estilo te apetece?
                   </span>
                   <motion.span
                     animate={{ rotate: showCuisineStyle ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {showCuisineStyle ? <IoChevronUpCircleOutline className="w-8 h-8 text-gray-500" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-gray-500" />}
+                    {showCuisineStyle ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
                   </motion.span>
                 </button>
 
@@ -648,8 +648,8 @@ const CulinariumForm: React.FC = () => {
                             whileTap={{ scale: 0.95 }}
                             className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 text-center
                               ${cuisineStyle === style.value
-                                ? 'border-indigo-500 bg-indigo-100 text-indigo-800 shadow-md'
-                                : 'border-gray-300 bg-white text-gray-700 hover:border-indigo-300'
+                                ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
+                                : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
                               }`}
                           >
                             <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">{style.icon}</span>
@@ -669,21 +669,21 @@ const CulinariumForm: React.FC = () => {
             type="submit"
             whileHover={{ scale: (loadingUser || status === 'loading') ? 1 : 1.02 }}
             whileTap={{ scale: (loadingUser || status === 'loading') ? 1 : 0.98 }}
-            className={`w-full text-white font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4
+            className={`w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4
               ${loadingUser || status === 'loading'
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-500 to-green-500 hover:shadow-xl focus:ring-blue-300'
+                ? 'bg-[var(--primary)]/50 cursor-not-allowed'
+                : 'bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]'
               }`}
             disabled={loadingUser || status === 'loading'}
           >
             {loadingUser ? 'Cargando usuario...' : (status === 'loading' ? 'Generando y Guardando...' : '¡Encuentra mi Receta!')}
           </motion.button>
-          {status === 'error' && <p className="text-red-500 text-center">Error: {error}. Intenta de nuevo.</p>}
+          {status === 'error' && <p className="text-[var(--highlight)] text-center">Error: {error}. Intenta de nuevo.</p>}
         </form>
 
         {/* Toast notification */}
         {toastMessage && (
-          <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="fixed bottom-4 right-4 bg-[var(--highlight)] text-[var(--text2)] px-4 py-2 rounded-lg shadow-lg">
             {toastMessage}
           </div>
         )}
@@ -697,23 +697,23 @@ const CulinariumForm: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+            className="fixed inset-0 bg-[var(--foreground)]/70 flex items-center justify-center z-50 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center space-y-4"
+              className="bg-[var(--background)] p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center space-y-4"
             >
               {/* Spinning Circle */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                className="w-16 h-16 border-4 border-t-4 border-blue-500 border-t-transparent rounded-full"
+                className="w-16 h-16 border-4 border-t-4 border-[var(--highlight)] border-t-transparent rounded-full"
               ></motion.div>
-              <p className="text-xl font-semibold text-gray-800">Generando y Guardando tu Receta...</p>
-              <p className="text-sm text-gray-600">Esto puede tardar unos segundos.</p>
+              <p className="text-xl font-semibold text-[var(--foreground)]">Generando y Guardando tu Receta...</p>
+              <p className="text-sm text-[var(--muted)]">Esto puede tardar unos segundos.</p>
             </motion.div>
           </motion.div>
         )}

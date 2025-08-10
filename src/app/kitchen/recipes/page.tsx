@@ -6,22 +6,23 @@ import { motion } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation'; // Importamos useSearchParams
 import Image from "next/image";
-// Eliminado el borrado en Firestore desde el cliente
+import { auth } from '@/lib/firebase'; // Necesitamos el auth del cliente para obtener el token
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
   nombre: string;
-  cantidad: string; // O number, si siempre es numérico y lo formateas
+  cantidad: string;
   unidad: string;
 };
 
-// Define el tipo de la Receta, ahora con 'ingredientes' como array de Ingredient
+// Define el tipo de la Receta, incluyendo el ID opcional
 type Recipe = {
+  id?: string; // Hacemos el ID opcional para cuando se carga de sessionStorage
   titulo: string;
   descripcion: string;
-  ingredientes: Ingredient[]; // <-- CAMBIO AQUÍ: Ahora es un array de objetos Ingredient
+  ingredientes: Ingredient[];
   instrucciones: { paso: number; texto: string; }[];
   tiempo_total_min: number;
   porciones: number;
@@ -33,10 +34,10 @@ type Recipe = {
 
 const RecipePage: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Hook para obtener los parámetros de la URL
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
 
-  // 👇 Mover aquí para evitar error de Hooks
   const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
 
@@ -67,20 +68,55 @@ const RecipePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('[RecipePage] useEffect:init - leyendo sessionStorage.generatedRecipe');
-      const storedRecipe = sessionStorage.getItem('generatedRecipe');
-      if (storedRecipe) {
-        console.log('[RecipePage] Receta encontrada en sessionStorage.');
-        const parsedRecipe: Recipe = JSON.parse(storedRecipe);
-        setRecipe(parsedRecipe);
-        console.log('[RecipePage] Imagen inicial de receta:', parsedRecipe.img_url);
-        setImageSrc(parsedRecipe.img_url || placeholderImageUrl); // ✅ Aquí se actualiza de forma segura
-      } else {
-        console.warn('[RecipePage] No hay receta en sessionStorage. Redirigiendo a /kitchen');
-        router.push('/kitchen');
+    const fetchRecipeById = async (id: string) => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          router.push('/login'); // Redirigir si el usuario no está autenticado
+          return;
+        }
+        const idToken = await user.getIdToken();
+
+        const response = await fetch(`/api/recipes/${id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener la receta desde la base de datos.');
+        }
+
+        const data = await response.json();
+        setRecipe(data.recipe);
+        setImageSrc(data.recipe.img_url || placeholderImageUrl);
+      } catch (error) {
+        console.error('Error fetching recipe by ID:', error);
+        router.push('/kitchen/recipes'); // Redirigir a la lista si falla la búsqueda
+      } finally {
+        setLoadingRecipe(false);
       }
-      setLoadingRecipe(false);
+    };
+
+    if (typeof window !== 'undefined') {
+      const id = searchParams.get('id'); // Obtener el 'id' de la URL
+
+      if (id) {
+        setLoadingRecipe(true);
+        fetchRecipeById(id);
+      } else {
+        const storedRecipe = sessionStorage.getItem('generatedRecipe');
+        if (storedRecipe) {
+          const parsedRecipe: Recipe = JSON.parse(storedRecipe);
+          setRecipe(parsedRecipe);
+          setImageSrc(parsedRecipe.img_url || placeholderImageUrl);
+        } else {
+          router.push('/kitchen');
+        }
+        setLoadingRecipe(false);
+      }
     }
   }, [router, placeholderImageUrl]);
 
@@ -137,7 +173,14 @@ const RecipePage: React.FC = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('generatedRecipe');
     }
-    router.push('/kitchen');
+    // Si la receta se cargó por ID, volvemos a la lista.
+    // Si no, volvemos al formulario para generar una nueva.
+    const id = searchParams.get('id');
+    if (id) {
+        router.push('/kitchen/recipes');
+    } else {
+        router.push('/kitchen');
+    }
   };
 
   const handleGenerateAnother = () => {
@@ -148,7 +191,6 @@ const RecipePage: React.FC = () => {
   };
 
   if (loadingRecipe || !recipe) {
-    // Puedes mostrar un spinner de carga o un mensaje mientras se carga/redirige
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center font-sans">
         <motion.div
@@ -185,10 +227,10 @@ const RecipePage: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center self-start px-6 py-3 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors text-lg font-semibold"
-            aria-label="Volver al formulario"
+            aria-label="Volver"
           >
             <IoArrowBackCircleOutline className="w-6 h-6 mr-2" />
-            Volver al Formulario
+            {searchParams.get('id') ? 'Volver a Mis Recetas' : 'Volver al Formulario'}
           </motion.button>
 
           {/* Recipe Header */}
@@ -278,7 +320,6 @@ const RecipePage: React.FC = () => {
                   <span className="mr-3 text-orange-500 text-4xl">🥕</span> Ingredientes
                 </h2>
                 <ul className="list-none space-y-3">
-                  {/* CAMBIO AQUÍ: Accediendo a las propiedades del objeto ingrediente */}
                   {recipe.ingredientes.map((ingredient, index) => (
                     <motion.li
                       key={index}
@@ -345,10 +386,10 @@ const RecipePage: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center mt-10 px-8 py-4 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-colors text-xl font-semibold"
-            aria-label="Volver al formulario"
+            aria-label="Volver"
           >
             <IoArrowBackCircleOutline className="w-7 h-7 mr-3" />
-            ¡Quiero otra Receta!
+            {searchParams.get('id') ? 'Volver a Mis Recetas' : '¡Quiero otra Receta!'}
           </motion.button>
         </div>
       </motion.div>
