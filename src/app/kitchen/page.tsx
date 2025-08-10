@@ -2,13 +2,13 @@
 
 "use client"
 // pages/culinarium-form.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoCloseCircleOutline, IoAddCircleOutline, IoChevronDownCircleOutline, IoChevronUpCircleOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice } from 'react-icons/gi';
 import { MdOutlineFastfood } from 'react-icons/md';
-import { useRouter } from 'next/navigation'; // Importa useRouter
+import { useRouter, useSearchParams } from 'next/navigation'; // Importa useRouter
 
 // Import Firebase client-side auth
 import { auth } from '@/lib/firebase'; // Ensure this path is correct for your client-side Firebase setup
@@ -128,6 +128,8 @@ const Tag: React.FC<TagProps> = ({ label, onRemove }) => (
 
 const CulinariumForm: React.FC = () => {
   const router = useRouter(); // Inicializa el router
+  const searchParams = useSearchParams();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   // Firebase User State
   const [user, setUser] = useState<FirebaseUser | null>(null); // State to hold Firebase user object
@@ -161,6 +163,7 @@ const CulinariumForm: React.FC = () => {
   const [cuisineStyle, setCuisineStyle] = useState<string | null>(null);
   const [showDietaryRestrictions, setShowDietaryRestrictions] = useState(false);
   const [showCuisineStyle, setShowCuisineStyle] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState<boolean>(false);
 
   const mealTimes = [
     { label: 'Desayuno', value: 'breakfast' },
@@ -308,6 +311,12 @@ const CulinariumForm: React.FC = () => {
     try {
       // 1. Call OpenAI API to generate recipe
       const formData = { ingredients, mealTime, diners, dietaryRestrictions, excludedIngredients, cuisineStyle, availableTime };
+      // Guardar último formulario para autogeneración futura
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('lastFormData', JSON.stringify(formData));
+        } catch {}
+      }
       const openaiRes = await fetch('/api/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -387,6 +396,36 @@ const CulinariumForm: React.FC = () => {
     }
   };
 
+  // Auto-generar una receta si venimos con ?auto=1 usando el último formulario guardado
+  useEffect(() => {
+    if (loadingUser) return;
+    const auto = searchParams.get('auto');
+    if (auto === '1' && !autoTriggered) {
+      const stored = typeof window !== 'undefined' ? sessionStorage.getItem('lastFormData') : null;
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : []);
+          setMealTime(typeof data.mealTime === 'string' || data.mealTime === null ? data.mealTime : null);
+          setDiners(typeof data.diners === 'number' ? data.diners : 1);
+          setDietaryRestrictions(Array.isArray(data.dietaryRestrictions) ? data.dietaryRestrictions : []);
+          setExcludedIngredients(Array.isArray(data.excludedIngredients) ? data.excludedIngredients : []);
+          setCuisineStyle(typeof data.cuisineStyle === 'string' || data.cuisineStyle === null ? data.cuisineStyle : null);
+          setAvailableTime(typeof data.availableTime === 'string' ? data.availableTime : '30');
+        } catch {
+          // Si falla el parseo, evitamos bucles
+        }
+        setAutoTriggered(true);
+        // Permite que React aplique los estados antes de enviar
+        setTimeout(() => {
+          formRef.current?.requestSubmit();
+        }, 0);
+      } else {
+        setAutoTriggered(true);
+      }
+    }
+  }, [loadingUser, searchParams, autoTriggered]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-green-50 to-blue-100 py-10 flex items-center justify-center font-sans">
       <Head>
@@ -400,7 +439,7 @@ const CulinariumForm: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-4 md:py-8 max-w-screen-2xl mx-auto"
       >
-        <form onSubmit={handleSubmit} className="space-y-10">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-10">
           {/* Contenedor principal del formulario con grid para 3 columnas en pantallas grandes */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}

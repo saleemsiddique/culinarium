@@ -8,6 +8,7 @@ import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRic
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
+// Eliminado el borrado en Firestore desde el cliente
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
@@ -134,9 +135,16 @@ const RecipePage: React.FC = () => {
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('generatedRecipe'); // Limpia la receta al volver
+      sessionStorage.removeItem('generatedRecipe');
     }
     router.push('/kitchen');
+  };
+
+  const handleGenerateAnother = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('generatedRecipe');
+    }
+    router.push('/kitchen?auto=1');
   };
 
   if (loadingRecipe || !recipe) {
@@ -333,7 +341,7 @@ const RecipePage: React.FC = () => {
           {/* Footer Back Button */}
           <motion.button
             type="button"
-            onClick={handleGoBack}
+            onClick={handleGenerateAnother}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center mt-10 px-8 py-4 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-colors text-xl font-semibold"
