@@ -20,23 +20,22 @@ export default function Pricing() {
     {
       title: "Premium",
       description: "¡Desbloquea tu potencial culinario sin límites!",
-      price: "9,99€",
+      price: "7,99€",
       features: [
         "30 recetas al mes (300 tokens)",
         "Todas las funcionalidades premium",
         "Restricciones dietéticas personalizadas",
         "Estilos de cocina (japonesa, española...)",
         "Soporte prioritario",
-        "Acceso anticipado a nuevas funciones",
-        "Integración con tu lista de la compra"
+        "Acceso anticipado a nuevas funciones"
       ],
       isHighlighted: true,
     },
   ];
-      
+
   return (
     <>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -52,7 +51,7 @@ export default function Pricing() {
         </p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: 0.5 }}
@@ -69,14 +68,14 @@ export default function Pricing() {
               whileHover={{ scale: 1.05, boxShadow: '0 25px 50px rgba(0, 0, 0, 0.2)' }}
               transition={{ type: "spring", stiffness: 300 }}
               className={`flex flex-col rounded-3xl p-8 transition-all duration-500 ease-in-out 
-                ${plan.isHighlighted 
-                  ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-2xl scale-105' 
+                ${plan.isHighlighted
+                  ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-2xl scale-105'
                   : 'bg-white shadow-md text-gray-900 border border-gray-200'
                 }`}
             >
               <h3 className="text-xl font-bold">{plan.title}</h3>
               <p className={`mt-4 text-sm ${plan.isHighlighted ? 'text-gray-100' : 'text-gray-600'}`}>{plan.description}</p>
-              
+
               <p className={`mt-6 flex items-baseline justify-center text-4xl font-bold tracking-tight ${plan.isHighlighted ? 'text-white' : 'text-gray-900'}`}>
                 {plan.price}
                 <span className={`text-base font-semibold tracking-normal ${plan.isHighlighted ? 'text-gray-200' : 'text-gray-500'}`}>/mes</span>
@@ -102,7 +101,7 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              <a 
+              <a
                 href="/login"
                 className={`mt-6 block w-full rounded-full py-3 px-4 text-center font-semibold shadow-md focus:outline-none focus:ring-2
                   ${plan.isHighlighted
