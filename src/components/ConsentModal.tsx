@@ -42,7 +42,7 @@ export default function ConsentModal() {
           localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
           localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
         }
-      } catch { }
+      } catch { console.log("error in ev: ", ev)}
 
       // Cerrar modal y quitar loading
       setShow(false);

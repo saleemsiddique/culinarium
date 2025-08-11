@@ -104,7 +104,7 @@ export async function POST(req: Request) {
         const decodedToken = await getAuth().verifyIdToken(token);
         userId = decodedToken.uid;
         isUserAuthenticated = true;
-      } catch (error) {
+      } catch {
         console.warn("Token de autorización no válido. Procediendo con user_id enviado (anónimo).");
       }
     }
