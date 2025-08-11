@@ -4,15 +4,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, auth } from '@/lib/firebase-admin';
 
+type Params = {
+  params: {
+    id: string;
+  };
+};
+
 // --- GET /api/recipes/[id] ---
 // Obtiene una receta específica por su ID, verificando el propietario.
-// ✅ CORRECCIÓN: Se define el tipo del objeto de contexto completo.
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: Params
 ) {
   try {
-    const { params } = context; // ✅ Desestructuramos 'params' dentro de la función.
     const recipeId = params.id;
 
     if (!recipeId) {
