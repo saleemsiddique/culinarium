@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
-import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline } from 'react-icons/io5';
+import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
 import { useRouter, useSearchParams } from 'next/navigation'; // Importamos useSearchParams
@@ -177,7 +177,7 @@ const RecipePage: React.FC = () => {
     // Si no, volvemos al formulario para generar una nueva.
     const id = searchParams.get('id');
     if (id) {
-        router.push('/kitchen/recipes');
+        router.push('/kitchen/recipes/list');
     } else {
         router.push('/kitchen');
     }
@@ -388,8 +388,8 @@ const RecipePage: React.FC = () => {
             className="flex items-center justify-center mt-10 px-8 py-4 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-colors text-xl font-semibold"
             aria-label="Volver"
           >
-            <IoArrowBackCircleOutline className="w-7 h-7 mr-3" />
-            {searchParams.get('id') ? 'Volver a Mis Recetas' : '¡Quiero otra Receta!'}
+            <IoReloadOutline  className="w-7 h-7 mr-3" />
+            {'¡Quiero otra Receta!'}
           </motion.button>
         </div>
       </motion.div>
