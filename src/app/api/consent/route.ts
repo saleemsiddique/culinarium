@@ -58,11 +58,12 @@ export async function POST(req: Request) {
       type,
       granted,
       user_id: bodyUserId,
-      version = null,
-      details = null,
-      origin = null,
-      ref = null,
-      path = null,
+      version = "", // Cambiado de null a ""
+      details = {}, // Cambiado de null a {}
+      origin = "", // Cambiado de null a ""
+      ref = "", // Cambiado de null a ""
+      path = "", // Cambiado de null a ""
+      client_timestamp: bodyClientTimestamp = null, // Renombrado y mantiene null por compatibilidad
     } = body;
 
     if (!accepted) {
@@ -70,18 +71,18 @@ export async function POST(req: Request) {
         console.error("Campos obligatorios faltantes (compat):", { type, granted, bodyUserId });
         return NextResponse.json({ error: "Campos obligatorios faltantes" }, { status: 400 });
       }
-      accepted = [{ type, version: version || envPolicyVersionForType(type), granted }];
+      accepted = [{ type, version: version || envPolicyVersionForType(type), granted, details: details || {} }]; // Asegura details
     } else {
       // validamos estructura mínima
       if (!Array.isArray(accepted) || accepted.length === 0) {
         return NextResponse.json({ error: "accepted debe ser un array no vacío" }, { status: 400 });
       }
-      // aseguramos que cada entrada tenga version y granted
+      // aseguramos que cada entrada tenga version, granted y details
       accepted = accepted.map((a: any) => ({
         type: a.type,
         version: a.version || envPolicyVersionForType(a.type),
         granted: typeof a.granted === "boolean" ? a.granted : true,
-        details: a.details || null,
+        details: a.details || {}, // Asegura que details sea un objeto si no viene
       }));
     }
 
@@ -115,26 +116,25 @@ export async function POST(req: Request) {
       req.headers.get("remote-addr") ||
       null;
 
-    const ip_masked = maskIp(rawIp);
+    const ip_masked = maskIp(rawIp) || ""; // Asegura que ip_masked no sea null
 
     // user agent desde cabeceras (más fiable que lo que envíe cliente)
-    const serverUserAgent = req.headers.get("user-agent") || null;
+    const serverUserAgent = req.headers.get("user-agent") || ""; // Asegura que serverUserAgent no sea null
 
     // Si origin/ref/path no vienen en body, intentar obtener de cabeceras
-    const originHeader = req.headers.get("origin") || null;
-    const refererHeader = req.headers.get("referer") || req.headers.get("referrer") || null;
+    const originHeader = req.headers.get("origin") || "";
+    const refererHeader = req.headers.get("referer") || req.headers.get("referrer") || "";
 
-    const resolvedOrigin = origin || originHeader || null;
-    const resolvedRef = ref || refererHeader || null;
-    const resolvedPath = path || null; // path típicamente lo envía el cliente
+    const resolvedOrigin = origin || originHeader; // Ya tiene valor por defecto
+    const resolvedRef = ref || refererHeader; // Ya tiene valor por defecto
+    const resolvedPath = path || ""; // path típicamente lo envía el cliente, si no, ""
 
     const db = getFirestore();
 
     const acceptedTypes = (accepted as any[]).map((a) => a.type);
 
-    // Si el cliente mandó un timestamp dentro de details, lo conservamos como client_timestamp
-    const clientTimestamp =
-      (details && (details.timestamp || details.client_timestamp)) || null;
+    // Si el cliente mandó un timestamp, lo conservamos. Si no, o si es inválido, puede ser null o una cadena vacía.
+    const clientTimestampValue = bodyClientTimestamp ? new Date(bodyClientTimestamp).toISOString() : "";
 
     const consentData = {
       user_id: userId,
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       // server timestamp (no confiar solo en la del cliente)
       timestamp: FieldValue.serverTimestamp(),
       // conservar la fecha del cliente si la envía (opcional)
-      client_timestamp: clientTimestamp,
+      client_timestamp: clientTimestampValue, // Usar la cadena ISO o vacía
       ip_masked,
       user_agent: serverUserAgent,
       meta: {
@@ -151,7 +151,7 @@ export async function POST(req: Request) {
         ref: resolvedRef,
         path: resolvedPath,
       },
-      details: details || null,
+      details: details || {}, // Asegura que details sea un objeto
       created_by_authenticated: isUserAuthenticated || false,
     };
 
@@ -178,7 +178,8 @@ export async function GET(req: Request) {
     const db = getFirestore();
     const consentTypes = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
-    const consentStatus: Record<string, boolean> = {};
+    // Modificamos para guardar la versión aceptada o null
+    const consentStatus: Record<string, string | null> = {};
 
     for (const type of consentTypes) {
       const consentsRef = db.collection("consents");
@@ -192,7 +193,7 @@ export async function GET(req: Request) {
       const snapshot = await q.get();
 
       if (snapshot.empty) {
-        consentStatus[type] = false;
+        consentStatus[type] = null; // No hay consentimiento
         continue;
       }
 
@@ -202,28 +203,14 @@ export async function GET(req: Request) {
       const entry = acceptedArr.find((e) => e.type === type && e.granted === true);
 
       if (!entry) {
-        consentStatus[type] = false;
+        consentStatus[type] = null; // Encontró un documento, pero no un consentimiento aceptado
         continue;
       }
 
       const latestVersion = entry.version || null;
-      const latestTimestamp = latestDoc.timestamp || null; // Firestore Timestamp o null
 
-      // Comprueba si la versión coincide con la configuración actual (soporte por tipo)
-      const requiredVersion = envPolicyVersionForType(type);
-
-      let isUpToDate = false;
-      if (latestVersion && latestVersion === requiredVersion) {
-        isUpToDate = true;
-      } else if (POLICY_UPDATED_AT && latestTimestamp && typeof latestTimestamp.toMillis === "function") {
-        const consentMillis = latestTimestamp.toMillis();
-        const policyMillis = Date.parse(POLICY_UPDATED_AT);
-        if (!Number.isNaN(policyMillis) && consentMillis >= policyMillis) {
-          isUpToDate = true;
-        }
-      }
-
-      consentStatus[type] = !!isUpToDate;
+      // Aquí deberías devolver la versión, no un booleano
+      consentStatus[type] = latestVersion;
     }
 
     return NextResponse.json({

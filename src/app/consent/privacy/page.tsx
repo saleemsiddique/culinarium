@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import PrivacyContent from '../../components/PrivacyContent';
+import PrivacyContent from '../../../components/PrivacyContent';
 
 // Este es el componente de servidor que exporta la metadata de la página.
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import TermsContent from '../../components/TermsConditions'
+import TermsContent from '../../../components/TermsConditions'
 
 // Este es el componente de servidor que exporta la metadata de la página.
 export const metadata: Metadata = {

@@ -120,6 +120,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const id = userCredential.user.uid;
+      const token = await userCredential.user.getIdToken();
 
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
@@ -141,27 +142,79 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const docRef = doc(db, "user", id);
       await setDoc(docRef, newUser);
 
+      const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
+      const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
+      const clientTimestamp = new Date().toISOString();
+
+      const accepted = CONSENT_TYPES.map(type => ({
+        type,
+        granted: true,
+        version: POLICY_VERSION,
+        details: {},
+      }));
+
+      const payload = {
+        accepted,
+        user_id: newUser.uid,
+        client_timestamp: clientTimestamp,
+        origin: typeof window !== "undefined" ? window.location.origin : null,
+        ref: typeof document !== "undefined" ? document.referrer || null : null,
+        path: typeof window !== "undefined" ? window.location.pathname : null,
+        details: {},
+      };
+
       const consentResponse = await fetch("/api/consent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${await userCredential.user.getIdToken()}`,
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          granted: true,
-          user_id: newUser.uid,
-          version: process.env.NEXT_PUBLIC_POLICY_VERSION,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!consentResponse.ok) {
-        console.error(
-          "Error al registrar el consentimiento:",
-          await consentResponse.json()
-        );
+        console.error("Error al registrar el consentimiento:", await consentResponse.json());
       } else {
         console.log("Consentimiento registrado correctamente.");
+
+        // Guardar en localStorage (solo en cliente)
+        if (typeof window !== "undefined") {
+          try {
+            const saveObj: Record<string, string> = {};
+            CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+            localStorage.setItem("consent_versions", JSON.stringify(saveObj));
+            localStorage.setItem("consent_version", POLICY_VERSION);
+          } catch (e) {
+            console.warn("No se pudo escribir consent en localStorage:", e);
+          }
+
+          // DISPATCH: notificar al resto de la app que el consentimiento ya está guardado
+          try {
+            window.dispatchEvent(
+              new CustomEvent("consent_updated", {
+                detail: { userId: id, source: "register" },
+              })
+            );
+          } catch (e) {
+            // noop
+          }
+        }
       }
+
+      if (!consentResponse.ok) {
+        console.error("Error al registrar el consentimiento:", await consentResponse.json());
+      } else {
+        console.log("Consentimiento registrado correctamente.");
+        // ✅ Nueva línea: Guardar en localStorage para evitar que el modal aparezca inmediatamente
+        const saveObj: Record<string, string> = {};
+        CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+        localStorage.setItem("consent_versions", JSON.stringify(saveObj));
+        localStorage.setItem("consent_version", POLICY_VERSION); // Por si acaso
+      }
+
+      setUser(newUser);
+      setFirebaseUser(userCredential.user);
+      setLoading(false);
 
       return id;
     } catch (error: any) {

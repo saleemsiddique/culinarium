@@ -116,7 +116,7 @@ const TermsContent = () => {
 
           <section>
             <h2 className="text-2xl font-semibold text-gray-100">12. Protección de datos</h2>
-            <p className="mt-2">Tratamos tus datos conforme a nuestra <a href="/privacy" className="text-orange-400 hover:underline">Política de Privacidad</a>. Procesadores principales: OpenAI, Stripe, Firebase, Vercel, GitHub.</p>
+            <p className="mt-2">Tratamos tus datos conforme a nuestra <a href="/consent/privacy" className="text-orange-400 hover:underline">Política de Privacidad</a>. Procesadores principales: OpenAI, Stripe, Firebase, Vercel, GitHub.</p>
           </section>
 
           <section>

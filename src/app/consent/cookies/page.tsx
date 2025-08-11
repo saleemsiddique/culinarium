@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import CookiesContent from '../../components/CookieContent';
+import CookiesContent from '../../../components/CookieContent';
 
 // Este es el componente principal de la página, un Server Component por defecto.
 // Se usa para definir y exportar la metadata para SEO.

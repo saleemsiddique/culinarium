@@ -75,7 +75,7 @@ export default function Footer() {
             <div className="flex flex-col items-center justify-self-center lg:items-center text-center lg:text-center mt-6 lg:mt-0">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
-                  href="/privacy"
+                  href="/consent/privacy"
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm bg-gray-800 hover:bg-gray-700 transition-colors duration-300"
                   aria-label="Política de Privacidad"
                 >
@@ -84,7 +84,7 @@ export default function Footer() {
                 </Link>
 
                 <Link
-                  href="/terms"
+                  href="/consent/terms"
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm bg-gray-800 hover:bg-gray-700 transition-colors duration-300"
                   aria-label="Términos y Condiciones"
                 >
@@ -93,7 +93,7 @@ export default function Footer() {
                 </Link>
 
                 <Link
-                  href="/cookies"
+                  href="/consent/cookies"
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm bg-gray-800 hover:bg-gray-700 transition-colors duration-300"
                   aria-label="Política de Cookies"
                 >
