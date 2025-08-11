@@ -4,13 +4,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, auth } from '@/lib/firebase-admin';
 
-// Define el tipo del contexto de la ruta para acceder a los parámetros
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
 // --- GET /api/recipes/[id] ---
 // Obtiene una receta específica por su ID, verificando el propietario.
 export async function GET(
