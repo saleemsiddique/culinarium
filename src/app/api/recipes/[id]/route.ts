@@ -4,17 +4,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, auth } from '@/lib/firebase-admin';
 
-type Params = {
-  params: {
-    id: string;
-  };
-};
-
 // --- GET /api/recipes/[id] ---
 // Obtiene una receta específica por su ID, verificando el propietario.
 export async function GET(
   request: NextRequest,
-  { params }: Params
+  { params }: { params: { id: string } }
 ) {
   try {
     const recipeId = params.id;
