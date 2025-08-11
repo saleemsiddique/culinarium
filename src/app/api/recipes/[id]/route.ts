@@ -13,9 +13,12 @@ interface Context {
 
 // --- GET /api/recipes/[id] ---
 // Obtiene una receta específica por su ID, verificando el propietario.
-export async function GET(request: NextRequest, context: Context) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const recipeId = context.params.id;
+    const recipeId = params.id;
 
     if (!recipeId) {
       return NextResponse.json({ error: 'Falta el ID de la receta en la URL.' }, { status: 400 });
@@ -30,7 +33,6 @@ export async function GET(request: NextRequest, context: Context) {
 
     let uid: string;
     try {
-      // Verificar el token para obtener el UID del usuario
       const decodedToken = await auth.verifyIdToken(idToken);
       uid = decodedToken.uid;
     } catch (authError) {
@@ -38,30 +40,28 @@ export async function GET(request: NextRequest, context: Context) {
       return NextResponse.json({ error: 'Token de autenticación inválido o expirado.' }, { status: 401 });
     }
 
-    // Referencia al documento de la receta en Firestore
     const docRef = db.collection('created_recipes').doc(recipeId);
     const docSnapshot = await docRef.get();
 
-    // 1. Verificar si la receta existe
     if (!docSnapshot.exists) {
       return NextResponse.json({ error: 'Receta no encontrada.' }, { status: 404 });
     }
 
     const recipeData = docSnapshot.data();
 
-    // 2. Verificar que el usuario sea el propietario de la receta
     if (recipeData?.user_id !== uid) {
       return NextResponse.json({ error: 'Acceso denegado. No eres el propietario de esta receta.' }, { status: 403 });
     }
 
-    const recipeWithId = {
-      id: docSnapshot.id,
-      ...recipeData,
-    };
-
-    return NextResponse.json({ recipe: recipeWithId }, { status: 200 });
+    return NextResponse.json(
+      { recipe: { id: docSnapshot.id, ...recipeData } },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error('Error al obtener la receta:', error);
-    return NextResponse.json({ error: 'Error interno del servidor al obtener la receta.', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error interno del servidor al obtener la receta.', details: error.message },
+      { status: 500 }
+    );
   }
 }
