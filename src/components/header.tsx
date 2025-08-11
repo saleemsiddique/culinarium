@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser, CustomUser } from '@/context/user-context';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen, Menu, X, User, Crown, Zap } from 'lucide-react';
+import { Plus, BookOpen, Menu, X, User } from 'lucide-react';
 import { TokensModal } from "./SideMenu/TokensModal";
 import { PremiumModal } from "./SideMenu/PremiumModal";
 

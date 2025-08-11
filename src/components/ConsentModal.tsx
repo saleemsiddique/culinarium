@@ -9,40 +9,44 @@ import { usePathname } from "next/navigation";
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
 const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
 
+// Llevar CONSENT_TYPES y keys al scope del módulo para que sean referencias estables
+const CONSENT_TYPES = [
+  "terms_of_service",
+  "privacy_policy",
+  "cookies_policy",
+];
+
+const LOCAL_KEY = "consent_versions";
+const LEGACY_KEY = "consent_version";
+
 export default function ConsentModal() {
+  // Hooks — todos al inicio, sin retornos antes de ellos
   const pathname = usePathname();
+  const { firebaseUser, loading: userLoading } = useUser();
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Si la ruta comienza por `${url_base}/consent`, NO mostrar el modal:
+  // nota: aquí hacemos el early return *después* de haber llamado a todos los hooks
   if (pathname.startsWith(`${url_base}/consent`)) {
     return null;
   }
 
-  const { user, firebaseUser, loading: userLoading } = useUser();
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const CONSENT_TYPES = [
-    "terms_of_service",
-    "privacy_policy",
-    "cookies_policy",
-  ];
-
-  const LOCAL_KEY = "consent_versions";
-  const LEGACY_KEY = "consent_version";
-
+  // Listener que recibe la señal de que el consentimiento fue actualizado en otra parte
   useEffect(() => {
-    const onConsentUpdated = (ev: Event) => {
+    const onConsentUpdated = () => {
       try {
-        // Opcional: sincronizar localStorage por si viene de otra parte
+        // Sincronizar localStorage por si viene de otra parte
         const saveObj: Record<string, string> = {};
         CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
         if (typeof window !== "undefined") {
           localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
           localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
         }
-      } catch { }
+      } catch {
+        // noop
+      }
 
-      // Cerrar modal y quitar loading
       setShow(false);
       setLoading(false);
     };
@@ -56,9 +60,9 @@ export default function ConsentModal() {
         window.removeEventListener("consent_updated", onConsentUpdated as EventListener);
       }
     };
-  }, []); // una vez
+  }, []); // solo una vez
 
-
+  // Efecto que comprueba el consentimiento (backend o local)
   useEffect(() => {
     if (userLoading) return;
 
@@ -85,11 +89,7 @@ export default function ConsentModal() {
 
           const data = await res.json();
 
-          // Lógica Corregida: Verifica si la versión de cada tipo de consentimiento
-          // en la base de datos coincide con la versión de la política actual.
-          const allConsentsAccepted = CONSENT_TYPES.every(
-            (type) => data[type] === POLICY_VERSION
-          );
+          const allConsentsAccepted = CONSENT_TYPES.every((type) => data[type] === POLICY_VERSION);
 
           if (allConsentsAccepted) {
             const saveObj: Record<string, string> = {};
@@ -101,7 +101,7 @@ export default function ConsentModal() {
             setShow(true);
           }
         } else {
-          // ... (el resto de la lógica para usuarios no logueados es correcta)
+          // Usuario anónimo: comprobar localStorage
           localStorage.removeItem("user_id");
           localStorage.removeItem("anonymous_user_id");
 
@@ -109,16 +109,14 @@ export default function ConsentModal() {
           if (localRaw) {
             try {
               const localObj = JSON.parse(localRaw);
-              const allOk = CONSENT_TYPES.every(
-                (type) => localObj && localObj[type] === POLICY_VERSION
-              );
+              const allOk = CONSENT_TYPES.every((type) => localObj && localObj[type] === POLICY_VERSION);
               if (allOk) {
                 setShow(false);
                 setLoading(false);
                 return;
               }
             } catch {
-              console.error("Error al verificar el consentimiento:");
+              console.error("Error al verificar el consentimiento desde localStorage");
             }
           }
 
@@ -133,7 +131,7 @@ export default function ConsentModal() {
     };
 
     checkConsent();
-  }, [firebaseUser, userLoading]);
+  }, [firebaseUser, userLoading]); // CONSENT_TYPES es constante de módulo, no necesita añadirse
 
   const handleAccept = async () => {
     setLoading(true);
@@ -163,15 +161,13 @@ export default function ConsentModal() {
         type,
         version: POLICY_VERSION,
         granted: true,
-        // Añade un objeto de detalles vacío si no hay ninguno
         details: {},
       }));
 
-      // Obtener la URL completa del cliente
       const clientOrigin = window.location.origin;
-      const clientRef = document.referrer || ""; // Referrer puede estar vacío
+      const clientRef = document.referrer || "";
       const clientPath = window.location.pathname;
-      const clientTimestamp = new Date().toISOString(); // Timestamp en formato ISO
+      const clientTimestamp = new Date().toISOString();
 
       const res = await fetch("/api/consent", {
         method: "POST",
@@ -182,12 +178,11 @@ export default function ConsentModal() {
         body: JSON.stringify({
           accepted,
           user_id: firebaseUser.uid,
-          // Enviar estos campos con valores definidos (o cadenas vacías)
-          details: {}, // Puedes agregar aquí detalles específicos si los tuvieras
+          details: {},
           origin: clientOrigin,
           ref: clientRef,
           path: clientPath,
-          client_timestamp: clientTimestamp, // Asegúrate de enviar este campo
+          client_timestamp: clientTimestamp,
         }),
       });
 

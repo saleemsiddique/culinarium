@@ -10,7 +10,6 @@ import {
   CreditCard,
   Calendar,
   AlertTriangle,
-  Check,
   Edit,
   Save,
   X,
@@ -158,7 +157,6 @@ function ProfileContent() {
         throw new Error("Error al cancelar la suscripción");
       }
 
-      const data = await response.json();
 
       setMessageModal({
         visible: true,
@@ -200,7 +198,6 @@ function ProfileContent() {
         throw new Error("Error al reactivar la suscripción");
       }
 
-      const data = await response.json();
 
       setMessageModal({
         visible: true,

@@ -11,7 +11,6 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
   query,
   where,
   setDoc,
@@ -28,7 +27,6 @@ import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
 } from "firebase/auth";
-import { v4 as uuidv4 } from "uuid";
 
 export interface CustomUser {
   uid: string;
@@ -195,7 +193,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 detail: { userId: id, source: "register" },
               })
             );
-          } catch (e) {
+          } catch {
             // noop
           }
         }
@@ -217,7 +215,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setLoading(false);
 
       return id;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al registrarse:", error);
       throw error;
     }

@@ -1,7 +1,6 @@
 "use client";
 
 import { FaCheck } from "react-icons/fa";
-import EmbeddedCheckoutButton from "./EmbeddedCheckoutForm";
 
 interface PricingCardProps {
   title: string;
@@ -17,7 +16,6 @@ export default function PricingCard({
   originalPrice,
   discountedPrice,
   features,
-  priceId,
 }: PricingCardProps) {
   return (
     <div className="w-[250px] max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8 dark:bg-gray-800 dark:border-gray-700 h-[650px]">

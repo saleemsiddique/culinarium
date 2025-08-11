@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -54,7 +56,7 @@ export default function GestionConsentimientosPage() {
     if (!raw) return null;
     try {
       return JSON.parse(raw);
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -64,7 +66,7 @@ export default function GestionConsentimientosPage() {
     if (!raw) return null;
     try {
       return JSON.parse(raw);
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -84,7 +86,7 @@ export default function GestionConsentimientosPage() {
         let token: string | null = null;
         try {
           if (firebaseUser) token = await firebaseUser.getIdToken();
-        } catch (e) {
+        } catch {
           // ignore
         }
 
@@ -218,7 +220,7 @@ export default function GestionConsentimientosPage() {
     let token: string | null = null;
     try {
       if (firebaseUser) token = await firebaseUser.getIdToken();
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -259,7 +261,7 @@ export default function GestionConsentimientosPage() {
       const analyticsAccepted = (newStatus as any).cookies_policy ?? (newStatus as any).analytics ?? false;
       try {
         emitConsentUpdated(analyticsAccepted);
-      } catch (e) {
+      } catch {
         // noop
       }
 

@@ -31,7 +31,7 @@ function hasAnalyticsConsentFromLocal(): boolean {
       // Comprueba si existe versión para cookies_policy
       return !!(versions && versions["cookies_policy"]);
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
   return false;

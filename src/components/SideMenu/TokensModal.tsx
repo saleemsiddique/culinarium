@@ -1,12 +1,6 @@
 import React, { useEffect } from "react";
-import { Zap, X, Star } from "lucide-react";
+import { Zap, X } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  EmbeddedCheckoutProvider,
-  EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
-import { useCallback, useRef, useState } from "react";
 import TokenPurchaseCards from "@/components/TokenPurchaseCards";
 
 interface TokensModalProps {

@@ -1,5 +1,4 @@
 "use client";
-import PricingCard from "@/components/pricingCard";
 import { motion } from "framer-motion";
 
 export default function Pricing() {

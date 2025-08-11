@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import NextLink from 'next/link'; // Renamed to avoid conflict with Lucide's Link
 import { useUser } from '@/context/user-context'; // Import useUser to get the authenticated user
 import { auth } from '@/lib/firebase'; // Import the client-side Firebase auth instance
@@ -201,15 +203,15 @@ const RecipeListPage: React.FC = () => {
                       query: { id: recipe.id },
                     }}
                     passHref
-                  >                    
-                  <motion.button
-                    className="w-full py-2 rounded-lg text-[var(--text2)] font-semibold
+                  >
+                    <motion.button
+                      className="w-full py-2 rounded-lg text-[var(--text2)] font-semibold
                                  bg-gradient-to-r from-[var(--primary)] to-[var(--foreground)]
                                  hover:from-[var(--foreground)] hover:to-[var(--primary)] transition-colors duration-300
                                  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
                       Ver Receta
                     </motion.button>
                   </NextLink>

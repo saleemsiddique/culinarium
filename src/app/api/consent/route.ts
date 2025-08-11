@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
+
 // app/api/consent/route.ts
 import { NextResponse } from "next/server";
 import { getAuth } from "firebase-admin/auth";

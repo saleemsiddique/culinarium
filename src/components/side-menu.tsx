@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Plus, BookOpen, Menu, X, User, Hammer, Crown, Zap } from 'lucide-react';
+import { Plus, BookOpen, Menu, X, User, Crown, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, CustomUser } from '@/context/user-context';
 import { TokensModal } from "./SideMenu/TokensModal";

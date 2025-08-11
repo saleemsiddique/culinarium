@@ -9,9 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUser } from "@/context/user-context";
 import Link from "next/link";
-import { emitConsentUpdated } from "@/lib/consent-events"; // Mantenemos la importación si es necesaria en otras partes
-
-const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
 export function AuthForm({
   type = "login",
@@ -72,7 +69,7 @@ export function AuthForm({
           window.dispatchEvent(
             new CustomEvent("consent_updated", { detail: { source: "authform" } })
           );
-        } catch (e) {
+        } catch {
           // noop
         }
       }

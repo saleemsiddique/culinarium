@@ -10,7 +10,7 @@ export function emitConsentUpdated(analyticsAccepted: boolean) {
       // re-write to trigger storage on other tabs (same key)
       if (versionsRaw !== null) localStorage.setItem("consent_versions", versionsRaw);
     } catch {}
-  } catch (e) {
-    // noop
+  } catch {
+
   }
 }

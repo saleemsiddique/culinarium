@@ -13,7 +13,6 @@ interface PremiumModalProps {
 
 export const PremiumModal: React.FC<PremiumModalProps> = ({
   onClose,
-  onSubscribe,
   user,
 }) => {
   const isSubscribed = user?.isSubscribed || false;

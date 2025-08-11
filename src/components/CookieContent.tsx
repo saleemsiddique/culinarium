@@ -82,7 +82,7 @@ export default function CookiesContent() {
           setConsent(built);
         }
       }
-    } catch (e) {
+    } catch {
       setConsent(null);
     } finally {
       setLoading(false);
