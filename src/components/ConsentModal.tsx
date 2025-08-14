@@ -78,7 +78,7 @@ export default function ConsentModal() {
             localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
           }
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
 

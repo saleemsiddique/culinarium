@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // /lib/consent-events.ts
 export function emitConsentUpdated(analytics: boolean | null = null, extraDetail: Record<string, any> = {}) {
   if (typeof window === "undefined") return;
