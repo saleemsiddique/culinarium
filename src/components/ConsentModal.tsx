@@ -31,18 +31,56 @@ export default function ConsentModal() {
 
   const LOCAL_KEY = "consent_versions";
   const LEGACY_KEY = "consent_version";
+  const FULL_KEY = "culinarium_cookie_consent";
+  const LAST_UPDATE_KEY = "culinarium_cookie_consent_last_update";
 
   useEffect(() => {
+    // Listener para actualizaciones desde la misma pestaña (CustomEvent)
     const onConsentUpdated = (ev: Event) => {
       try {
-        // Opcional: sincronizar localStorage por si viene de otra parte
-        const saveObj: Record<string, string> = {};
-        CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-        if (typeof window !== "undefined") {
-          localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
-          localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+        const custom = ev as CustomEvent;
+
+        // Si recibimos un detail concreto, podemos sincronizar localStorage si hace falta
+        if (custom?.detail) {
+          // Construye y guarda versiones si vienen accepted_types o analytics
+          const saveObj: Record<string, string> = {};
+          CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+
+          if (typeof window !== "undefined") {
+            // Guardamos consent_versions + legacy
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
+            localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+
+            // Si no existe el objeto full, construimos uno mínimo para mantener compatibilidad
+            const full = {
+              accepted: CONSENT_TYPES.map((type) => ({
+                type,
+                version: POLICY_VERSION,
+                granted: true,
+                details: {},
+              })),
+              accepted_types: CONSENT_TYPES,
+              client_timestamp: new Date().toISOString(),
+              created_by_authenticated: !!firebaseUser,
+              details: {
+                ip_masked: "",
+              },
+              meta: {
+                origin: typeof window !== "undefined" ? window.location.origin : "",
+                path: typeof window !== "undefined" ? window.location.pathname : "",
+                ref: typeof document !== "undefined" ? document.referrer || "" : "",
+              },
+              timestamp: new Date().toLocaleString(),
+              user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+              user_id: firebaseUser ? firebaseUser.uid : undefined,
+            };
+            localStorage.setItem(FULL_KEY, JSON.stringify(full));
+            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+          }
         }
-      } catch { console.log("error in ev: ", ev)}
+      } catch (err) {
+        // ignore
+      }
 
       // Cerrar modal y quitar loading
       setShow(false);
@@ -50,16 +88,16 @@ export default function ConsentModal() {
     };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("consent_updated", onConsentUpdated as EventListener);
+      // Nota: usamos el nombre 'consent:updated' (coincide con AnalyticsGate)
+      window.addEventListener("consent:updated", onConsentUpdated as EventListener);
     }
 
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("consent_updated", onConsentUpdated as EventListener);
+        window.removeEventListener("consent:updated", onConsentUpdated as EventListener);
       }
     };
-  }, []); // una vez
-
+  }, [firebaseUser]); // dependemos de firebaseUser para incluir user_id en el objeto full si hace falta
 
   useEffect(() => {
     if (userLoading) return;
@@ -89,21 +127,50 @@ export default function ConsentModal() {
 
           // Lógica Corregida: Verifica si la versión de cada tipo de consentimiento
           // en la base de datos coincide con la versión de la política actual.
+          // Asumimos que el endpoint devuelve un objeto tipo { terms_of_service: "1.0.0", ... }
           const allConsentsAccepted = CONSENT_TYPES.every(
             (type) => data[type] === POLICY_VERSION
           );
 
           if (allConsentsAccepted) {
+            // Guardar en localStorage (consistencia)
             const saveObj: Record<string, string> = {};
             CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
             localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
             localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+
+            // Guardar objeto completo compatible con tu estructura en BBDD
+            const full = {
+              accepted: CONSENT_TYPES.map((type) => ({
+                type,
+                version: POLICY_VERSION,
+                granted: true,
+                details: {},
+              })),
+              accepted_types: CONSENT_TYPES,
+              client_timestamp: new Date().toISOString(),
+              created_by_authenticated: true,
+              details: {
+                ip_masked: "",
+              },
+              meta: {
+                origin: window.location.origin,
+                path: window.location.pathname,
+                ref: document.referrer || "",
+              },
+              timestamp: new Date().toLocaleString(),
+              user_agent: navigator.userAgent,
+              user_id: firebaseUser.uid,
+            };
+            localStorage.setItem(FULL_KEY, JSON.stringify(full));
+            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+
             setShow(false);
           } else {
             setShow(true);
           }
         } else {
-          // ... (el resto de la lógica para usuarios no logueados es correcta)
+          // Usuario anónimo: mirar localStorage
           localStorage.removeItem("user_id");
           localStorage.removeItem("anonymous_user_id");
 
@@ -140,17 +207,52 @@ export default function ConsentModal() {
   const handleAccept = async () => {
     setLoading(true);
 
+    // Construimos accepted array para backend y para localStorage/full object
+    const accepted = CONSENT_TYPES.map((type) => ({
+      type,
+      version: POLICY_VERSION,
+      granted: true,
+      details: {},
+    }));
+
+    // Objeto completo que guardaremos en localStorage para compatibilidad
+    const fullConsent = {
+      accepted,
+      accepted_types: CONSENT_TYPES,
+      client_timestamp: new Date().toISOString(),
+      created_by_authenticated: !!firebaseUser,
+      details: {
+        ip_masked: "",
+      },
+      meta: {
+        origin: typeof window !== "undefined" ? window.location.origin : "",
+        path: typeof window !== "undefined" ? window.location.pathname : "",
+        ref: typeof document !== "undefined" ? document.referrer || "" : "",
+      },
+      timestamp: new Date().toLocaleString(),
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      user_id: firebaseUser ? firebaseUser.uid : undefined,
+    };
+
     if (!firebaseUser) {
       // Usuario anónimo: no guardamos nada en backend, solo localStorage
       const saveObj: Record<string, string> = {};
       CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
       localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
       localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+      localStorage.setItem(FULL_KEY, JSON.stringify(fullConsent));
+      localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
 
-      // Emitir evento para que otras partes reaccionen
+      // Emitir evento para que otras partes reaccionen (usamos emitConsentUpdated centralizado)
       try {
-        emitConsentUpdated(true);
-      } catch { }
+        emitConsentUpdated(true, { accepted_types: CONSENT_TYPES });
+      } catch {
+        // Fallback dispatch
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: true, accepted_types: CONSENT_TYPES } }));
+          localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+        }
+      }
 
       setShow(false);
       setLoading(false);
@@ -161,19 +263,10 @@ export default function ConsentModal() {
     try {
       const token = await firebaseUser.getIdToken();
 
-      const accepted = CONSENT_TYPES.map((type) => ({
-        type,
-        version: POLICY_VERSION,
-        granted: true,
-        // Añade un objeto de detalles vacío si no hay ninguno
-        details: {},
-      }));
-
-      // Obtener la URL completa del cliente
       const clientOrigin = window.location.origin;
-      const clientRef = document.referrer || ""; // Referrer puede estar vacío
+      const clientRef = document.referrer || "";
       const clientPath = window.location.pathname;
-      const clientTimestamp = new Date().toISOString(); // Timestamp en formato ISO
+      const clientTimestamp = new Date().toISOString();
 
       const res = await fetch("/api/consent", {
         method: "POST",
@@ -184,12 +277,11 @@ export default function ConsentModal() {
         body: JSON.stringify({
           accepted,
           user_id: firebaseUser.uid,
-          // Enviar estos campos con valores definidos (o cadenas vacías)
-          details: {}, // Puedes agregar aquí detalles específicos si los tuvieras
+          details: {}, // si tienes detalles, añádelos
           origin: clientOrigin,
           ref: clientRef,
           path: clientPath,
-          client_timestamp: clientTimestamp, // Asegúrate de enviar este campo
+          client_timestamp: clientTimestamp,
         }),
       });
 
@@ -197,14 +289,23 @@ export default function ConsentModal() {
         console.error("Error al guardar el consentimiento:", await res.text());
         setShow(true);
       } else {
+        // Guardamos en localStorage igual que en anónimo (consistencia)
         const saveObj: Record<string, string> = {};
         CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
         localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
         localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+        localStorage.setItem(FULL_KEY, JSON.stringify(fullConsent));
+        localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
 
+        // Emitir evento para que otras partes reaccionen
         try {
-          emitConsentUpdated(true);
-        } catch { }
+          emitConsentUpdated(true, { accepted_types: CONSENT_TYPES });
+        } catch {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: true, accepted_types: CONSENT_TYPES } }));
+            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+          }
+        }
 
         setShow(false);
       }
