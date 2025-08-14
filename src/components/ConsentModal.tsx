@@ -8,7 +8,7 @@ import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 import { usePathname } from "next/navigation";
 
-const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
+const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.5";
 const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
 
 export default function ConsentModal() {
