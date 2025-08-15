@@ -87,3 +87,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Error interno del servidor al obtener las recetas.', details: error.message }, { status: 500 });
   }
 }
+
+// --- DELETE /api/recipes ---
+// Delete a specific recipe by id (requires idToken and ownership)
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id, idToken } = await request.json();
+    if (!id || !idToken) {
+      return NextResponse.json({ error: 'Faltan el id de la receta o el token de autenticación.' }, { status: 400 });
+    }
+
+    let uid: string | null = null;
+    try {
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch (authError) {
+      console.error('Error al verificar el token de autenticación (DELETE):', authError);
+      return NextResponse.json({ error: 'Token de autenticación inválido o expirado.' }, { status: 401 });
+    }
+
+    const docRef = db.collection('created_recipes').doc(id);
+    const snapshot = await docRef.get();
+    if (!snapshot.exists) {
+      return NextResponse.json({ error: 'Receta no encontrada.' }, { status: 404 });
+    }
+    const data = snapshot.data() as { user_id?: string } | undefined;
+    if (!data || data.user_id !== uid) {
+      return NextResponse.json({ error: 'No autorizado para eliminar esta receta.' }, { status: 403 });
+    }
+
+    await docRef.delete();
+    return NextResponse.json({ message: 'Receta eliminada exitosamente.' }, { status: 200 });
+  } catch (error: any) {
+    console.error('Error al eliminar la receta:', error);
+    return NextResponse.json({ error: 'Error interno del servidor al eliminar la receta.', details: error.message }, { status: 500 });
+  }
+}

@@ -1,0 +1,56 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// app/api/recipes/[id]/route.ts
+import { NextResponse } from 'next/server';
+import { db, auth } from '@/lib/firebase-admin';
+
+export async function GET(req: Request, { params }: any) {
+  const { id } = params as { id: string };
+
+  try {
+    if (!id) {
+      return NextResponse.json({ error: 'Falta el ID de la receta en la URL.' }, { status: 400 });
+    }
+
+    // Obtener el ID token del encabezado de autorización
+    const authHeader = req.headers.get('Authorization');
+    const idToken = authHeader?.split('Bearer ')[1];
+
+    if (!idToken) {
+      return NextResponse.json({ error: 'No se proporcionó token de autenticación.' }, { status: 401 });
+    }
+
+    let uid: string;
+    try {
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch (authError) {
+      console.error('Error al verificar el token de autenticación:', authError);
+      return NextResponse.json({ error: 'Token de autenticación inválido o expirado.' }, { status: 401 });
+    }
+
+    const docRef = db.collection('created_recipes').doc(id);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      return NextResponse.json({ error: 'Receta no encontrada.' }, { status: 404 });
+    }
+
+    const recipeData = docSnapshot.data();
+
+    if (recipeData?.user_id !== uid) {
+      return NextResponse.json({ error: 'Acceso denegado. No eres el propietario de esta receta.' }, { status: 403 });
+    }
+
+    return NextResponse.json(
+      { recipe: { id: docSnapshot.id, ...recipeData } },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error('Error al obtener la receta:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor al obtener la receta.', details: error.message },
+      { status: 500 }
+    );
+  }
+}

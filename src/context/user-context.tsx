@@ -14,24 +14,26 @@ import {
   query,
   where,
   setDoc,
+  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
-import bcrypt from "bcryptjs";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  User as FirebaseUser,
 } from "firebase/auth";
-import { v4 as uuidv4 } from "uuid";
 
 export interface CustomUser {
-  uid: string; // ✅ Añadido el campo uid
+  uid: string;
   email: string;
   firstName: string;
   lastName: string;
   created_at: Timestamp;
-  password?: string;
   extra_tokens: number;
   isSubscribed: boolean;
   lastRenewal: Timestamp;
@@ -39,11 +41,13 @@ export interface CustomUser {
   stripeCustomerId: string;
   subscriptionId: string;
   subscriptionStatus: string;
+  subscriptionCanceled: boolean;
   tokens_reset_date: Timestamp;
 }
 
 interface UserContextType {
   user: CustomUser | null;
+  firebaseUser: FirebaseUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (
@@ -51,28 +55,31 @@ interface UserContextType {
     password: string,
     name: string,
     surname: string
-  ) => Promise<void>;
+  ) => Promise<string>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUserName: (newName: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser?.email) {
+    const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
+      setFirebaseUser(userAuth);
+      if (userAuth?.email) {
         const usersRef = collection(db, "user");
-        const q = query(usersRef, where("email", "==", firebaseUser.email));
+        const q = query(usersRef, where("email", "==", userAuth.email));
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
           const docData = snapshot.docs[0].data() as CustomUser;
-          // ✅ Añadir el ID del documento
           docData.uid = snapshot.docs[0].id;
+
           setUser(docData);
         } else {
           setUser(null);
@@ -80,7 +87,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
       }
-
       setLoading(false);
     });
 
@@ -88,18 +94,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = result.user;
+
     const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
+    const q = query(usersRef, where("email", "==", firebaseUser.email));
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) throw new Error("Usuario no encontrado");
 
     const docData = snapshot.docs[0].data() as CustomUser;
-    // ✅ Añadir el ID del documento
     docData.uid = snapshot.docs[0].id;
-
-    const match = await bcrypt.compare(password, docData.password || "");
-    if (!match) throw new Error("Contraseña incorrecta");
 
     setUser(docData);
   };
@@ -110,35 +115,110 @@ export function UserProvider({ children }: { children: ReactNode }) {
     firstName: string,
     lastName: string
   ) => {
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const id = userCredential.user.uid;
+      const token = await userCredential.user.getIdToken();
 
-    if (!snapshot.empty) throw new Error("El usuario ya existe");
+      const newUser: Omit<CustomUser, "password"> = {
+        uid: id,
+        email,
+        firstName,
+        lastName,
+        created_at: Timestamp.now(),
+        extra_tokens: 0,
+        isSubscribed: false,
+        lastRenewal: Timestamp.now(),
+        monthly_tokens: 30,
+        stripeCustomerId: "",
+        subscriptionId: "",
+        subscriptionStatus: "cancelled",
+        subscriptionCanceled: false,
+        tokens_reset_date: Timestamp.now(),
+      };
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const id = uuidv4();
+      const docRef = doc(db, "user", id);
+      await setDoc(docRef, newUser);
 
-    const newUser: CustomUser = {
-      uid: id, // ✅ Incluir el uid en el objeto
-      email,
-      firstName,
-      lastName,
-      password: hashedPassword,
-      created_at: Timestamp.now(),
-      extra_tokens: 0,
-      isSubscribed: false,
-      lastRenewal: Timestamp.now(),
-      monthly_tokens: 30,
-      stripeCustomerId: "",
-      subscriptionId: "",
-      subscriptionStatus: "",
-      tokens_reset_date: Timestamp.now(),
-    };
+      const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
+      const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
+      const clientTimestamp = new Date().toISOString();
 
-    const docRef = doc(db, "user", id);
-    await setDoc(docRef, newUser);
-    setUser(newUser);
+      const accepted = CONSENT_TYPES.map(type => ({
+        type,
+        granted: true,
+        version: POLICY_VERSION,
+        details: {},
+      }));
+
+      const payload = {
+        accepted,
+        user_id: newUser.uid,
+        client_timestamp: clientTimestamp,
+        origin: typeof window !== "undefined" ? window.location.origin : null,
+        ref: typeof document !== "undefined" ? document.referrer || null : null,
+        path: typeof window !== "undefined" ? window.location.pathname : null,
+        details: {},
+      };
+
+      const consentResponse = await fetch("/api/consent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!consentResponse.ok) {
+        console.error("Error al registrar el consentimiento:", await consentResponse.json());
+      } else {
+        console.log("Consentimiento registrado correctamente.");
+
+        // Guardar en localStorage (solo en cliente)
+        if (typeof window !== "undefined") {
+          try {
+            const saveObj: Record<string, string> = {};
+            CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+            localStorage.setItem("consent_versions", JSON.stringify(saveObj));
+            localStorage.setItem("consent_version", POLICY_VERSION);
+          } catch (e) {
+            console.warn("No se pudo escribir consent en localStorage:", e);
+          }
+
+          // DISPATCH: notificar al resto de la app que el consentimiento ya está guardado
+          try {
+            window.dispatchEvent(
+              new CustomEvent("consent_updated", {
+                detail: { userId: id, source: "register" },
+              })
+            );
+          } catch {
+            // noop
+          }
+        }
+      }
+
+      if (!consentResponse.ok) {
+        console.error("Error al registrar el consentimiento:", await consentResponse.json());
+      } else {
+        console.log("Consentimiento registrado correctamente.");
+        // ✅ Nueva línea: Guardar en localStorage para evitar que el modal aparezca inmediatamente
+        const saveObj: Record<string, string> = {};
+        CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+        localStorage.setItem("consent_versions", JSON.stringify(saveObj));
+        localStorage.setItem("consent_version", POLICY_VERSION); // Por si acaso
+      }
+
+      setUser(newUser);
+      setFirebaseUser(userCredential.user);
+      setLoading(false);
+
+      return id;
+    } catch (error) {
+      console.error("Error al registrarse:", error);
+      throw error;
+    }
   };
 
   const loginWithGoogle = async () => {
@@ -169,7 +249,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         monthly_tokens: 30,
         stripeCustomerId: "",
         subscriptionId: "",
-        subscriptionStatus: "",
+        subscriptionStatus: "cancelled",
+        subscriptionCanceled: false,
         tokens_reset_date: Timestamp.now(),
       };
 
@@ -185,16 +266,50 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    await signOut(auth);
     setUser(null);
+  };
+
+  // 🆕 Nueva función para actualizar el nombre de usuario
+  const updateUserName = async (newName: string) => {
+    if (!user) {
+      throw new Error("No hay usuario autenticado");
+    }
+
+    if (!newName.trim()) {
+      throw new Error("El nombre no puede estar vacío");
+    }
+
+    try {
+      // Actualizar en Firestore
+      const userDocRef = doc(db, "user", user.uid);
+      await updateDoc(userDocRef, {
+        firstName: newName.trim(),
+      });
+
+      // Actualizar el estado local
+      setUser((prevUser) => {
+        if (!prevUser) return null;
+        return {
+          ...prevUser,
+          firstName: newName.trim(),
+        };
+      });
+    } catch (error) {
+      console.error("Error al actualizar el nombre:", error);
+      throw new Error("No se pudo actualizar el nombre");
+    }
   };
 
   const value: UserContextType = {
     user,
+    firebaseUser,
     loading,
     login,
     register,
     loginWithGoogle,
     logout,
+    updateUserName,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

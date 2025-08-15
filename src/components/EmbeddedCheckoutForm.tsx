@@ -5,15 +5,15 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import { useCallback, useRef, useState } from "react";
+import { CustomUser } from "@/context/user-context";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
-export default function EmbeddedCheckoutButton({ priceId }: { priceId: string }) {
+export default function EmbeddedCheckoutButton({ priceId, user }: { priceId: string, user: CustomUser | null }) {
   const [showCheckout, setShowCheckout] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  //PRUEBA
-  const userId = "Sgnx6XwmBFXEY7EbzOkB";
+  const userId = user?.uid;
 
   const fetchClientSecret = useCallback(() => {
     return fetch("/api/embedded-checkout", {
@@ -40,12 +40,12 @@ export default function EmbeddedCheckoutButton({ priceId }: { priceId: string })
   };
 
   return (
-    <div className="my-4">
-      <button className="btn" onClick={handleCheckoutClick}>
-        Elegir este plan
+    <div  className="flex flex-col items-center gap-4">
+      <button className="cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out" onClick={handleCheckoutClick}>
+        Suscribirse
       </button>
       <dialog ref={modalRef} className="modal ">
-        <div className="modal-box w-full max-w-6xl">
+        <div className="modal-box w-full max-h-[90vh] max-w-lg p-6 rounded-2xl bg-white shadow-2xl text-center">
           <h3 className="font-bold text-lg">Pago seguro con Stripe</h3>
           <div className="py-4">
             {showCheckout && (
