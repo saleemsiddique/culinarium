@@ -68,6 +68,49 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Función para verificar y resetear tokens mensuales
+  const checkAndResetMonthlyTokens = async (userData: CustomUser): Promise<CustomUser> => {
+    // Solo verificar para usuarios sin suscripción activa
+    if (userData.isSubscribed && (userData.subscriptionStatus === 'active' || userData.subscriptionStatus === 'cancel_at_period_end')) {
+      return userData;
+    }
+
+    const now = Timestamp.now();
+    const resetDate = userData.tokens_reset_date;
+    
+    // 30 días en milisegundos
+    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+    const timeDiff = now.toMillis() - resetDate.toMillis();
+    
+    if (timeDiff >= thirtyDaysInMs) {
+      try {
+        const userDocRef = doc(db, "user", userData.uid);
+        const newResetDate = Timestamp.now();
+        
+        await updateDoc(userDocRef, {
+          monthly_tokens: 50,
+          tokens_reset_date: newResetDate,
+        });
+        
+        console.log(`Tokens reseteados para usuario: ${userData.email}`);
+        
+        // Retornar datos actualizados
+        return {
+          ...userData,
+          monthly_tokens: 50,
+          tokens_reset_date: newResetDate,
+        };
+        
+      } catch (error) {
+        console.error("Error al resetear tokens:", error);
+        // Si falla el update, devolver datos originales
+        return userData;
+      }
+    }
+    
+    return userData;
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
       setFirebaseUser(userAuth);
@@ -77,8 +120,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          const docData = snapshot.docs[0].data() as CustomUser;
+          let docData = snapshot.docs[0].data() as CustomUser;
           docData.uid = snapshot.docs[0].id;
+
+          // ✅ Verificar y resetear tokens si es necesario
+          docData = await checkAndResetMonthlyTokens(docData);
 
           setUser(docData);
         } else {
@@ -103,8 +149,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     if (snapshot.empty) throw new Error("Usuario no encontrado");
 
-    const docData = snapshot.docs[0].data() as CustomUser;
+    let docData = snapshot.docs[0].data() as CustomUser;
     docData.uid = snapshot.docs[0].id;
+
+    // ✅ Verificar y resetear tokens si es necesario
+    docData = await checkAndResetMonthlyTokens(docData);
 
     setUser(docData);
   };
@@ -129,7 +178,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         extra_tokens: 0,
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
-        monthly_tokens: 30,
+        monthly_tokens: 50,
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "cancelled",
@@ -246,7 +295,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         extra_tokens: 0,
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
-        monthly_tokens: 30,
+        monthly_tokens: 50,
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "cancelled",
@@ -260,6 +309,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       userData = snapshot.docs[0].data() as CustomUser;
       // ✅ Añadir el ID del documento
       userData.uid = snapshot.docs[0].id;
+
+      // ✅ Verificar y resetear tokens si es necesario (solo para usuarios existentes)
+      userData = await checkAndResetMonthlyTokens(userData);
     }
 
     setUser(userData);

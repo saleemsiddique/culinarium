@@ -364,7 +364,7 @@ export async function POST(request: NextRequest) {
           subscriptionCanceled: false,
           isSubscribed: false,
           subscriptionStatus: "cancelled",
-          monthly_tokens: 30, // Al cancelar, eliminar tokens mensuales
+          monthly_tokens: 50, 
         });
 
         // Actualizar estado en subcolección
