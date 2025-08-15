@@ -398,7 +398,7 @@ function ProfileContent() {
                 Actualiza a Premium para obtener más funciones
               </p>
               <EmbeddedCheckoutButton
-                priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
+                priceId={"price_1RwHJCRpBiBhmezm4D1fPQt5"}
                 user={user}
               />
             </div>

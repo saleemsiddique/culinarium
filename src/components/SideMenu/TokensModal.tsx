@@ -55,12 +55,12 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
           className="flex-grow overflow-y-auto px-2 -mx-2 pb-2"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            <TokenPurchaseCards user={user} count={30} price={0.99} color="blue" label="Uso puntual (3 recetas)" priceId="price_1RrL5F2LSjDC5txTL3uBh13K" />
-            <TokenPurchaseCards user={user} count={60} price={1.99} color="purple" label="Uso ocasional (6 recetas)" priceId="price_1RrL6V2LSjDC5txT4rjhvL16" />
-            <TokenPurchaseCards user={user} count={120} price={3.99} color="green" label="Uso semanal (12 recetas)" priceId="price_1RrL7H2LSjDC5txTqcpnGZYE" />
-            <TokenPurchaseCards user={user} count={250} price={6.99} color="orange" label="Uso frecuente (25 recetas)" priceId="price_1RrL7b2LSjDC5txTUKbWlDO5" labelPromo="Más Popular" isHighlighted />
-            <TokenPurchaseCards user={user} count={600} price={13.99} color="red" label="Uso intensivo (60 recetas)" priceId="price_1RrL7r2LSjDC5txTy0i2I8MY" labelPromo="Mejor Valor" />
-            <TokenPurchaseCards user={user} count={1200} price={24.99} color="blue" label="Uso profesional (120 recetas)" priceId="price_1RrL8A2LSjDC5txT9vjD59AH" />
+            <TokenPurchaseCards user={user} count={30} price={0.99} color="blue" label="Uso puntual (3 recetas)" priceId="price_1RwHKLRpBiBhmezmK1AybT5C" />
+            <TokenPurchaseCards user={user} count={60} price={1.99} color="purple" label="Uso ocasional (6 recetas)" priceId="price_1RwHL6RpBiBhmezmsEhJyMC1" />
+            <TokenPurchaseCards user={user} count={120} price={3.49} color="green" label="Uso semanal (12 recetas)" priceId="price_1RwHLWRpBiBhmezmY3vPGDxT" />
+            <TokenPurchaseCards user={user} count={250} price={6.49} color="orange" label="Uso frecuente (25 recetas)" priceId="price_1RwHLrRpBiBhmezmFamEW9Ct" labelPromo="Más Popular" isHighlighted />
+            <TokenPurchaseCards user={user} count={600} price={13.99} color="red" label="Uso intensivo (60 recetas)" priceId="price_1RwHMCRpBiBhmezmRzyb4DAm"  />
+            <TokenPurchaseCards user={user} count={1200} price={24.99} color="blue" label="Uso profesional (120 recetas)" priceId="price_1RwHMbRpBiBhmezmgyMbGrJq" labelPromo="Mejor Valor"/>
           </div>
         </div>
       </div>

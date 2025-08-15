@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
       const PRICE_TO_TOKENS = {
         //One Tier Sub
-        price_1RrJVF2LSjDC5txTR6lOQslg: {
+        price_1RwHJCRpBiBhmezm4D1fPQt5: {
           type: "subscription",
           tokens: 300,
           name: "Culinarium premium",
@@ -64,42 +64,42 @@ export async function POST(request: NextRequest) {
           price: 7.99,
         },
         //Extra Tokens
-        price_1RrL5F2LSjDC5txTL3uBh13K: {
+        price_1RwHKLRpBiBhmezmK1AybT5C: {
           type: "tokens",
           tokens: 30,
           name: "Pack 30 tokens",
           isSubscription: false,
           price: 0.99,
         },
-        price_1RrL6V2LSjDC5txT4rjhvL16: {
+        price_1RwHL6RpBiBhmezmsEhJyMC1: {
           type: "tokens",
           tokens: 60,
           name: "Pack 60 Tokens",
           isSubscription: false,
           price: 1.99,
         },
-        price_1RrL7H2LSjDC5txTqcpnGZYE: {
+        price_1RwHLWRpBiBhmezmY3vPGDxT: {
           type: "tokens",
           tokens: 120,
           name: "Pack 120 Tokens",
           isSubscription: false,
-          price: 3.99,
+          price: 3.49,
         },
-        price_1RrL7b2LSjDC5txTUKbWlDO5: {
+        price_1RwHLrRpBiBhmezmFamEW9Ct: {
           type: "tokens",
           tokens: 250,
           name: "Pack 250 Tokens",
           isSubscription: false,
-          price: 6.99,
+          price: 6.49,
         },
-        price_1RrL7r2LSjDC5txTy0i2I8MY: {
+        price_1RwHMCRpBiBhmezmRzyb4DAm: {
           type: "tokens",
           tokens: 600,
           name: "Pack 600 Tokens",
           isSubscription: false,
           price: 13.99,
         },
-        price_1RrL8A2LSjDC5txT9vjD59AH: {
+        price_1RwHMbRpBiBhmezmgyMbGrJq: {
           type: "tokens",
           tokens: 1200,
           name: "Pack 1200 Tokens",
@@ -388,7 +388,7 @@ export async function POST(request: NextRequest) {
     }
 
     // =============================================
-    // PAGO FALLIDO (OPCIONAL)
+    // PAGO FALLIDO
     // =============================================
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
