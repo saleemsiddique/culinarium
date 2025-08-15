@@ -11,6 +11,7 @@ import {
   FaCookieBite,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useUser } from "@/context/user-context";
 
 const footerVariants = {
   initial: { opacity: 0, y: 20 },
@@ -19,6 +20,7 @@ const footerVariants = {
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { firebaseUser } = useUser();
 
   return (
     <>
@@ -112,7 +114,8 @@ export default function Footer() {
               <p className="mt-1 text-sm text-gray-500">Dirección: 03502, España</p>
 
               <div className="mt-8">
-                <CookieSettingsLink />
+                {/* Mostrar enlace a ajustes solo si el usuario está logueado */}
+                {firebaseUser ? <CookieSettingsLink /> : null}
               </div>
             </div>
           </div>

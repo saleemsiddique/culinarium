@@ -33,7 +33,7 @@ export default function RootLayout({
           </SubscriptionProvider>
         </UserProvider>
         {/* Analytics solo se monta si el usuario acepta analítica */}
-        {/*<AnalyticsGate />*/}
+        <AnalyticsGate />
       </body>
     </html>
   );

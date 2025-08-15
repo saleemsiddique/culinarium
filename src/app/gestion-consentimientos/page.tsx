@@ -3,9 +3,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { useUser } from "@/context/user-context";
 import { motion } from "framer-motion";
+import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 
 const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"] as const;
@@ -25,7 +24,9 @@ const itemVariants = {
 
 export default function GestionConsentimientosPage() {
   const { firebaseUser, user, loading: userLoading } = useUser();
+  const isAnonymous = !firebaseUser;
 
+  // Estado para usuarios autenticados
   const [status, setStatus] = useState<ConsentState>({
     terms_of_service: false,
     privacy_policy: false,
@@ -37,117 +38,68 @@ export default function GestionConsentimientosPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Utilities
-  const LOCAL_KEY_FULL = "culinarium_cookie_consent"; // used by cookies content
-  const LOCAL_KEY_VERSIONS = "consent_versions"; // map type->version
-  const LOCAL_ANON_ID = "anonymous_user_id";
+  // LOCAL KEYS (solo se usan para usuarios autenticados)
+  const LOCAL_KEY_FULL = "culinarium_cookie_consent";
+  const LOCAL_KEY_VERSIONS = "consent_versions";
+  const LAST_UPDATE_KEY = "culinarium_cookie_consent_last_update";
+  const LEGACY_KEY = "consent_version";
 
-  function ensureAnonymousId() {
-    let id = localStorage.getItem(LOCAL_ANON_ID);
-    if (!id) {
-      id = uuidv4();
-      localStorage.setItem(LOCAL_ANON_ID, id);
-    }
-    return id;
-  }
-
-  function getStoredVersions() {
-    const raw = localStorage.getItem(LOCAL_KEY_VERSIONS);
-    if (!raw) return null;
+  // ---- Helpers para usuarios autenticados ----
+  function persistLocalAccepted(acceptedTrue: any[], createdByAuthenticated: boolean, userId: string | null) {
     try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
-    }
-  }
-
-  function getFullLocalConsent() {
-    const raw = localStorage.getItem(LOCAL_KEY_FULL);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
-    }
-  }
-
-  // Called on mount and when user state changes
-  useEffect(() => {
-    // load local
-    const local = getFullLocalConsent();
-    setLocalRecord(local);
-
-    // If user is logged, try to fetch server-side consent status
-    const fetchStatus = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // try to get idToken
-        let token: string | null = null;
-        try {
-          if (firebaseUser) token = await firebaseUser.getIdToken();
-        } catch {
-          // ignore
-        }
-
-        if (!token) {
-          // anonymous — use local versions if available
-          const versions = getStoredVersions();
-          if (versions) {
-            const nextStatus: ConsentState = {
-              terms_of_service: versions["terms_of_service"] === POLICY_VERSION,
-              privacy_policy: versions["privacy_policy"] === POLICY_VERSION,
-              cookies_policy: versions["cookies_policy"] === POLICY_VERSION,
-            };
-            setStatus(nextStatus);
-            setLoading(false);
-            return;
-          }
-          setLoading(false);
-          return;
-        }
-
-        const res = await fetch("/api/consent", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const nextStatus: ConsentState = {
-            terms_of_service: !!data.terms_of_service,
-            privacy_policy: !!data.privacy_policy,
-            cookies_policy: !!data.cookies_policy,
-          };
-          setStatus(nextStatus);
-        } else {
-          // fallback to local
-          const versions = getStoredVersions();
-          if (versions) {
-            const nextStatus: ConsentState = {
-              terms_of_service: versions["terms_of_service"] === POLICY_VERSION,
-              privacy_policy: versions["privacy_policy"] === POLICY_VERSION,
-              cookies_policy: versions["cookies_policy"] === POLICY_VERSION,
-            };
-            setStatus(nextStatus);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo comprobar el estado de consentimientos.");
-      } finally {
-        setLoading(false);
+      // Si no hay aceptados, eliminar SOLO las claves de consent (no llamar localStorage.clear)
+      if (!acceptedTrue || acceptedTrue.length === 0) {
+        localStorage.removeItem(LOCAL_KEY_VERSIONS);
+        localStorage.removeItem(LOCAL_KEY_FULL);
+        localStorage.removeItem(LAST_UPDATE_KEY);
+        localStorage.removeItem(LEGACY_KEY);
+        setLocalRecord(null);
+        return;
       }
-    };
 
-    if (!userLoading) fetchStatus();
-  }, [firebaseUser, userLoading]);
+      const versionsMap: Record<string, string> = {};
+      acceptedTrue.forEach((a: any) => {
+        if (a && a.type) versionsMap[a.type] = a.version || POLICY_VERSION;
+      });
+      localStorage.setItem(LOCAL_KEY_VERSIONS, JSON.stringify(versionsMap));
 
-  // Toggle a single consent locally in the UI
-  const toggle = (type: typeof CONSENT_TYPES[number]) => {
-    setStatus((s) => ({ ...s, [type]: !s[type] }));
-  };
+      const fullLocal = {
+        accepted: acceptedTrue.map((a: any) => ({
+          type: a.type,
+          version: a.version || POLICY_VERSION,
+          granted: !!a.granted,
+          details: a.details || {},
+        })),
+        accepted_types: acceptedTrue.map((a: any) => a.type),
+        client_timestamp: new Date().toISOString(),
+        created_by_authenticated: !!createdByAuthenticated,
+        details: {},
+        meta: {
+          origin: typeof window !== "undefined" ? window.location.origin : null,
+          path: typeof window !== "undefined" ? window.location.pathname : null,
+          ref: typeof document !== "undefined" ? document.referrer || null : null,
+        },
+        timestamp: new Date().toLocaleString(),
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent || null : null,
+        user_id: userId || null,
+      };
 
-  // Prepare accepted array
+      localStorage.setItem(LOCAL_KEY_FULL, JSON.stringify(fullLocal));
+      localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+
+      const allAccepted = CONSENT_TYPES.every((t) => versionsMap[t] === POLICY_VERSION);
+      if (allAccepted) {
+        localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+      } else {
+        localStorage.removeItem(LEGACY_KEY);
+      }
+
+      setLocalRecord(fullLocal);
+    } catch (err) {
+      console.warn("persistLocalAccepted error:", err);
+    }
+  }
+
   function buildAcceptedArray(fromStatus: ConsentState) {
     const POLICY_TEXTS: Record<string, string> = {
       terms_of_service: "Aceptación de Términos y Condiciones (versión).",
@@ -159,42 +111,87 @@ export default function GestionConsentimientosPage() {
       type: t,
       version: POLICY_VERSION,
       granted: !!fromStatus[t],
-      details: POLICY_TEXTS[t] || null,
+      details: POLICY_TEXTS[t] || {},
     }));
   }
 
-  // Disable analytics placeholder
-  function disableAnalyticsClientSide() {
-    try {
-      // GA example (replace with your measurement id if used):
-      // window['ga-disable-GA_MEASUREMENT_ID'] = true;
-      // Clear common analytics cookies
-      ["_ga", "_gid", "_gat"].forEach((c) => {
-        document.cookie = `${c}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+  // ---- Effects (SOLO para usuarios autenticados hacemos lecturas/escrituras) ----
+  useEffect(() => {
+    // Si es anónimo no hacemos lecturas ni escrituras en localStorage ni intentamos fetch
+    if (isAnonymous) {
+      // Quitamos cualquier rastro visual y dejamos que el ConsentModal maneje el flujo para anónimos
+      setLocalRecord(null);
+      setStatus({
+        terms_of_service: false,
+        privacy_policy: false,
+        cookies_policy: false,
       });
-      // If you use other SDKs, call their opt-out APIs here.
-    } catch (e) {
-      console.warn("No se pudo desactivar analytics en cliente:", e);
+      setLoading(false);
+      return;
     }
-  }
 
-  function enableAnalyticsClientSide() {
-    try {
-      // Re-initialize analytics SDK if needed
-      // e.g., re-run initialisation code
-    } catch (e) {
-      console.warn("No se pudo activar analytics en cliente:", e);
-    }
-  }
+    // Usuario autenticado: comprobamos estado en servidor y sincronizamos local
+    const fetchStatus = async () => {
+      setLoading(true);
+      setError(null);
 
-  // Update consents: creates a new consent doc (not overwrite)
-  const updateConsents = async (newStatus: ConsentState) => {
+      try {
+        // Obtener token
+        let token: string | null = null;
+        if (firebaseUser) {
+          token = await firebaseUser.getIdToken();
+        }
+
+        if (!token) {
+          setError("No se pudo obtener token de autenticación.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/consent", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          setError("No se pudo obtener el estado de consentimientos desde el servidor.");
+          setLoading(false);
+          return;
+        }
+
+        const data = await res.json();
+        const nextStatus: ConsentState = {
+          terms_of_service: data.terms_of_service === POLICY_VERSION,
+          privacy_policy: data.privacy_policy === POLICY_VERSION,
+          cookies_policy: data.cookies_policy === POLICY_VERSION,
+        };
+        setStatus(nextStatus);
+
+        const acceptedTypes = CONSENT_TYPES.filter((t) => nextStatus[t]);
+        const acceptedTrue = acceptedTypes.map((t) => ({ type: t, version: POLICY_VERSION, granted: true, details: {} }));
+        persistLocalAccepted(acceptedTrue, true, firebaseUser?.uid || null);
+      } catch (err) {
+        console.error(err);
+        setError("Error comprobando el estado de consentimientos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!userLoading) fetchStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firebaseUser, userLoading]);
+
+  // ---- Actions para usuarios autenticados ----
+  const toggle = (type: typeof CONSENT_TYPES[number]) => {
+    setStatus((s) => ({ ...s, [type]: !s[type] }));
+  };
+
+  async function updateConsents(newStatus: ConsentState) {
     setSaving(true);
     setMessage(null);
     setError(null);
 
     const accepted = buildAcceptedArray(newStatus);
-
     const clientTimestamp = new Date().toISOString();
     const meta = {
       path: typeof window !== "undefined" ? window.location.pathname : null,
@@ -205,101 +202,101 @@ export default function GestionConsentimientosPage() {
       platform: typeof navigator !== "undefined" ? navigator.platform || null : null,
     };
 
-    const userId = (user && (user.uid || (firebaseUser && firebaseUser.uid))) || localStorage.getItem(LOCAL_ANON_ID) || ensureAnonymousId();
-
-    const payload: any = {
-      accepted,
-      user_id: userId,
-      details: { timestamp: clientTimestamp, version: POLICY_VERSION, meta },
-      origin: meta.origin,
-      ref: meta.ref,
-      path: meta.path,
-    };
-
-    // try to obtain token
-    let token: string | null = null;
     try {
-      if (firebaseUser) token = await firebaseUser.getIdToken();
-    } catch {
-      // ignore
-    }
+      if (!firebaseUser) throw new Error("Usuario no autenticado.");
 
-    try {
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const token = await firebaseUser.getIdToken();
+      const userId = firebaseUser.uid;
+      const payload: any = {
+        accepted,
+        user_id: userId,
+        details: { timestamp: clientTimestamp, version: POLICY_VERSION, meta },
+        origin: meta.origin,
+        ref: meta.ref,
+        path: meta.path,
+        client_timestamp: clientTimestamp,
+      };
 
       const res = await fetch("/api/consent", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || "Error guardando consentimiento");
+        throw new Error(text || "Error guardando consentimiento en servidor");
       }
 
-      // update local storage versions map
-      const storedRaw = localStorage.getItem(LOCAL_KEY_VERSIONS);
-      const stored = storedRaw ? JSON.parse(storedRaw) : {};
-      accepted.forEach((a: any) => (stored[a.type] = a.version));
-      localStorage.setItem(LOCAL_KEY_VERSIONS, JSON.stringify(stored));
+      const acceptedTrue = accepted.filter((a: any) => !!a.granted);
+      persistLocalAccepted(acceptedTrue, true, userId);
 
-      // also save a full local record for UI
-      const fullLocal = { ...newStatus, timestamp: clientTimestamp, version: POLICY_VERSION, meta };
-      localStorage.setItem(LOCAL_KEY_FULL, JSON.stringify(fullLocal));
-      setLocalRecord(fullLocal);
-
-      // apply client-side effects
+      // client-side effects: analytics toggle (best-effort)
       if (!newStatus.cookies_policy) {
-        disableAnalyticsClientSide();
-      } else {
-        enableAnalyticsClientSide();
+        // try to disable analytics SDKs (best-effort)
+        ["_ga", "_gid", "_gat"].forEach((c) => {
+          document.cookie = `${c}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+        });
       }
 
-      // Emit global event to notify other parts of the app (AnalyticsGate, other tabs...)
-      const analyticsAccepted = (newStatus as any).cookies_policy ?? (newStatus as any).analytics ?? false;
-      try {
-        emitConsentUpdated(analyticsAccepted);
-      } catch {
-        // noop
-      }
+      emitConsentUpdated(!!newStatus.cookies_policy, { accepted_types: acceptedTrue.map((a: any) => a.type) });
 
       setStatus(newStatus);
-      setMessage("Consentimientos actualizados correctamente.");
-
-      // If we have anonymous id stored and user just logged in (token present), try to link
-      try {
-        const anonymousId = localStorage.getItem(LOCAL_ANON_ID);
-        if (anonymousId && token) {
-          await fetch("/api/consent/link", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ anonymous_id: anonymousId }),
-          });
-          // optionally remove anonymous id
-          // localStorage.removeItem(LOCAL_ANON_ID);
-        }
-      } catch (linkErr) {
-        console.warn("No se pudo linkear anonymous consent:", linkErr);
-      }
+      setMessage("Consentimientos actualizados correctamente en el servidor.");
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Error al actualizar consentimientos");
+      setError(err?.message || "Error actualizando consentimientos");
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   const handleSave = async () => {
     await updateConsents(status);
   };
 
   const handleRevokeAll = async () => {
-    const newStatus: ConsentState = { terms_of_service: false, privacy_policy: false, cookies_policy: false };
-    await updateConsents(newStatus);
+    // Solo para usuarios autenticados
+    const revokeStatus: ConsentState = { terms_of_service: false, privacy_policy: false, cookies_policy: false };
+    await updateConsents(revokeStatus);
   };
 
+  // ---- Render ----
+  if (isAnonymous) {
+    // Si el usuario no está autenticado NO permitimos gestión desde esta página.
+    return (
+      <motion.div
+        className="w-screen min-h-screen bg-gray-950 text-gray-300 p-6 lg:py-24 flex items-center justify-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="max-w-xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl text-center">
+          <h1 className="text-2xl font-bold mb-4">Gestionar consentimientos</h1>
+          <p className="text-sm text-gray-400 mb-6">
+            Esta página solo está disponible para usuarios autenticados. Si quieres gestionar tus preferencias o conservarlas entre dispositivos,
+            por favor inicia sesión.
+          </p>
+          <div className="flex justify-center gap-3">
+            <a
+              href="/login"
+              className="px-6 py-3 rounded-full bg-orange-600 text-white hover:bg-orange-700"
+            >
+              Iniciar sesión
+            </a>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Usuario autenticado: mostramos interfaz de gestión
   return (
     <motion.div
       className="w-screen min-h-screen bg-gray-950 text-gray-300 p-6 lg:py-24"
@@ -315,7 +312,7 @@ export default function GestionConsentimientosPage() {
           Gestión de consentimientos
         </h1>
         <p className="text-sm text-gray-400 mb-6">
-          Aquí puedes ver y modificar tus preferencias de privacidad y cookies en cualquier momento. Los cambios quedan registrados para auditoría.
+          Aquí puedes ver y modificar las preferencias guardadas en tu cuenta.
         </p>
 
         {loading ? (
@@ -326,7 +323,7 @@ export default function GestionConsentimientosPage() {
               <div key={t} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
                 <div>
                   <p className="font-semibold text-gray-200">
-                    {t === 'terms_of_service' ? 'Términos y Condiciones' : t === 'privacy_policy' ? 'Política de Privacidad' : 'Política de Cookies'}
+                    {t === "terms_of_service" ? "Términos y Condiciones" : t === "privacy_policy" ? "Política de Privacidad" : "Política de Cookies"}
                   </p>
                   <p className="text-sm text-gray-500">Versión: {POLICY_VERSION}</p>
                 </div>
@@ -334,12 +331,12 @@ export default function GestionConsentimientosPage() {
                   <button
                     onClick={() => toggle(t)}
                     className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 ${status[t]
-                      ? 'bg-orange-600 text-white hover:bg-orange-700'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? "bg-orange-600 text-white hover:bg-orange-700"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                     }`}
                     aria-pressed={status[t]}
                   >
-                    {status[t] ? 'Aceptado' : 'Rechazado'}
+                    {status[t] ? "Aceptado" : "Rechazado"}
                   </button>
                 </div>
               </div>
@@ -349,16 +346,16 @@ export default function GestionConsentimientosPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className={`px-6 py-3 rounded-full font-medium transition ${saving ? 'bg-orange-800 text-gray-500 cursor-not-allowed' : 'bg-orange-600 text-white hover:bg-orange-700'}`}
+                className={`px-6 py-3 rounded-full font-medium transition ${saving ? "bg-orange-800 text-gray-500 cursor-not-allowed" : "bg-orange-600 text-white hover:bg-orange-700"}`}
               >
-                {saving ? 'Guardando...' : 'Guardar cambios'}
+                {saving ? "Guardando..." : "Guardar cambios"}
               </button>
               <button
                 onClick={handleRevokeAll}
                 disabled={saving}
-                className={`px-6 py-3 rounded-full font-medium transition ${saving ? 'bg-red-800 text-gray-500 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}
+                className={`px-6 py-3 rounded-full font-medium transition ${saving ? "bg-red-800 text-gray-500 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-700"}`}
               >
-                {saving ? 'Procesando...' : 'Revocar todo'}
+                {saving ? "Procesando..." : "Revocar todo"}
               </button>
             </div>
 
@@ -371,7 +368,7 @@ export default function GestionConsentimientosPage() {
                 {JSON.stringify(localRecord, null, 2)}
               </pre>
               <p className="text-xs text-gray-500 mt-2">
-                Si estás autenticado, el historial real se guarda en nuestro backend. Aquí verás la última elección local.
+                El historial real se guarda en nuestro backend. Aquí verás la última elección local.
               </p>
             </div>
 

@@ -1,16 +1,12 @@
-// lib/consent-events.ts
-export function emitConsentUpdated(analyticsAccepted: boolean) {
-  try {
-    window.dispatchEvent(
-      new CustomEvent("consent:updated", { detail: { analytics: !!analyticsAccepted } })
-    );
-    // también disparar storage event para otras pestañas (opcional, pero útil)
-    try {
-      const versionsRaw = localStorage.getItem("consent_versions");
-      // re-write to trigger storage on other tabs (same key)
-      if (versionsRaw !== null) localStorage.setItem("consent_versions", versionsRaw);
-    } catch {}
-  } catch {
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-  }
+// /lib/consent-events.ts
+export function emitConsentUpdated(analytics: boolean | null = null, extraDetail: Record<string, any> = {}) {
+  if (typeof window === "undefined") return;
+  try {
+    const detail = { ...extraDetail };
+    if (typeof analytics === "boolean") detail.analytics = analytics;
+    window.dispatchEvent(new CustomEvent("consent:updated", { detail }));
+    localStorage.setItem("culinarium_cookie_consent_last_update", String(Date.now()));
+  } catch {}
 }
