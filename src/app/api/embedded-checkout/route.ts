@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     const isSubscription = body.priceId === "price_1RwHJCRpBiBhmezm4D1fPQt5";
 
     const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded",
+      ui_mode: "hosted",
       payment_method_types: ["card"],
       customer: customerId, // ¡ESTA ES LA LÍNEA CLAVE!
       line_items: [
@@ -63,17 +63,17 @@ export async function POST(request: Request) {
         },
       ],
       mode: isSubscription ? "subscription" : "payment",
-      return_url: `${request.headers.get(
+      success_url:  `${request.headers.get(
         "origin"
       )}/return?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${request.headers.get("origin")}/kitchen`,
       metadata: {
         userId: body.userId,
       },
     });
 
     return NextResponse.json({
-      id: session.id,
-      client_secret: session.client_secret,
+      url: session.url,
     });
   } catch (error: any) {
     console.error(error);
