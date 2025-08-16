@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
@@ -37,8 +37,9 @@ const RecipePage: React.FC = () => {
   const searchParams = useSearchParams(); // Hook para obtener los parámetros de la URL
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
-  const placeholderImageUrl = `https://placehold.co/600x400/a7f3d0/065f46?text=Culinarium`;
+  const placeholderImageUrl = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`;
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
 
   // Helper to get cuisine style icon
@@ -118,55 +119,49 @@ const RecipePage: React.FC = () => {
         setLoadingRecipe(false);
       }
     }
-  }, [router, placeholderImageUrl]);
+  }, [router, placeholderImageUrl, searchParams]);
 
-  // Generar imagen hiperrealista con OpenAI si no existe aún
+  // Watch for image updates from background generation
   useEffect(() => {
-    const generateImage = async () => {
-      if (!recipe) return;
-      const isError = recipe.titulo?.startsWith('ERROR:');
-      console.log('[RecipePage] generateImage: receta cargada', { titulo: recipe.titulo, estilo: recipe.estilo });
-      if (isError) {
-        console.warn('[RecipePage] generateImage: receta de error. No se genera imagen.');
-        return;
-      }
-      if (recipe.img_url) {
-        console.log(recipe.img_url);
-        console.log('[RecipePage] generateImage: ya hay img_url base64. No se regenera.');
-        return;
-      }
-
-      try {
-        console.log('[RecipePage] generateImage: solicitando /api/recipe-image ...');
-        const res = await fetch('/api/recipe-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recipe })
-        });
-        console.log('[RecipePage] generateImage: respuesta status', res.status);
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          console.error('[RecipePage] generateImage: error de servidor', errBody);
-          return;
-        }
-        const data = await res.json();
-        console.log('[RecipePage] generateImage: payload', data);
-        if (data?.img_url) {
-          setImageSrc(data.img_url);
-          const updated = { ...recipe, img_url: data.img_url } as Recipe;
-          setRecipe(updated);
-          if (typeof window !== 'undefined') {
-            console.log('[RecipePage] generateImage: guardando receta con img_url en sessionStorage');
-            sessionStorage.setItem('generatedRecipe', JSON.stringify(updated));
+    if (!recipe) return;
+    
+    // If recipe doesn't have an image and it's not an error recipe
+    const isError = recipe.titulo?.startsWith('ERROR:');
+    if (!recipe.img_url && !isError) {
+      setIsGeneratingImage(true);
+      
+      // Check periodically if the image has been generated
+      const checkForImage = () => {
+        if (typeof window !== 'undefined') {
+          const storedRecipe = sessionStorage.getItem('generatedRecipe');
+          if (storedRecipe) {
+            const parsedRecipe: Recipe = JSON.parse(storedRecipe);
+            if (parsedRecipe.img_url && parsedRecipe.img_url !== recipe.img_url) {
+              console.log('🖼️ Nueva imagen detectada en sessionStorage');
+              setImageSrc(parsedRecipe.img_url);
+              setRecipe(parsedRecipe);
+              setIsGeneratingImage(false);
+            }
           }
         }
-      } catch (e) {
-        // Mantener placeholder si falla
-        console.error('[RecipePage] generateImage: excepción lanzada', e);
-      }
-    };
+      };
 
-    generateImage();
+      // Check immediately and then every 2 seconds
+      checkForImage();
+      const interval = setInterval(checkForImage, 2000);
+      
+      // Clean up after 30 seconds (image generation timeout)
+      const timeout = setTimeout(() => {
+        console.log('⏰ Timeout: stopping image generation check');
+        setIsGeneratingImage(false);
+        clearInterval(interval);
+      }, 30000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
   }, [recipe]);
 
   const handleGoBack = () => {
@@ -187,7 +182,8 @@ const RecipePage: React.FC = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('generatedRecipe');
     }
-    router.push('/kitchen?auto=1');
+    // Usar regenerate=1 para indicar que es una regeneración (5 tokens)
+    router.push('/kitchen?auto=1&regenerate=1');
   };
 
   if (loadingRecipe || !recipe) {
@@ -250,7 +246,28 @@ const RecipePage: React.FC = () => {
             </p>
           </section>
 
-          {/* Recipe Image (or Placeholder) */}
+          {/* Image generation notification */}
+          {/*<AnimatePresence>
+            {isGeneratingImage && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center space-x-3"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full"
+                ></motion.div>
+                <p className="text-sm text-blue-700">
+                  🖼️ Generando imagen de la receta en segundo plano...
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence> */}
+
+          {/* Recipe Image (or Placeholder) with Loading State */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -265,6 +282,29 @@ const RecipePage: React.FC = () => {
               unoptimized
               onError={() => setImageSrc(placeholderImageUrl)}
             />
+            
+            {/* Loading overlay for image generation */}
+            <AnimatePresence>
+              {isGeneratingImage && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm"
+                >
+                  <div className="bg-white/90 p-4 rounded-2xl flex flex-col items-center space-y-3">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      className="w-8 h-8 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full"
+                    ></motion.div>
+                    <p className="text-sm font-medium text-gray-700 text-center">
+                      Generando imagen...
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           {/* Metadata Section */}
@@ -386,10 +426,12 @@ const RecipePage: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center mt-10 px-8 py-4 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-colors text-xl font-semibold"
-            aria-label="Volver"
+            aria-label="Generar otra receta"
           >
             <IoReloadOutline  className="w-7 h-7 mr-3" />
-            {'¡Quiero otra Receta!'}
+            <span className="flex flex-col items-center">
+              <span>¡Quiero otra Receta!</span>
+            </span>
           </motion.button>
         </div>
       </motion.div>

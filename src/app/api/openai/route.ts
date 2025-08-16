@@ -5,11 +5,32 @@
 // app/api/openai/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { auth } from '@/lib/firebase-admin';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Costo en tokens por generar una receta
+const TOKENS_PER_RECIPE = 10;
+
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticación
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Token de autenticación requerido' }, { status: 401 });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    let uid: string;
+
+    try {
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch (authError) {
+      console.error('Error al verificar el token de autenticación:', authError);
+      return NextResponse.json({ error: 'Token de autenticación inválido' }, { status: 401 });
+    }
+
     const body = await request.json();
     const {
       ingredients,
@@ -145,6 +166,9 @@ export async function POST(request: NextRequest) {
         { status: 502 }
       );
     }
+
+    // La deducción de tokens se manejará en el frontend para mantener el estado sincronizado
+    console.log(`✅ Receta generada exitosamente para usuario ${uid}. Los tokens se deducirán desde el frontend.`);
 
     return NextResponse.json(data);
   } catch (err: any) {
