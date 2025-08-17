@@ -401,7 +401,7 @@ const CulinariumForm: React.FC = () => {
 
       // STEP 4: Generate image in background (non-blocking)
       // This happens after navigation, so user doesn't wait for image
-      generateImageInBackground(recipeDataFromAI.receta, firebaseUser);
+      generateImageInBackground(recipeDataFromAI.receta, firebaseUser, savedRecipeData.id);
 
     } catch (err: any) {
       console.error('❌ Error general en el proceso:', err);
@@ -413,9 +413,9 @@ const CulinariumForm: React.FC = () => {
   };
 
   // Background image generation function
-  const generateImageInBackground = async (recipe: any, firebaseUser: any) => {
+  const generateImageInBackground = async (recipe: any, firebaseUser: any, recipeId: string) => {
     try {
-      console.log('🖼️ Iniciando generación de imagen en segundo plano...');
+      console.log('🖼️ Iniciando generación de imagen en segundo plano para receta ID:', recipeId);
       
       const imageRes = await fetch('/api/recipe-image', {
         method: 'POST',
@@ -435,13 +435,11 @@ const CulinariumForm: React.FC = () => {
           maxHeight: 1024,
         });
         
-        // Update recipe with image
+        // Update recipe with image using PUT endpoint
         const updatedRecipe = { ...recipe, img_url: compressedDataUrl };
-        
-        // Save updated recipe with image
         const saveIdToken = await firebaseUser.getIdToken();
-        const updateRecipeRes = await fetch('/api/recipes', {
-          method: 'POST',
+        const updateRecipeRes = await fetch(`/api/recipes/${recipeId}`, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ recipe: updatedRecipe, idToken: saveIdToken }),
         });
@@ -454,7 +452,8 @@ const CulinariumForm: React.FC = () => {
             sessionStorage.setItem('generatedRecipe', JSON.stringify(updatedRecipe));
           }
         } else {
-          console.warn('⚠️ No se pudo actualizar la receta con la imagen');
+          const errorData = await updateRecipeRes.json().catch(() => ({}));
+          console.warn('⚠️ No se pudo actualizar la receta con la imagen:', errorData);
         }
       } else {
         console.warn('⚠️ No se pudo generar la imagen en segundo plano');
