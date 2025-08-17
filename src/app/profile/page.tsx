@@ -50,7 +50,7 @@ function ProfileContent() {
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
   const customerPortalLink =
-    "https://billing.stripe.com/p/login/test_fZu00c7Dz0T31RZg4QcQU00";
+    "https://billing.stripe.com/p/login/7sYdRbbnH2L2fnNd9793y00";
 
   const handleLogout = async () => {
     try {

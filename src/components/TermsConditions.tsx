@@ -63,6 +63,7 @@ const TermsContent = () => {
               <li><strong>Suscripción:</strong> por suscripción mensual se otorgan 300 tokens + funcionalidades extra. Los tokens de suscripción <em>expiran</em> al finalizar cada periodo de suscripción (no son permanentes).</li>
               <li><strong>Packs de tokens (1–6):</strong> paquetes de tokens que se compran por separado; esos tokens extra permanecen disponibles mientras el servicio exista.</li>
               <li><strong>Orden de gasto:</strong> los tokens de suscripción se consumen antes que los tokens comprados en packs.</li>
+              <li><strong>Costos de generación:</strong> generar una nueva receta cuesta 10 tokens, regenerar una receta existente cuesta 5 tokens.</li>
             </ul>
           </section>
 

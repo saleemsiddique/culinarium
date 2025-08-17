@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
   ReactNode,
 } from "react";
 import {
@@ -59,6 +60,9 @@ interface UserContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateUserName: (newName: string) => Promise<void>;
+  deductTokens: (amount: number) => Promise<void>;
+  hasEnoughTokens: (amount: number) => boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -67,6 +71,49 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // ✅ Función para verificar y resetear tokens mensuales
+  const checkAndResetMonthlyTokens = async (userData: CustomUser): Promise<CustomUser> => {
+    // Solo verificar para usuarios sin suscripción activa
+    if (userData.isSubscribed && (userData.subscriptionStatus === 'active' || userData.subscriptionStatus === 'cancel_at_period_end')) {
+      return userData;
+    }
+
+    const now = Timestamp.now();
+    const resetDate = userData.tokens_reset_date;
+    
+    // 30 días en milisegundos
+    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+    const timeDiff = now.toMillis() - resetDate.toMillis();
+    
+    if (timeDiff >= thirtyDaysInMs) {
+      try {
+        const userDocRef = doc(db, "user", userData.uid);
+        const newResetDate = Timestamp.now();
+        
+        await updateDoc(userDocRef, {
+          monthly_tokens: 50,
+          tokens_reset_date: newResetDate,
+        });
+        
+        console.log(`Tokens reseteados para usuario: ${userData.email}`);
+        
+        // Retornar datos actualizados
+        return {
+          ...userData,
+          monthly_tokens: 50,
+          tokens_reset_date: newResetDate,
+        };
+        
+      } catch (error) {
+        console.error("Error al resetear tokens:", error);
+        // Si falla el update, devolver datos originales
+        return userData;
+      }
+    }
+    
+    return userData;
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
@@ -77,8 +124,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          const docData = snapshot.docs[0].data() as CustomUser;
+          let docData = snapshot.docs[0].data() as CustomUser;
           docData.uid = snapshot.docs[0].id;
+
+          // ✅ Verificar y resetear tokens si es necesario
+          docData = await checkAndResetMonthlyTokens(docData);
 
           setUser(docData);
         } else {
@@ -88,10 +138,65 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
       setLoading(false);
+
+      
     });
 
     return () => unsubscribe();
   }, []);
+
+  // 🆕 Función para refrescar los datos del usuario desde la base de datos
+  const refreshUser = useCallback(async () => {
+    if (!firebaseUser?.email) {
+      console.warn("No hay usuario autenticado para refrescar");
+      return;
+    }
+
+    try {
+      const usersRef = collection(db, "user");
+      const q = query(usersRef, where("email", "==", firebaseUser.email));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data() as CustomUser;
+        docData.uid = snapshot.docs[0].id;
+
+        setUser(docData);
+        console.log("✅ Datos de usuario refrescados desde la base de datos");
+      } else {
+        console.warn("No se encontró el usuario en la base de datos");
+      }
+    } catch (error) {
+      console.error("Error al refrescar datos del usuario:", error);
+    }
+  }, [firebaseUser?.email]);
+
+  // Listener para eventos de actualización de tokens (ej: después de compras)
+  useEffect(() => {
+    const handleTokenUpdate = () => {
+      console.log("🔄 Evento de actualización de tokens detectado, refrescando usuario...");
+      refreshUser().catch(console.error);
+    };
+
+    const handleVisibilityChange = () => {
+      // Refrescar cuando el usuario regrese a la pestaña (útil después de completar compras en Stripe)
+      if (!document.hidden && firebaseUser?.email) {
+        console.log("🔄 Usuario regresó a la pestaña, refrescando datos...");
+        setTimeout(() => {
+          refreshUser().catch(console.error);
+        }, 1000); // Delay para asegurar que los webhooks se hayan procesado
+      }
+    };
+
+    // Escuchar eventos personalizados de actualización de tokens
+    window.addEventListener('token_update', handleTokenUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('token_update', handleTokenUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [firebaseUser?.email, refreshUser]);
 
   const login = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
@@ -103,8 +208,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     if (snapshot.empty) throw new Error("Usuario no encontrado");
 
-    const docData = snapshot.docs[0].data() as CustomUser;
+    let docData = snapshot.docs[0].data() as CustomUser;
     docData.uid = snapshot.docs[0].id;
+
+    // ✅ Verificar y resetear tokens si es necesario
+    docData = await checkAndResetMonthlyTokens(docData);
 
     setUser(docData);
   };
@@ -120,6 +228,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const id = userCredential.user.uid;
       const token = await userCredential.user.getIdToken();
 
+      
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
         email,
@@ -129,7 +238,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         extra_tokens: 0,
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
-        monthly_tokens: 30,
+        monthly_tokens: 50,
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "cancelled",
@@ -246,7 +355,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         extra_tokens: 0,
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
-        monthly_tokens: 30,
+        monthly_tokens: 50,
         stripeCustomerId: "",
         subscriptionId: "",
         subscriptionStatus: "cancelled",
@@ -260,6 +369,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       userData = snapshot.docs[0].data() as CustomUser;
       // ✅ Añadir el ID del documento
       userData.uid = snapshot.docs[0].id;
+
+      // ✅ Verificar y resetear tokens si es necesario (solo para usuarios existentes)
+      userData = await checkAndResetMonthlyTokens(userData);
     }
 
     setUser(userData);
@@ -301,6 +413,61 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 🆕 Función para verificar si el usuario tiene suficientes tokens
+  const hasEnoughTokens = (amount: number) => {
+    if (!user) return false;
+    const totalTokens = (user.monthly_tokens || 0) + (user.extra_tokens || 0);
+    return totalTokens >= amount;
+  };
+
+  // 🆕 Función para descontar tokens
+  const deductTokens = async (amount: number) => {
+    if (!user || !firebaseUser) {
+      throw new Error("No hay usuario autenticado");
+    }
+
+    if (!hasEnoughTokens(amount)) {
+      throw new Error("Tokens insuficientes");
+    }
+
+    try {
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/deduct-tokens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al descontar tokens');
+      }
+
+      const { updatedUser } = await response.json();
+      
+      // Actualizar el estado local con los nuevos valores de tokens
+      setUser((prevUser) => {
+        if (!prevUser) return null;
+        return {
+          ...prevUser,
+          monthly_tokens: updatedUser.monthly_tokens,
+          extra_tokens: updatedUser.extra_tokens,
+        };
+      });
+
+      // También refrescar los datos desde la base de datos para asegurar sincronización
+      setTimeout(() => {
+        refreshUser().catch(console.error);
+      }, 100); // Pequeño delay para asegurar que la base de datos se haya actualizado
+    } catch (error) {
+      console.error("Error al descontar tokens:", error);
+      throw error;
+    }
+  };
+
   const value: UserContextType = {
     user,
     firebaseUser,
@@ -310,6 +477,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     loginWithGoogle,
     logout,
     updateUserName,
+    deductTokens,
+    hasEnoughTokens,
+    refreshUser,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
