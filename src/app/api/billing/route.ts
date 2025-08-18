@@ -36,8 +36,6 @@ export async function GET(request: Request) {
       limit: 10, // Puedes ajustar el límite según tus necesidades
     });
 
-    console.log(invoices.data);
-
     // 4. Devolver solo los datos de las facturas
     return NextResponse.json({
       invoices: invoices.data,
