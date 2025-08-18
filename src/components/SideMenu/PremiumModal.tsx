@@ -137,7 +137,7 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                   Cancelar
                 </button>
                 <EmbeddedCheckoutButton
-                  priceId={"price_1RwHJCRpBiBhmezm4D1fPQt5"}
+                  priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
                   user={user}
                 />
               </div>

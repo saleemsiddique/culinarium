@@ -15,7 +15,7 @@ import { useUser } from "@/context/user-context";
 
 const BillingContent = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Se inicia en true para mostrar el spinner
   const { user } = useUser();
 
   useEffect(() => {
@@ -28,19 +28,15 @@ const BillingContent = () => {
     const fetchBillingData = async () => {
       setLoading(true);
       try {
-        // Llama a tu endpoint de API para obtener las facturas
         const res = await fetch(`/api/billing?userId=${user.uid}`);
-
         if (!res.ok) {
-          // Manejar errores de la respuesta HTTP
           throw new Error("Failed to fetch billing data");
         }
-
         const data = await res.json();
         setInvoices(data.invoices);
       } catch (error) {
         console.error("Error fetching billing data:", error);
-        setInvoices([]); // En caso de error, mostramos una lista vacía
+        setInvoices([]);
       } finally {
         setLoading(false);
       }
@@ -75,18 +71,18 @@ const BillingContent = () => {
     }
   };
 
-  const handleDownloadInvoice = async (invoiceId: string) => {
-    setLoading(true);
-    setTimeout(() => {
-      alert(`Simulación: Descargando factura ${invoiceId}`);
-      setLoading(false);
-    }, 1000);
+  const handleDownloadInvoice = (invoiceId: string) => {
+    const invoice = invoices.find(inv => inv.id === invoiceId);
+    if (invoice && invoice.invoice_pdf) {
+      window.open(invoice.invoice_pdf, '_blank');
+    } else {
+      alert("URL de la factura no encontrada.");
+    }
   };
 
   return (
     <div className="h-full w-full min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto mt-[100px]">
-        {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -98,9 +94,13 @@ const BillingContent = () => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {invoices.length > 0 ? (
+          {loading ? (
+            <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando facturas...</p>
+            </div>
+          ) : invoices.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -128,13 +128,16 @@ const BillingContent = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                          {new Date(invoice.date).toLocaleDateString("es-ES")}
+                          {/* Usa invoice.created, que es un timestamp */}
+                          {new Date(invoice.created * 1000).toLocaleDateString("es-ES")}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div>
-                          {invoice.description}
-                          {invoice.subscription && (
+                          {/* Revisa si invoice.description existe, si no, usa el de la línea de la factura */}
+                          {invoice.description || invoice.lines?.data?.[0]?.description || 'N/A'}
+                          {/* Verificación para la suscripción */}
+                          {invoice.lines?.data?.[0]?.price?.type === 'recurring' && (
                             <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
                               Suscripción
                             </span>
@@ -144,8 +147,10 @@ const BillingContent = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center">
                           <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                          {"0"}{" "}
-                          {invoice.currency.toUpperCase()}
+                          {/* Usa amount_due y el operador ?. */}
+                          {(invoice.amount_due / 100)?.toFixed(2) ?? '0.00'}{" "}
+                          {/* La moneda está en minúsculas */}
+                          {invoice.currency?.toUpperCase()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -187,8 +192,7 @@ const BillingContent = () => {
             </div>
           )}
         </div>
-
-        {/* Loading Overlay */}
+        
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 flex items-center space-x-3">

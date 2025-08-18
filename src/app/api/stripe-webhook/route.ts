@@ -56,15 +56,15 @@ export async function POST(request: NextRequest) {
 
       const PRICE_TO_TOKENS = {
         //One Tier Sub
-        price_1RwHJCRpBiBhmezm4D1fPQt5: {
-          type: "subscription",
+        price_1RrJVF2LSjDC5txTR6lOQslg: {  
+          type: "subscription", 
           tokens: 300,
           name: "Culinarium premium",
           isSubscription: true,
           price: 7.99,
         },
         //Extra Tokens
-        price_1RwHKLRpBiBhmezmK1AybT5C: {
+        price_1RrL5F2LSjDC5txTL3uBh13K: {  
           type: "tokens",
           tokens: 30,
           name: "Pack 30 tokens",
