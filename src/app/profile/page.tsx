@@ -71,7 +71,7 @@ function ProfileContent() {
 
   const handleCustomerPortal = async () => {
     window.location.href =
-      customerPortalLink + "?prefilled_email=" + user?.email;
+      customerPortalLink;
   };
 
   // Función para guardar el nuevo nombre

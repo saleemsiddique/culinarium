@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "hosted",
-      payment_method_types: ["card", "amazon_pay", "revolut_pay", "paypal"],
+      payment_method_types: isSubscription ? ["card", "amazon_pay", "revolut_pay"] : ["card", "amazon_pay", "revolut_pay", "paypal"],
       customer: customerId, // ¡ESTA ES LA LÍNEA CLAVE!
       line_items: [
         {
