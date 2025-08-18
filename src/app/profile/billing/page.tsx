@@ -91,20 +91,28 @@ const BillingContent = () => {
   };
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
+    if (window.confirm("¿Estás seguro de que quieres eliminar esta tarjeta?")) {
       setLoading(true);
       try {
-        // Lógica para eliminar la tarjeta en tu backend
-        // await fetch(`/api/payment-methods?id=${paymentMethodId}`, { method: 'DELETE' });
-        
-        // Simulación:
-        setTimeout(() => {
-            setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
-            alert("Tarjeta eliminada correctamente.");
-            setLoading(false);
-        }, 500);
+        const res = await fetch(
+          `/api/payment-methods/delete?userId=${user?.uid}&paymentMethodId=${paymentMethodId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to delete payment method");
+        }
+
+        setPaymentMethods((prev) =>
+          prev.filter((pm) => pm.id !== paymentMethodId)
+        );
+        alert("Tarjeta eliminada correctamente.");
       } catch (error) {
         console.error("Error deleting payment method:", error);
+        alert("Error al eliminar la tarjeta.");
+      } finally {
         setLoading(false);
       }
     }
@@ -113,23 +121,28 @@ const BillingContent = () => {
   const handleSetDefaultPaymentMethod = async (paymentMethodId: string) => {
     setLoading(true);
     try {
-        // Lógica para establecer la tarjeta como predeterminada en tu backend
-        // await fetch(`/api/payment-methods?id=${paymentMethodId}`, { method: 'PUT' });
+      const res = await fetch(
+        `/api/payment-methods/default?userId=${user?.uid}&paymentMethodId=${paymentMethodId}`,
+        {
+          method: "PUT",
+        }
+      );
 
-        // Simulación:
-        setTimeout(() => {
-            setPaymentMethods(prev =>
-                prev.map(pm => ({
-                    ...pm,
-                    is_default: pm.id === paymentMethodId
-                }))
-            );
-            alert("Tarjeta establecida como predeterminada.");
-            setLoading(false);
-        }, 500);
+      if (!res.ok) {
+        throw new Error("Failed to set default payment method");
+      }
+
+      setPaymentMethods((prev) =>
+        prev.map((pm) => ({
+          ...pm,
+          is_default: pm.id === paymentMethodId,
+        }))
+      );
     } catch (error) {
-        console.error("Error setting default payment method:", error);
-        setLoading(false);
+      console.error("Error setting default payment method:", error);
+      alert("Error al establecer la tarjeta predeterminada.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -143,16 +156,19 @@ const BillingContent = () => {
       alert("Simulación: Tarjeta añadida correctamente.");
       const newDummyCard = {
         id: `pm_${Math.random().toString(36).substring(7)}`,
-        type: 'card',
+        type: "card",
         card: {
-          brand: 'visa',
-          last4: '9876',
+          brand: "visa",
+          last4: "9876",
           exp_month: 1,
-          exp_year: 2029
+          exp_year: 2029,
         },
-        is_default: true
+        is_default: true,
       };
-      setPaymentMethods(prev => [...prev.map(pm => ({...pm, is_default: false})), newDummyCard]);
+      setPaymentMethods((prev) => [
+        ...prev.map((pm) => ({ ...pm, is_default: false })),
+        newDummyCard,
+      ]);
       setShowAddCard(false);
       setLoading(false);
     }, 1500);
@@ -194,7 +210,7 @@ const BillingContent = () => {
     </div>
   );
 
-    return (
+  return (
     <div className="h-full w-full min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto mt-[100px]">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
@@ -206,7 +222,7 @@ const BillingContent = () => {
               Gestiona tus facturas y métodos de pago
             </p>
           </div>
-          
+
           <div className="border-t border-gray-200">
             <nav className="flex space-x-8 px-6">
               <button
@@ -245,12 +261,12 @@ const BillingContent = () => {
                 Todas tus facturas y pagos realizados
               </p>
             </div>
-            
+
             {loading ? (
-                <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Cargando facturas...</p>
-                </div>
+              <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Cargando facturas...</p>
+              </div>
             ) : invoices.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -279,13 +295,18 @@ const BillingContent = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center">
                             <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                            {new Date(invoice.created * 1000).toLocaleDateString("es-ES")}
+                            {new Date(
+                              invoice.created * 1000
+                            ).toLocaleDateString("es-ES")}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
                           <div>
-                            {invoice.description || invoice.lines?.data?.[0]?.description || 'N/A'}
-                            {invoice.lines?.data?.[0]?.price?.type === 'recurring' && (
+                            {invoice.description ||
+                              invoice.lines?.data?.[0]?.description ||
+                              "N/A"}
+                            {invoice.lines?.data?.[0]?.price?.type ===
+                              "recurring" && (
                               <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
                                 Suscripción
                               </span>
@@ -295,7 +316,7 @@ const BillingContent = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center">
                             <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                            {(invoice.amount_due / 100)?.toFixed(2) ?? '0.00'}{" "}
+                            {(invoice.amount_due / 100)?.toFixed(2) ?? "0.00"}{" "}
                             {invoice.currency?.toUpperCase()}
                           </div>
                         </td>
@@ -373,16 +394,18 @@ const BillingContent = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-8 bg-gradient-to-r rounded flex items-center justify-center ${
-                          pm.card.brand === 'visa'
-                            ? 'from-blue-600 to-blue-700'
-                            : pm.card.brand === 'mastercard'
-                            ? 'from-red-500 to-red-600'
-                            : 'from-gray-400 to-gray-500'
-                        }`}>
+                        <div
+                          className={`w-12 h-8 bg-gradient-to-r rounded flex items-center justify-center ${
+                            pm.card.brand === "visa"
+                              ? "from-blue-600 to-blue-700"
+                              : pm.card.brand === "mastercard"
+                              ? "from-red-500 to-red-600"
+                              : "from-gray-400 to-gray-500"
+                          }`}
+                        >
                           <CreditCard className="w-5 h-5 text-white" />
                         </div>
-                        
+
                         <div>
                           <div className="flex items-center space-x-2">
                             <span className="font-medium text-gray-900 capitalize">
@@ -398,7 +421,9 @@ const BillingContent = () => {
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Caduca {pm.card.exp_month.toString().padStart(2, '0')}/{pm.card.exp_year}
+                            Caduca{" "}
+                            {pm.card.exp_month.toString().padStart(2, "0")}/
+                            {pm.card.exp_year}
                           </div>
                         </div>
                       </div>
@@ -413,16 +438,20 @@ const BillingContent = () => {
                             Establecer como predeterminada
                           </button>
                         )}
-                        
+
                         <button
                           onClick={() => handleDeletePaymentMethod(pm.id)}
                           disabled={loading || pm.is_default}
                           className={`p-2 rounded-md transition-colors ${
                             pm.is_default
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-red-600 hover:bg-red-50'
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-red-600 hover:bg-red-50"
                           }`}
-                          title={pm.is_default ? 'No puedes eliminar la tarjeta predeterminada' : 'Eliminar tarjeta'}
+                          title={
+                            pm.is_default
+                              ? "No puedes eliminar la tarjeta predeterminada"
+                              : "Eliminar tarjeta"
+                          }
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -451,7 +480,7 @@ const BillingContent = () => {
             </div>
           </div>
         )}
-        
+
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
