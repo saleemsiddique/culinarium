@@ -49,8 +49,6 @@ function ProfileContent() {
   });
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
-  const customerPortalLink =
-    "https://billing.stripe.com/p/login/7sYdRbbnH2L2fnNd9793y00";
 
   const handleLogout = async () => {
     try {
@@ -70,8 +68,11 @@ function ProfileContent() {
   };
 
   const handleCustomerPortal = async () => {
-    window.location.href =
-      customerPortalLink;
+    try {
+      router.push("/profile/billing");
+    } catch (error) {
+      console.error("Error al entrar en billing:", error);
+    }
   };
 
   // Función para guardar el nuevo nombre

@@ -62,6 +62,7 @@ export async function POST(request: Request) {
           price: body.priceId,
         },
       ],
+       ...(isSubscription ? {} : { invoice_creation: { enabled: true } }),
       mode: isSubscription ? "subscription" : "payment",
       success_url:  `${request.headers.get(
         "origin"
