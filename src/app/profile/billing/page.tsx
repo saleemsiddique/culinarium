@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  CreditCard,
   Download,
+  Plus,
+  Trash2,
   Calendar,
   DollarSign,
   FileText,
+  Settings,
   CheckCircle,
   XCircle,
   Clock,
@@ -14,10 +18,14 @@ import {
 import { useUser } from "@/context/user-context";
 
 const BillingContent = () => {
+  const [activeTab, setActiveTab] = useState("invoices");
+
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true); // Se inicia en true para mostrar el spinner
   const { user } = useUser();
-
+  const [showAddCard, setShowAddCard] = useState(false);
   useEffect(() => {
     // Si no hay un ID de usuario, no hacemos la llamada
     if (!user?.uid) {
@@ -33,10 +41,12 @@ const BillingContent = () => {
           throw new Error("Failed to fetch billing data");
         }
         const data = await res.json();
-        setInvoices(data.invoices);
+        setInvoices(data.invoices || []);
+        setPaymentMethods(data.paymentMethods || []);
       } catch (error) {
         console.error("Error fetching billing data:", error);
         setInvoices([]);
+        setPaymentMethods([]);
       } finally {
         setLoading(false);
       }
@@ -72,126 +82,375 @@ const BillingContent = () => {
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
-    const invoice = invoices.find(inv => inv.id === invoiceId);
+    const invoice = invoices.find((inv) => inv.id === invoiceId);
     if (invoice && invoice.invoice_pdf) {
-      window.open(invoice.invoice_pdf, '_blank');
+      window.open(invoice.invoice_pdf, "_blank");
     } else {
       alert("URL de la factura no encontrada.");
     }
   };
 
-  return (
+  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
+      setLoading(true);
+      try {
+        // Lógica para eliminar la tarjeta en tu backend
+        // await fetch(`/api/payment-methods?id=${paymentMethodId}`, { method: 'DELETE' });
+        
+        // Simulación:
+        setTimeout(() => {
+            setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
+            alert("Tarjeta eliminada correctamente.");
+            setLoading(false);
+        }, 500);
+      } catch (error) {
+        console.error("Error deleting payment method:", error);
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleSetDefaultPaymentMethod = async (paymentMethodId: string) => {
+    setLoading(true);
+    try {
+        // Lógica para establecer la tarjeta como predeterminada en tu backend
+        // await fetch(`/api/payment-methods?id=${paymentMethodId}`, { method: 'PUT' });
+
+        // Simulación:
+        setTimeout(() => {
+            setPaymentMethods(prev =>
+                prev.map(pm => ({
+                    ...pm,
+                    is_default: pm.id === paymentMethodId
+                }))
+            );
+            alert("Tarjeta establecida como predeterminada.");
+            setLoading(false);
+        }, 500);
+    } catch (error) {
+        console.error("Error setting default payment method:", error);
+        setLoading(false);
+    }
+  };
+
+  const handleAddCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    // Simulación:
+    setTimeout(() => {
+      alert("Simulación: Tarjeta añadida correctamente.");
+      const newDummyCard = {
+        id: `pm_${Math.random().toString(36).substring(7)}`,
+        type: 'card',
+        card: {
+          brand: 'visa',
+          last4: '9876',
+          exp_month: 1,
+          exp_year: 2029
+        },
+        is_default: true
+      };
+      setPaymentMethods(prev => [...prev.map(pm => ({...pm, is_default: false})), newDummyCard]);
+      setShowAddCard(false);
+      setLoading(false);
+    }, 1500);
+  };
+
+  const AddCardForm = () => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <h3 className="text-lg font-semibold mb-4">Añadir nueva tarjeta</h3>
+      <form>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Número de tarjeta
+            </label>
+            <input
+              type="text"
+              className="p-3 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="•••• •••• •••• ••••"
+            />
+          </div>
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowAddCard(false)}
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+            >
+              Añadir tarjeta
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+
+    return (
     <div className="h-full w-full min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto mt-[100px]">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Historial de Facturación
+              Portal de Facturación
             </h1>
             <p className="text-gray-600">
-              Todas tus facturas y pagos realizados.
+              Gestiona tus facturas y métodos de pago
             </p>
+          </div>
+          
+          <div className="border-t border-gray-200">
+            <nav className="flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab("invoices")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "invoices"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <FileText className="w-4 h-4 inline mr-2" />
+                Facturas
+              </button>
+              <button
+                onClick={() => setActiveTab("payment-methods")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "payment-methods"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <CreditCard className="w-4 h-4 inline mr-2" />
+                Métodos de pago
+              </button>
+            </nav>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {loading ? (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Cargando facturas...</p>
-            </div>
-          ) : invoices.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Concepto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Importe
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Factura
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {invoices.map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                          {/* Usa invoice.created, que es un timestamp */}
-                          {new Date(invoice.created * 1000).toLocaleDateString("es-ES")}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div>
-                          {/* Revisa si invoice.description existe, si no, usa el de la línea de la factura */}
-                          {invoice.description || invoice.lines?.data?.[0]?.description || 'N/A'}
-                          {/* Verificación para la suscripción */}
-                          {invoice.lines?.data?.[0]?.price?.type === 'recurring' && (
-                            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
-                              Suscripción
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
-                          {/* Usa amount_due y el operador ?. */}
-                          {(invoice.amount_due / 100)?.toFixed(2) ?? '0.00'}{" "}
-                          {/* La moneda está en minúsculas */}
-                          {invoice.currency?.toUpperCase()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center">
-                          {getStatusIcon(invoice.status)}
-                          <span className="ml-2">
-                            {getStatusText(invoice.status)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleDownloadInvoice(invoice.id)}
-                          disabled={loading || invoice.status !== "paid"}
-                          className={`inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md transition-colors ${
-                            invoice.status === "paid"
-                              ? "text-gray-700 bg-white hover:bg-gray-50"
-                              : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                          }`}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          PDF
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No tienes facturas disponibles
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Las facturas aparecerán aquí después de tu primer pago.
+        {activeTab === "invoices" && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Historial de facturas
+              </h2>
+              <p className="text-gray-600 mt-1">
+                Todas tus facturas y pagos realizados
               </p>
             </div>
-          )}
-        </div>
+            
+            {loading ? (
+                <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Cargando facturas...</p>
+                </div>
+            ) : invoices.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Concepto
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Importe
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Factura
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {invoices.map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                            {new Date(invoice.created * 1000).toLocaleDateString("es-ES")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          <div>
+                            {invoice.description || invoice.lines?.data?.[0]?.description || 'N/A'}
+                            {invoice.lines?.data?.[0]?.price?.type === 'recurring' && (
+                              <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
+                                Suscripción
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="flex items-center">
+                            <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
+                            {(invoice.amount_due / 100)?.toFixed(2) ?? '0.00'}{" "}
+                            {invoice.currency?.toUpperCase()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex items-center">
+                            {getStatusIcon(invoice.status)}
+                            <span className="ml-2">
+                              {getStatusText(invoice.status)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleDownloadInvoice(invoice.id)}
+                            disabled={loading || invoice.status !== "paid"}
+                            className={`inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md transition-colors ${
+                              invoice.status === "paid"
+                                ? "text-gray-700 bg-white hover:bg-gray-50"
+                                : "text-gray-400 bg-gray-100 cursor-not-allowed"
+                            }`}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No tienes facturas disponibles
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Las facturas aparecerán aquí después de tu primer pago.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "payment-methods" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Métodos de pago
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Gestiona tus tarjetas de crédito y débito
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAddCard(true)}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Añadir tarjeta
+                </button>
+              </div>
+            </div>
+
+            {showAddCard && <AddCardForm />}
+
+            <div className="space-y-4">
+              {paymentMethods.length > 0 ? (
+                paymentMethods.map((pm) => (
+                  <div
+                    key={pm.id}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-8 bg-gradient-to-r rounded flex items-center justify-center ${
+                          pm.card.brand === 'visa'
+                            ? 'from-blue-600 to-blue-700'
+                            : pm.card.brand === 'mastercard'
+                            ? 'from-red-500 to-red-600'
+                            : 'from-gray-400 to-gray-500'
+                        }`}>
+                          <CreditCard className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium text-gray-900 capitalize">
+                              {pm.card.brand}
+                            </span>
+                            <span className="text-gray-600">
+                              •••• {pm.card.last4}
+                            </span>
+                            {pm.is_default && (
+                              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                Predeterminada
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Caduca {pm.card.exp_month.toString().padStart(2, '0')}/{pm.card.exp_year}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {!pm.is_default && (
+                          <button
+                            onClick={() => handleSetDefaultPaymentMethod(pm.id)}
+                            disabled={loading}
+                            className="px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            Establecer como predeterminada
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => handleDeletePaymentMethod(pm.id)}
+                          disabled={loading || pm.is_default}
+                          className={`p-2 rounded-md transition-colors ${
+                            pm.is_default
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-red-600 hover:bg-red-50'
+                          }`}
+                          title={pm.is_default ? 'No puedes eliminar la tarjeta predeterminada' : 'Eliminar tarjeta'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                  <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No tienes métodos de pago
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Añade una tarjeta para continuar con tus pagos
+                  </p>
+                  <button
+                    onClick={() => setShowAddCard(true)}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Añadir primera tarjeta
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
