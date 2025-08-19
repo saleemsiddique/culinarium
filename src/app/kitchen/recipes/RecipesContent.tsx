@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
@@ -39,7 +39,11 @@ const RecipePage: React.FC = () => {
   const [loadingRecipe, setLoadingRecipe] = useState(true);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
-  const placeholderImageUrl = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`;
+  // Usar useMemo para que placeholderImageUrl no cambie en cada render
+  const placeholderImageUrl = useMemo(() => 
+    `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`, 
+    []
+  );
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
 
   // Helper to get cuisine style icon
@@ -119,7 +123,7 @@ const RecipePage: React.FC = () => {
         setLoadingRecipe(false);
       }
     }
-  }, [router, placeholderImageUrl, searchParams]);
+  }, [router, searchParams, placeholderImageUrl]); // Ahora placeholderImageUrl es estable
 
   // Watch for image updates from background generation
   useEffect(() => {
@@ -245,27 +249,6 @@ const RecipePage: React.FC = () => {
               {recipe.descripcion}
             </p>
           </section>
-
-          {/* Image generation notification */}
-          {/*<AnimatePresence>
-            {isGeneratingImage && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center space-x-3"
-              >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                  className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full"
-                ></motion.div>
-                <p className="text-sm text-blue-700">
-                  🖼️ Generando imagen de la receta en segundo plano...
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
 
           {/* Recipe Image (or Placeholder) with Loading State */}
           <motion.div
