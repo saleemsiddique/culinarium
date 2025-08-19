@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useUser } from "@/context/user-context";
+import AddCardComponent from "@/components/AddCardComponent";
 
 const BillingContent = () => {
   const [activeTab, setActiveTab] = useState("invoices");
@@ -145,70 +146,6 @@ const BillingContent = () => {
       setLoading(false);
     }
   };
-
-  const handleAddCard = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setLoading(true);
-
-    // Simulación:
-    setTimeout(() => {
-      alert("Simulación: Tarjeta añadida correctamente.");
-      const newDummyCard = {
-        id: `pm_${Math.random().toString(36).substring(7)}`,
-        type: "card",
-        card: {
-          brand: "visa",
-          last4: "9876",
-          exp_month: 1,
-          exp_year: 2029,
-        },
-        is_default: true,
-      };
-      setPaymentMethods((prev) => [
-        ...prev.map((pm) => ({ ...pm, is_default: false })),
-        newDummyCard,
-      ]);
-      setShowAddCard(false);
-      setLoading(false);
-    }, 1500);
-  };
-
-  const AddCardForm = () => (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold mb-4">Añadir nueva tarjeta</h3>
-      <form>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Número de tarjeta
-            </label>
-            <input
-              type="text"
-              className="p-3 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="•••• •••• •••• ••••"
-            />
-          </div>
-          <div className="flex space-x-3">
-            <button
-              type="button"
-              onClick={() => setShowAddCard(false)}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-            >
-              Añadir tarjeta
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
 
   return (
     <div className="h-full w-full min-h-screen bg-gray-50 p-4">
@@ -383,8 +320,13 @@ const BillingContent = () => {
               </div>
             </div>
 
-            {showAddCard && <AddCardForm />}
-
+            {showAddCard && user?.stripeCustomerId && (
+              <AddCardComponent
+                customerId={user.stripeCustomerId}
+                setPaymentMethods={setPaymentMethods}
+                setShowAddCard={setShowAddCard}
+              />
+            )}
             <div className="space-y-4">
               {paymentMethods.length > 0 ? (
                 paymentMethods.map((pm) => (

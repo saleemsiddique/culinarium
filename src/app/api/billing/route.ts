@@ -54,8 +54,6 @@ export async function GET(request: Request) {
       is_default: pm.id === defaultPaymentMethodId,
     }));
 
-    console.log("Card", formattedPaymentMethods);
-
     return NextResponse.json({
       invoices: invoices.data,
       paymentMethods: formattedPaymentMethods,
