@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useState } from 'react';
@@ -117,7 +119,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
         </div>
 
         {/* Contenido centrado */}
-        <div className="flex flex-col items-center justify-center gap-6 p-4 flex-grow">
+        <div className="flex flex-col items-center justify-center gap-3 p-4 flex-grow">
           <MobileMenuItem href="/kitchen" icon={<Plus />} label="Nueva Receta" onClick={() => setDrawerOpen(false)} />
           <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Mis Recetas" onClick={() => setDrawerOpen(false)} />
           <MobileMenuItem href="/profile" icon={<User />} label="Mi Perfil" onClick={() => setDrawerOpen(false)} />
@@ -150,13 +152,29 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                   setDrawerOpen(false); // Cierra el cajón al abrir el modal
                 }}
                 className="w-full py-3 rounded-full text-lg font-bold shadow-lg transition-all duration-300
-                            bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                            hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)] text-center"
+                          bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
+                          hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)] text-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 role="button"
               >
                 ¡Comprar Más Tokens!
+              </motion.button>
+
+              {/* Nuevo: Botón para el modal de Premium */}
+              <motion.button
+                onClick={() => {
+                  onOpenPremium();
+                  setDrawerOpen(false); // Cierra el cajón al abrir el modal
+                }}
+                className="w-full py-3 mt-4 rounded-full text-lg font-bold shadow-lg transition-all duration-300
+                          bg-gradient-to-r from-yellow-400 to-yellow-600 text-white
+                          hover:from-[var(--foreground)] hover:to-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--foreground)] text-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                role="button"
+              >
+                {user?.isSubscribed ? 'Tu Plan Premium' : '¡Hacerme Premium!'}
               </motion.button>
             </motion.div>
           )}
@@ -181,44 +199,62 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
         {/* Espacio flexible para empujar controles abajo */}
         <div className="flex-1" />
 
-        {/* Sección inferior: tokens / premium / perfil */}
+        {/* Sección inferior: tokens / premium */}
         <div className="w-full px-3 space-y-4">
           {user ? (
-            <>
-              {/* Botones con el estilo que pediste */}
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={onOpenPremium}
-                  className={`cursor-pointer w-16 h-16 flex items-center justify-center rounded-lg hover:bg-gray-100 transition
-                    ${user?.isSubscribed ? "bg-gradient-to-r from-orange-500 to-yellow-400 shadow-lg border-transparent" : "bg-gray-50 border-dashed border-amber-400 hover:bg-amber-50"}
-                  `}
-                  title="Premium"
-                  aria-label="Abrir Premium"
-                >
-                  <Crown className={`w-6 h-6 ${user?.isSubscribed ? "text-white" : "text-amber-500"}`} />
-                </button>
+            <div className="flex flex-col items-center gap-3">
 
-                <button
-                  onClick={onOpenTokens}
-                  className="cursor-pointer w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex flex-col items-center justify-center relative group"
-                  title="Ver Tokens"
-                  aria-label="Ver Tokens"
-                >
-                  <Zap className="w-6 h-6 text-white mb-0.5" />
-                  {!user?.isSubscribed && remainingTokens <= 5 && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                  )}
-                </button>
-              </div>
-
-              {/* Perfil como Link sin <a> dentro */}
-              <Link
-                href="/profile"
-                className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--background)] border border-[var(--primary)] hover:bg-[var(--primary)]/5 transition"
+              {/* Botón de Tokens */}
+              <motion.button
+                onClick={onOpenTokens}
+                className="relative w-16 h-16 rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-105 group"
+                title="Ver Tokens"
+                aria-label="Ver Tokens"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Perfil
-              </Link>
-            </>
+                {/* Fondo animado */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--highlight)] to-[var(--highlight-dark)]" />
+                
+                {/* Contenido del botón */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--text2)] transition-opacity duration-300 group-hover:opacity-0 z-10">
+                  <Zap className="w-6 h-6" />
+                  <span className="mt-1 text-xs font-semibold">{remainingTokens}</span>
+                </div>
+                
+                {/* Tooltip en hover */}
+                <span className="absolute inset-0 flex items-center justify-center text-[var(--text2)] text-xs font-semibold opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
+                  Comprar
+                </span>
+                
+                {/* Indicador de tokens bajos */}
+                {!user?.isSubscribed && remainingTokens <= 5 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse z-20" />
+                )}
+              </motion.button>
+              
+              {/* Botón de Premium */}
+              <motion.button
+                onClick={onOpenPremium}
+                className={`relative w-16 h-16 rounded-xl border-2 transition-all duration-300 hover:scale-105 group ${
+                  user?.isSubscribed 
+                    ? "border-[var(--highlight-dark)] bg-gradient-to-br from-[var(--highlight)]/30 to-[var(--highlight-dark)]/30" 
+                    : "border-dashed border-[var(--highlight)]"
+                }`}
+                title="Premium"
+                aria-label="Abrir Premium"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="relative flex flex-col items-center justify-center text-[var(--highlight)]">
+                  <Crown className="w-6 h-6" />
+                  <span className="mt-1 text-xs font-semibold">
+                    {user?.isSubscribed ? "Activo" : "Premium"}
+                  </span>
+                </div>
+              </motion.button>
+
+            </div>
           ) : (
             <Link
               href="/login"

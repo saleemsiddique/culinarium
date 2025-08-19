@@ -267,7 +267,7 @@ export default function Header() {
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                         className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 p-4
-                                   bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-200 dark:border-zinc-700
+                                   bg-white rounded-lg shadow-xl border border-gray-200
                                    text-[var(--foreground)] z-50"
                       >
                         <h3 className="text-lg font-bold mb-2 text-center">Tus Tokens</h3>
@@ -279,7 +279,7 @@ export default function Header() {
                             <span>Extras:</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
                           </p>
                         </div>
-                        <div className="h-px bg-gray-200 dark:bg-zinc-700 my-3" />
+                        <div className="h-px bg-gray-200 my-3" />
                         <p className="flex justify-between items-center text-base font-semibold">
                           <span>Total:</span> <span className="text-[var(--highlight)] font-bold">{totalTokens}</span>
                         </p>

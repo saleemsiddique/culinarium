@@ -32,9 +32,9 @@ export default function RedirectCheckoutButton({ priceId, user }: { priceId: str
   }, [priceId, userId]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-4">
       <button 
-        className="cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out" 
+        className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out" 
         onClick={handleCheckoutClick}
       >
         Suscribirse
