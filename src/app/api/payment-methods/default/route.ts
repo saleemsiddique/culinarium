@@ -22,6 +22,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Stripe customer ID not found for user' }, { status: 404 });
     }
 
+    await stripe.paymentMethods.update(paymentMethodId, {
+      allow_redisplay: 'always',
+    });
+
     await stripe.customers.update(customerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
