@@ -401,8 +401,8 @@ export async function POST(request: NextRequest) {
         console.log("Estado de suscripción:", userData.subscriptionStatus);
 
         // Solo procesar si tiene suscripción activa
-        if (userData.subscriptionStatus === "active") {
-          console.log("✅ Usuario con suscripción activa:", userId);
+        if (invoice.parent?.subscription_details?.subscription) {
+          console.log("✅ Factura asociada a una suscripción. Procediendo a asignar tokens.");
           console.log("-------------------------");
           // Verificar si es el primer pago o renovación
           const isFirstPayment =
