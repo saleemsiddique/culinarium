@@ -69,7 +69,6 @@ export async function POST(request: Request) {
       ],
       ...(isSubscription ? {} : { invoice_creation: { enabled: true } }),
       mode: isSubscription ? "subscription" : "payment",
-      saved_payment_method_options: { payment_method_save: "enabled" },
       success_url: `${request.headers.get(
         "origin"
       )}/return?session_id={CHECKOUT_SESSION_ID}`,

@@ -33,6 +33,7 @@ function ProfileContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showCancelNowDialog, setShowCancelNowDialog] = useState(false);
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
 
   // Estados para editar nombre
@@ -158,11 +159,50 @@ function ProfileContent() {
         throw new Error("Error al cancelar la suscripción");
       }
 
-
       setMessageModal({
         visible: true,
         title: "Suscripción Cancelada",
         text: "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual.",
+        isError: false,
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error:", error);
+      setMessageModal({
+        visible: true,
+        title: "Error",
+        text: "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
+        isError: true,
+      });
+    } finally {
+      setIsLoading(false);
+      setShowCancelDialog(false);
+      setShowReactivateDialog(false);
+    }
+  };
+
+  const handleCancelImmediateSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/subscription/cancel-now", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.uid,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al cancelar la suscripción");
+      }
+
+      setMessageModal({
+        visible: true,
+        title: "Suscripción Cancelada",
+        text: "Suscripción cancelada exitosamente.",
         isError: false,
       });
 
@@ -198,7 +238,6 @@ function ProfileContent() {
       if (!response.ok) {
         throw new Error("Error al reactivar la suscripción");
       }
-
 
       setMessageModal({
         visible: true,
@@ -240,6 +279,12 @@ function ProfileContent() {
         text: "Cancelada (activa hasta el final del período)",
         color: "text-[var(--highlight)]",
       };
+    if (user?.subscriptionStatus === "payment_failed") {
+      return {
+        text: "Pago Fallido. Gestiona tu suscripción",
+        color: "text-[var(--highlight)]",
+      };
+    }
     return { text: "Activa", color: "text-green-600" };
   };
 
@@ -315,14 +360,14 @@ function ProfileContent() {
             <div className="bg-[var(--primary)] text-[var(--text2)] rounded-[var(--radius)] p-6 mb-8">
               <div className="flex items-center justify-center mb-4">
                 <CreditCard className="h-6 w-6 text-[var(--highlight)] mr-2" />
-                <h2 className="text-xl font-semibold">
-                  Suscripción Premium
-                </h2>
+                <h2 className="text-xl font-semibold">Suscripción Premium</h2>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <div className="text-center">
-                  <p className="text-sm text-[var(--text2)] opacity-80">Estado</p>
+                  <p className="text-sm text-[var(--text2)] opacity-80">
+                    Estado
+                  </p>
                   <p
                     className={`text-lg font-semibold ${subscriptionStatus.color}`}
                   >
@@ -331,7 +376,9 @@ function ProfileContent() {
                 </div>
 
                 <div className="text-center">
-                  <p className="text-sm text-[var(--text2)] opacity-80">Próxima facturación</p>
+                  <p className="text-sm text-[var(--text2)] opacity-80">
+                    Próxima facturación
+                  </p>
                   <div className="flex items-center justify-center">
                     <Calendar className="h-4 w-4 mr-1 text-[var(--highlight)]" />
                     <p className="text-lg font-semibold">
@@ -344,21 +391,38 @@ function ProfileContent() {
               </div>
 
               <div className="text-center mb-4">
-                <p className="text-sm text-[var(--text2)] opacity-80">Tokens restantes</p>
+                <p className="text-sm text-[var(--text2)] opacity-80">
+                  Tokens restantes
+                </p>
                 <p className="text-2xl font-bold text-[var(--highlight)]">
                   {totalOfTokens}
                 </p>
               </div>
 
               {/* Botón de cancelación */}
-              {user?.isSubscribed && !user?.subscriptionCanceled && (
-                <div className="text-center">
+              {user?.isSubscribed &&
+                !user?.subscriptionCanceled &&
+                user?.subscriptionStatus !== "payment_failed" && (
+                  <div className="text-center">
+                    <Button
+                      onClick={() => setShowCancelDialog(true)}
+                      variant="outline"
+                      className="border-[var(--highlight)] text-[var(--highlight)] hover:bg-[var(--highlight)] hover:text-[var(--text2)]"
+                    >
+                      Cancelar Suscripción
+                    </Button>
+                  </div>
+                )}
+
+              {/* Botón de cancelación para pagos fallidos*/}
+              {user?.subscriptionStatus === "payment_failed" && (
+                <div className="text-center mt-4">
                   <Button
-                    onClick={() => setShowCancelDialog(true)}
-                    variant="outline"
-                    className="border-[var(--highlight)] text-[var(--highlight)] hover:bg-[var(--highlight)] hover:text-[var(--text2)]"
+                    onClick={() => setShowCancelNowDialog(true)}
+                    variant="destructive"
+                    className="bg-red-600 text-white hover:bg-red-700"
                   >
-                    Cancelar Suscripción
+                    Cancelar Suscripción Ahora
                   </Button>
                 </div>
               )}
@@ -463,6 +527,41 @@ function ProfileContent() {
         </div>
       )}
 
+      {/* Modal de confirmación de cancelación inmediata */}
+      {showCancelNowDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-[var(--radius)] p-6 max-w-md w-full">
+            <div className="text-center text-[var(--foreground)]">
+              <AlertTriangle className="h-12 w-12 text-[var(--highlight)] mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                ¿Cancelar Suscripción?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Tu suscripción se cancelará de inmediato y perderás acceso a
+                todas las funciones Premium.
+              </p>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => setShowCancelNowDialog(false)}
+                  variant="outline"
+                  className="flex-1 border-gray-400 text-gray-600 hover:bg-gray-200"
+                  disabled={isLoading}
+                >
+                  Mantener Suscripción
+                </Button>
+                <Button
+                  onClick={handleCancelImmediateSubscription}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Cancelando..." : "Confirmar Cancelación"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de confirmación de reactivación */}
       {showReactivateDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -514,7 +613,9 @@ function ProfileContent() {
               </h3>
               <p className="text-gray-600 mb-6">{messageModal.text}</p>
               <Button
-                onClick={() => setMessageModal({ ...messageModal, visible: false })}
+                onClick={() =>
+                  setMessageModal({ ...messageModal, visible: false })
+                }
                 className="bg-[var(--highlight)] hover:bg-[var(--highlight-dark)] text-[var(--text2)]"
               >
                 Cerrar
