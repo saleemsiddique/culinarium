@@ -1,35 +1,32 @@
 "use client";
 
 import React from "react";
-import { Zap } from "lucide-react";
+import { Zap, TrendingUp, Crown, Star } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
 
 interface TokenPurchaseCardsProps {
   user: CustomUser | null;
   count: number;
   price: number;
-  color: string;
   label: string;
   priceId: string;
   labelPromo?: string;
-  isHighlighted?: boolean;
+  promoType?: "limited" | "popular" | "value";
 }
 
 export default function TokenPurchaseCards({
   user,
   count,
   price,
-  color,
   label,
   priceId,
   labelPromo,
-  isHighlighted = false,
+  promoType,
 }: TokenPurchaseCardsProps) {
   const userId = user?.uid ?? null;
 
   const handlePurchase = async () => {
     try {
-      // 1. Llamar a tu API para crear la sesión de redirección
       const res = await fetch("/api/embedded-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -42,61 +39,198 @@ export default function TokenPurchaseCards({
       }
 
       const data = await res.json();
-      
-      // 2. Redirigir al usuario a la URL de Stripe
       window.location.href = data.url;
-
     } catch (error) {
       console.error("Error al iniciar el pago:", error);
       alert("No se pudo iniciar el proceso de pago. Por favor, inténtelo de nuevo.");
     }
   };
 
-  const getColorClasses = (colorName: string) => {
-    // ... (Tu función getColorClasses se mantiene igual)
-    const colorMap: { [key: string]: { border: string; hoverBorder: string; text: string; bg: string; ribbonBg?: string } } = {
-      blue: { border: "border-blue-200", hoverBorder: "hover:border-blue-400", text: "text-blue-600", bg: "bg-blue-50" },
-      green: { border: "border-green-200", hoverBorder: "hover:border-green-400", text: "text-green-600", bg: "bg-green-50" },
-      purple: { border: "border-purple-200", hoverBorder: "hover:border-purple-400", text: "text-purple-600", bg: "bg-purple-50" },
-      red: { border: "border-red-200", hoverBorder: "hover:border-red-400", text: "text-red-600", bg: "bg-red-50" },
-      orange: { border: "border-orange-200", hoverBorder: "hover:border-orange-400", text: "text-orange-600", bg: "bg-orange-50", ribbonBg: "bg-yellow-400" },
-    };
-    return colorMap[colorName] || colorMap.blue;
+  // Precio original para el descuento (33% más)
+  const originalPrice = promoType === "limited" ? (price * 1.49).toFixed(2) : null;
+  const savings = originalPrice ? (parseFloat(originalPrice) - price).toFixed(2) : null;
+
+  const getPromoStyles = () => {
+    switch (promoType) {
+      case "limited":
+        return {
+          cardStyle: {
+            border: "3px solid #dc2626",
+            background: "linear-gradient(135deg, #fef2f2 0%, #fff5f5 50%, #fef2f2 100%)",
+            boxShadow: "0 12px 30px rgba(220, 38, 38, 0.25), 0 0 0 4px rgba(220, 38, 38, 0.12), 0 4px 12px rgba(220, 38, 38, 0.15)",
+            transform: "translateY(-2px)",
+          },
+          ribbonStyle: {
+            background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+            color: "white",
+            fontWeight: "800",
+            letterSpacing: "0.5px",
+            textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+          },
+        };
+      case "popular":
+        return {
+          cardStyle: {
+            border: "2px solid var(--highlight)",
+            background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+            boxShadow: "0 10px 25px rgba(230, 126, 34, 0.2), 0 0 0 3px rgba(230, 126, 34, 0.12)",
+            transform: "translateY(-1px)",
+          },
+          ribbonStyle: {
+            background: "linear-gradient(135deg, var(--highlight) 0%, var(--highlight-dark) 100%)",
+            color: "white",
+            fontWeight: "700",
+          },
+        };
+      case "value":
+        return {
+          cardStyle: {
+            border: "2px solid var(--primary)",
+            background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+            boxShadow: "0 8px 20px rgba(44, 62, 80, 0.15), 0 0 0 2px rgba(44, 62, 80, 0.1)",
+            transform: "translateY(-1px)",
+          },
+          ribbonStyle: {
+            background: "linear-gradient(135deg, var(--primary) 0%, #34495e 100%)",
+            color: "white",
+            fontWeight: "700",
+          },
+        };
+      default:
+        return {
+          cardStyle: {
+            border: "2px solid #e5e7eb",
+            background: "linear-gradient(135deg, var(--background) 0%, #f9fafb 100%)",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04)",
+          },
+          ribbonStyle: {},
+        };
+    }
   };
-  
-  const colorClasses = getColorClasses(color);
+
+  const getPromoIcon = () => {
+    switch (promoType) {
+      case "limited":
+        return <TrendingUp className="w-4 h-4" />;
+      case "popular":
+        return <Star className="w-4 h-4" />;
+      case "value":
+        return <Crown className="w-4 h-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const promoStyles = getPromoStyles();
+  const hasPromo = Boolean(labelPromo && promoType);
 
   return (
     <button
       type="button"
       onClick={handlePurchase}
-      className={`relative w-full text-left rounded-[var(--radius)] p-6 shadow-md transition-all duration-300 transform hover:scale-105 cursor-pointer
-        ${isHighlighted ? "border-2 border-orange-500 bg-orange-100 ring-4 ring-orange-200 shadow-xl" : "border-2 border-gray-200 bg-white hover:border-gray-400"}`}
+      className={`relative w-full text-left p-6 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer ${
+        hasPromo ? "hover:scale-[1.03]" : "hover:shadow-lg"
+      } z-10 hover:z-20`}
+      style={{
+        borderRadius: "var(--radius)",
+        ...promoStyles.cardStyle,
+      }}
       aria-label={`Comprar ${count} tokens por ${price.toFixed(2)}€`}
     >
       {labelPromo && (
         <div
-          className={`absolute top-8 -right-6 transform rotate-45 px-6 py-1 text-center text-xs font-bold text-white uppercase shadow-md
-          ${isHighlighted ? "bg-orange-500" : "bg-red-500"}`}
+          className="absolute top-8 -right-10 transform rotate-45 px-8 py-2 text-center text-xs font-bold uppercase shadow-lg flex items-center gap-1"
+          style={{
+            ...promoStyles.ribbonStyle,
+            zIndex: 10,
+            minWidth: "120px",
+          }}
         >
+          {getPromoIcon()}
           {labelPromo}
         </div>
       )}
+      
       <div className="flex flex-col h-full justify-between">
         <div className="flex items-center mb-4">
-          <Zap className={`w-8 h-8 ${colorClasses.text}`} />
-          <h3 className="text-2xl font-bold ml-2 text-gray-800">
+          <div 
+            className={`p-2 rounded-full ${hasPromo ? 'shadow-md' : 'shadow-sm'}`}
+            style={{ 
+              backgroundColor: hasPromo 
+                ? (promoType === "limited" ? "rgba(220, 38, 38, 0.1)" : "rgba(230, 126, 34, 0.1)")
+                : "rgba(59, 130, 246, 0.1)"
+            }}
+          >
+            <Zap 
+              className="w-6 h-6" 
+              style={{ color: hasPromo ? (promoType === "limited" ? "#dc2626" : "var(--highlight)") : "var(--primary)" }} 
+            />
+          </div>
+          <h3 
+            className="text-2xl font-bold ml-3"
+            style={{ color: "var(--foreground)" }}
+          >
             {count} Tokens
           </h3>
         </div>
-        <p className="text-gray-600 mb-4">{label}</p>
-        <div className="mt-auto text-left">
-          <span className={`text-4xl font-extrabold ${colorClasses.text}`}>
-            €{price.toFixed(2)}
-          </span>
-          <p className="text-sm text-gray-500">
-            €{(price / count).toFixed(2)} por token
-          </p>
+        
+        <p 
+          className="mb-4 text-sm font-medium"
+          style={{ color: "var(--foreground)", opacity: 0.85 }}
+        >
+          {label}
+        </p>
+        
+        <div className="mt-auto">
+          {promoType === "limited" && originalPrice && savings && (
+            <div className="mb-2">
+              <span 
+                className="text-lg font-semibold line-through opacity-60"
+                style={{ color: "var(--foreground)" }}
+              >
+                €{originalPrice}
+              </span>
+              <span 
+                className="ml-2 text-sm font-bold px-2 py-1 rounded"
+                style={{ 
+                  backgroundColor: "#dc2626", 
+                  color: "white" 
+                }}
+              >
+                ¡Ahorras €{savings}!
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-baseline gap-2">
+            <span 
+              className="text-4xl font-extrabold"
+              style={{ 
+                color: hasPromo 
+                  ? (promoType === "limited" ? "#dc2626" : "var(--highlight)")
+                  : "var(--primary)" 
+              }}
+            >
+              €{price.toFixed(2)}
+            </span>
+            {promoType === "limited" && (
+              <span 
+                className="text-lg font-bold"
+                style={{ color: "#dc2626" }}
+              >
+                33% OFF
+              </span>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-between mt-1">
+            <p 
+              className="text-sm font-medium"
+              style={{ color: "var(--foreground)", opacity: 0.7 }}
+            >
+              €{(price / count).toFixed(2)} por token
+            </p>
+          </div>
         </div>
       </div>
     </button>
