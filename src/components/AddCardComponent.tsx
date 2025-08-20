@@ -7,7 +7,7 @@ import {
   CardExpiryElement,
   CardCvcElement,
 } from "@stripe/react-stripe-js";
-
+import { useUser } from "@/context/user-context";
 interface PaymentMethod {
   id: string;
   type: string;
@@ -26,7 +26,12 @@ interface AddCardComponentProps {
   setShowAddCard: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaymentMethods, setShowAddCard }) => {
+const AddCardComponent: React.FC<AddCardComponentProps> = ({
+  customerId,
+  setPaymentMethods,
+  setShowAddCard,
+}) => {
+  const { user } = useUser();
   const stripe = useStripe();
   const elements = useElements();
   const [cardholderName, setCardholderName] = useState("");
@@ -58,7 +63,9 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
       return;
     }
     if (!consent) {
-      setError("El usuario debe consentir guardar la tarjeta para futuros pagos");
+      setError(
+        "El usuario debe consentir guardar la tarjeta para futuros pagos"
+      );
       return;
     }
 
@@ -73,10 +80,12 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
       });
 
       const createData = await createResp.json();
-      if (!createResp.ok) throw new Error(createData.error || "Error creando SetupIntent");
+      if (!createResp.ok)
+        throw new Error(createData.error || "Error creando SetupIntent");
 
       const clientSecret = createData.clientSecret;
-      if (!clientSecret) throw new Error("No se recibió client_secret del servidor");
+      if (!clientSecret)
+        throw new Error("No se recibió client_secret del servidor");
 
       // 2) Confirmar el SetupIntent en el cliente
       const cardElement = elements.getElement(CardNumberElement);
@@ -90,26 +99,38 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
       });
 
       if (confirmResult.error) {
-        throw new Error(confirmResult.error.message || "Error confirmando SetupIntent");
+        throw new Error(
+          confirmResult.error.message || "Error confirmando SetupIntent"
+        );
       }
 
       const setupIntent = confirmResult.setupIntent;
       if (!setupIntent || setupIntent.status !== "succeeded") {
-        throw new Error("La autenticación de la tarjeta no se completó correctamente");
+        throw new Error(
+          "La autenticación de la tarjeta no se completó correctamente"
+        );
       }
 
       const paymentMethodId = setupIntent.payment_method as string;
-      if (!paymentMethodId) throw new Error("No se obtuvo payment_method del SetupIntent");
+      if (!paymentMethodId)
+        throw new Error("No se obtuvo payment_method del SetupIntent");
 
       // 3) Avisar al backend para obtener los datos del método y marcar por defecto si aplica
       const completeResp = await fetch("/api/payment-methods/complete-setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentMethodId, customerId }),
+        body: JSON.stringify({
+          paymentMethodId,
+          customerId,
+          userEmail: user?.email,
+        }),
       });
 
       const completeData = await completeResp.json();
-      if (!completeResp.ok) throw new Error(completeData.error || "Error completando setup en servidor");
+      if (!completeResp.ok)
+        throw new Error(
+          completeData.error || "Error completando setup en servidor"
+        );
 
       // 4) Actualizar estado local con el payment method devuelto
       const pm = completeData.paymentMethod;
@@ -125,9 +146,13 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
         is_default: completeData.isDefault || false,
       };
 
-      setPaymentMethods((prev) => [...prev.map((p) => ({ ...p, is_default: false })), newPaymentMethod]);
+      setPaymentMethods((prev) => [
+        ...prev.map((p) => ({ ...p, is_default: false })),
+        newPaymentMethod,
+      ]);
 
       setShowAddCard(false);
+      window.location.reload();
     } catch (err: any) {
       console.error("Error añadiendo tarjeta:", err);
       setError(err.message || "Error desconocido");
@@ -148,7 +173,9 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
 
       <form onSubmit={handleAddCard} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre en la tarjeta</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nombre en la tarjeta
+          </label>
           <input
             type="text"
             value={cardholderName}
@@ -160,7 +187,9 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Número de tarjeta</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Número de tarjeta
+          </label>
           <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
             <CardNumberElement options={cardElementOptions} />
           </div>
@@ -168,13 +197,17 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de caducidad</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha de caducidad
+            </label>
             <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
               <CardExpiryElement options={cardElementOptions} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">CVC</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              CVC
+            </label>
             <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
               <CardCvcElement options={cardElementOptions} />
             </div>
@@ -182,7 +215,12 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({ customerId, setPaym
         </div>
 
         <div className="flex items-center space-x-2">
-          <input id="saveConsent" type="checkbox" checked={consent} onChange={() => setConsent(!consent)} />
+          <input
+            id="saveConsent"
+            type="checkbox"
+            checked={consent}
+            onChange={() => setConsent(!consent)}
+          />
           <label htmlFor="saveConsent" className="text-sm text-gray-700">
             Guardar tarjeta para pagos futuros y aceptar términos.
           </label>

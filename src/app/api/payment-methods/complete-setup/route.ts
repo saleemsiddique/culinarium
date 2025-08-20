@@ -1,30 +1,37 @@
-// pages/api/stripe/complete-setup.ts
-import { NextApiRequest, NextApiResponse } from "next";
+// src/app/api/stripe/complete-setup/route.ts
 import { stripe } from "@/lib/stripe";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
-
-  const { paymentMethodId, customerId } = req.body;
-  if (!paymentMethodId || !customerId) return res.status(400).json({ error: "paymentMethodId y customerId requeridos" });
-
+export async function POST(req: Request) {
   try {
-    // 1) Recupera el payment method (SetupIntent normalmente ya lo asocia al customer si lo creaste con customer)
+    const { paymentMethodId, customerId, userEmail } = await req.json();
+    if (!paymentMethodId || !customerId) {
+      return new Response(
+        JSON.stringify({ error: "paymentMethodId y customerId requeridos" }),
+        { status: 400 }
+      );
+    }
+
+    // 1) Recupera el payment method
     let pm = await stripe.paymentMethods.retrieve(paymentMethodId);
 
-    // 2) Si no tiene customer (raro), adjúntalo
+    // 2) Si no tiene customer, adjúntalo
     if (!pm.customer) {
       try {
         await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
         pm = await stripe.paymentMethods.retrieve(paymentMethodId);
       } catch (attachErr: any) {
-        // Si falla por "already attached" o similar, simplemente intentamos continuar
         console.warn("attach error (puede ser ignorable):", attachErr?.message || attachErr);
         pm = await stripe.paymentMethods.retrieve(paymentMethodId);
       }
     }
 
-    // 3) Comprobar si es la primera tarjeta del cliente para marcarla por defecto
+    await stripe.paymentMethods.update(paymentMethodId, {
+      billing_details: {
+        email: userEmail,
+      },
+    });
+
+    // 3) Comprobar si es la primera tarjeta del cliente
     const list = await stripe.paymentMethods.list({ customer: customerId, type: "card" });
     const isFirstCard = list.data.length === 1;
 
@@ -34,14 +41,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 4) Devolver la info útil al frontend
-    return res.status(200).json({
-      success: true,
-      isDefault: isFirstCard,
-      paymentMethod: pm,
-    });
+    // 4) Devolver info útil al frontend
+    return new Response(
+      JSON.stringify({ success: true, isDefault: isFirstCard, paymentMethod: pm }),
+      { status: 200 }
+    );
   } catch (err: any) {
     console.error("Error finalizando setup:", err);
-    return res.status(500).json({ error: err.message || "Error interno" });
+    return new Response(
+      JSON.stringify({ error: err.message || "Error interno" }),
+      { status: 500 }
+    );
   }
 }

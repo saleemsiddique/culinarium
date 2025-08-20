@@ -1,22 +1,21 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { stripe } from "@/lib/stripe";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
-
-  const { customerId } = req.body;
-  if (!customerId) return res.status(400).json({ error: "customerId es requerido" });
-
+export async function POST(req: Request) {
   try {
+    const { customerId } = await req.json();
+    if (!customerId) {
+      return new Response(JSON.stringify({ error: "customerId es requerido" }), { status: 400 });
+    }
+
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       payment_method_types: ["card"],
       usage: "off_session",
     });
 
-    return res.status(200).json({ clientSecret: setupIntent.client_secret });
+    return new Response(JSON.stringify({ clientSecret: setupIntent.client_secret }), { status: 200 });
   } catch (err: any) {
     console.error("Error creando SetupIntent:", err);
-    return res.status(500).json({ error: err.message || "Error interno" });
+    return new Response(JSON.stringify({ error: err.message || "Error interno" }), { status: 500 });
   }
 }
