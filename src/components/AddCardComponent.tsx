@@ -19,6 +19,7 @@ interface PaymentMethod {
   };
   is_default: boolean;
 }
+import CountrySelect from "./countrySelect";
 
 interface AddCardComponentProps {
   customerId: string;
@@ -32,6 +33,8 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
   setShowAddCard,
 }) => {
   const { user } = useUser();
+  const [country, setCountry] = useState<string>("");
+  const [postalCode, setPostalCode] = useState<string>("");
   const stripe = useStripe();
   const elements = useElements();
   const [cardholderName, setCardholderName] = useState("");
@@ -123,6 +126,8 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
           paymentMethodId,
           customerId,
           userEmail: user?.email,
+          country,
+          postalCode: postalCode || undefined
         }),
       });
 
@@ -210,6 +215,34 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
             </label>
             <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
               <CardCvcElement options={cardElementOptions} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              País o región
+            </label>
+            <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
+              <CountrySelect value={country} onChange={setCountry} />
+            </div>
+            <div>
+              {(country === "US" || country === "GB") && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Código Postal
+                  </label>
+                  <input
+                    type="text"
+                    value={postalCode.toLocaleUpperCase()}
+                    minLength={5}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    placeholder={
+                      country === "US" ? "Ej: 94105" : "Ej: SW1A 1AA"
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

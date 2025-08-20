@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { paymentMethodId, customerId, userEmail } = await req.json();
+    const { paymentMethodId, customerId, userEmail, country, postalCode } = await req.json();
     if (!paymentMethodId || !customerId) {
       return new Response(
         JSON.stringify({ error: "paymentMethodId y customerId requeridos" }),
@@ -28,9 +28,14 @@ export async function POST(req: Request) {
     await stripe.paymentMethods.update(paymentMethodId, {
       billing_details: {
         email: userEmail,
+        address: {
+          country: country,
+          postal_code: postalCode || undefined,
+        }
       },
+      allow_redisplay: 'always',
     });
-
+    
     // 3) Comprobar si es la primera tarjeta del cliente
     const list = await stripe.paymentMethods.list({ customer: customerId, type: "card" });
     const isFirstCard = list.data.length === 1;
