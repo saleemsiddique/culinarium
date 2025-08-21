@@ -399,7 +399,7 @@ const RecipeListPage: React.FC = () => {
             <div className="flex flex-wrap gap-2 justify-center">
               {filters.searchTerm && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--highlight)] text-white rounded-full text-sm">
-                  Búsqueda: "{filters.searchTerm}"
+                  Búsqueda: {filters.searchTerm}
                   <button onClick={() => setFilters(prev => ({ ...prev, searchTerm: '' }))}>
                     <IoClose className="w-3 h-3" />
                   </button>
