@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Onboarding({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
@@ -8,18 +9,22 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
     {
       title: "👋 Bienvenido",
       text: "Gracias por unirte a nuestra aplicación. Te mostraremos lo esencial.",
+      image: "/onboarding/step1.jpg",
     },
     {
-      title: "⚡ Funcionalidades",
-      text: "Aquí podrás gestionar tu perfil, explorar contenido y más.",
+      title: "🥘 Monedas y Recetas",
+      text: "Las monedas son tu recurso principal: cada vez que crees una receta gastarás 10 monedas, y al modificar una receta se descontarán 5 monedas.",
+      image: "/onboarding/step2.jpg",
     },
     {
-      title: "🔔 Notificaciones",
-      text: "Activa las notificaciones para no perderte nada importante.",
+      title: "🔄 Renovación",
+      text: "Tus monedas se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
+      image: "/onboarding/step3.jpg",
     },
     {
       title: "🚀 Listo",
-      text: "Ya conoces lo básico, ahora disfruta de la app.",
+      text: "Ya conoces lo básico, hora de cocinar.",
+      image: "/onboarding/step4.jpg",
     },
   ];
 
@@ -38,9 +43,17 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-xl p-6 shadow-lg w-96 text-center">
+      <div className="bg-white rounded-xl p-6 shadow-lg w-[800px] text-center">
+        
         <h2 className="text-2xl font-bold">{steps[step].title}</h2>
-        <p className="mt-2 text-gray-700">{steps[step].text}</p>
+        <Image
+          src={steps[step].image}
+          alt={steps[step].title}
+          width={800}
+          height={400}
+          className="mx-auto mt-4 border-black border-2 rounded-lg"
+        />
+        <p className="mt-2 text-gray-700 font-bold">{steps[step].text}</p>
 
         {/* Controles de navegación */}
         <div className="flex justify-between mt-6">
