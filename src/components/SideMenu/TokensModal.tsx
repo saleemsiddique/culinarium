@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { Zap, X } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
@@ -21,10 +23,10 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"> {/* Cambiado p-6 a p-4 para mejor ajuste en móvil */}
       {/* Modal container - Aumentado el tamaño máximo y altura */}
       <div 
-        className="rounded-3xl p-8 w-full max-w-7xl max-h-[95vh] min-h-[80vh] shadow-2xl relative flex flex-col"
+        className="rounded-3xl p-6 md:p-8 w-full max-w-7xl max-h-[95vh] shadow-2xl relative flex flex-col"
         style={{ backgroundColor: 'var(--background)' }}
       >
         {/* Header */}
@@ -65,8 +67,8 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
           </button>
         </div>
 
-        {/* Contenido - Removido overflow y aumentado padding */}
-        <div className="flex-grow">
+        {/* Contenido - Añadido overflow-y-auto y flex-grow para desplazamiento */}
+        <div className="flex-grow overflow-y-auto p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             <TokenPurchaseCards 
               user={user} 

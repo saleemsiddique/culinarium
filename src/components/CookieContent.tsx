@@ -167,7 +167,7 @@ export default function CookiesContent() {
             )}
 
             <div className="mt-4">
-              <Link href="/gestion-consentimientos" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition">
+              <Link href="consent/gestion-consentimientos" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition">
                 Ir a gestión de consentimientos
               </Link>
             </div>

@@ -325,15 +325,15 @@ export default function ConsentModal() {
         <h2 className="text-xl font-bold mb-4">Política y Condiciones</h2>
         <p className="mb-4">
           Al continuar usando este sitio, confirmas que aceptas nuestros{" "}
-          <a href="/consent/terms" className="text-[var(--highlight)] underline">
+          <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline">
             Términos y Condiciones
           </a>
           ,{" "}
-          <a href="/consent/privacy" className="text-[var(--highlight)] underline">
+          <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline">
             Política de Privacidad
           </a>{" "}
           y{" "}
-          <a href="/consent/cookies" className="text-[var(--highlight)] underline">
+          <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline">
             Política de Cookies
           </a>
           .
