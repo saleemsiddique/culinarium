@@ -13,7 +13,7 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
     },
     {
       title: "🥘 Monedas y Recetas",
-      text: "Las monedas son tu recurso principal: cada vez que crees una receta gastarás 10 monedas, y al modificar una receta se descontarán 5 monedas.",
+      text: "¡Las monedas son tu recurso más valioso! Cada vez que crees una receta gastarás monedas, y siempre podrás ver el precio indicado antes de crearla.",
       image: "/onboarding/step2.jpg",
     },
     {
