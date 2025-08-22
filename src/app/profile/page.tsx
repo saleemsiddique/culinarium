@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useUser } from "@/context/user-context";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CreditCard,
   Calendar,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";
 import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutForm";
+import Onboarding from "@/components/onboarding";
 
 export default function ProfilePage() {
   return (
@@ -35,6 +36,7 @@ function ProfileContent() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCancelNowDialog, setShowCancelNowDialog] = useState(false);
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Estados para editar nombre
   const [isEditingName, setIsEditingName] = useState(false);
@@ -50,6 +52,13 @@ function ProfileContent() {
   });
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("hasSeenOnboarding");
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -292,9 +301,13 @@ function ProfileContent() {
 
   return (
     <div className="h-full w-full min-h-screen bg-[var(--background)] flex items-center justify-center md:py-24">
+      {/* Showing OnBoarding al hacer cliq al boton */}
+      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
       <section className="bg-white bg-opacity-90 backdrop-blur-md rounded-[var(--radius)] border border-white border-opacity-20 shadow-2xl p-8 max-w-2xl w-full text-[var(--foreground)] m-10">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-8">Mi Perfil</h1>
+
+
 
           {/* Información Personal */}
           <div className="grid md:grid-cols-2 gap-4 mb-8">
@@ -482,6 +495,14 @@ function ProfileContent() {
           >
             Historial de Pagos
           </Button>
+          <Button
+            onClick={() => setShowOnboarding(true)}
+            className="cursor-pointer w-full bg-[var(--highlight)] hover:bg-[var(--highlight-dark)] text-[var(--text2)] mb-5"
+          >
+            Como Funciona
+          </Button>
+
+
           <Button
             onClick={handleLogout}
             className="cursor-pointer w-full bg-red-600 hover:bg-red-700 text-white"
