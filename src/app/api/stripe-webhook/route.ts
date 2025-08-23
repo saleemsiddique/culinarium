@@ -50,6 +50,109 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // --- NUEVO: establecer payment method como default SOLO si el customer no tiene uno ---
+      try {
+        const customerId = session.customer as string | undefined;
+        if (customerId) {
+          const customer = (await stripe.customers.retrieve(customerId)) as any;
+          const existingDefault =
+            customer?.invoice_settings?.default_payment_method;
+
+          if (!existingDefault) {
+            // intentar obtener el payment method usado en la subscripción o pago
+            let pmId: string | undefined;
+
+            if (session.subscription) {
+              // Si es suscripción: recuperamos la suscripción para intentar obtener el PM
+              const subscription = (await stripe.subscriptions.retrieve(
+                session.subscription as string,
+                {
+                  expand: [
+                    "default_payment_method",
+                    "latest_invoice.payment_intent",
+                  ],
+                }
+              )) as any;
+
+              pmId =
+                (subscription.default_payment_method as any)?.id ||
+                (subscription.latest_invoice as any)?.payment_intent
+                  ?.payment_method;
+            } else {
+              // Si no es subscripción (pago único), intentar obtener payment_intent desde la sesión
+              const fullSession = (await stripe.checkout.sessions.retrieve(
+                session.id,
+                {
+                  expand: ["payment_intent"],
+                }
+              )) as any;
+              pmId = fullSession?.payment_intent?.payment_method;
+            }
+
+            if (pmId) {
+              try {
+                // attach si hace falta (normalmente ya estará attached)
+                await stripe.paymentMethods.attach(pmId, {
+                  customer: customerId,
+                });
+              } catch (attachErr: any) {
+                // Si falla por ya estar attached en la misma cuenta u otra, solo lo logueamos
+                console.warn(
+                  "attach pm warning:",
+                  attachErr?.message || attachErr
+                );
+              }
+
+              // Opcional: permitir redisplay para que se pueda prefilar en futuros Checkouts
+              try {
+                await stripe.paymentMethods.update(pmId, {
+                  allow_redisplay: "always",
+                });
+              } catch (updErr: any) {
+                console.warn(
+                  "Could not set allow_redisplay:",
+                  updErr?.message || updErr
+                );
+              }
+
+              // Finalmente: establecer como default en el Customer (solo si aún no tiene default)
+              try {
+                await stripe.customers.update(customerId, {
+                  invoice_settings: { default_payment_method: pmId },
+                });
+                console.log(
+                  `✅ Customer ${customerId} default_payment_method set -> ${pmId}`
+                );
+              } catch (custUpdErr: any) {
+                console.error(
+                  "Error setting customer default payment method:",
+                  custUpdErr
+                );
+              }
+            } else {
+              console.warn(
+                "No payment method found in session/subscription to set as default."
+              );
+            }
+          } else {
+            console.log(
+              "Customer already has a default payment method -> skipping default set."
+            );
+          }
+        } else {
+          console.warn(
+            "Session has no customer id; skipping default payment method assignment."
+          );
+        }
+      } catch (err: any) {
+        console.error(
+          "Error while attempting to set default payment method:",
+          err
+        );
+        // no retornamos error aquí para no interrumpir la lógica principal del webhook
+      }
+      // --- FIN NUEVO ---
+
       const lineItems = await stripe.checkout.sessions.listLineItems(
         session.id
       );
@@ -298,8 +401,8 @@ export async function POST(request: NextRequest) {
         console.log("Estado de suscripción:", userData.subscriptionStatus);
 
         // Solo procesar si tiene suscripción activa
-        if (userData.subscriptionStatus === "active") {
-          console.log("✅ Usuario con suscripción activa:", userId);
+        if (invoice.parent?.subscription_details?.subscription) {
+          console.log("✅ Factura asociada a una suscripción. Procediendo a asignar tokens.");
           console.log("-------------------------");
           // Verificar si es el primer pago o renovación
           const isFirstPayment =
@@ -364,7 +467,7 @@ export async function POST(request: NextRequest) {
           subscriptionCanceled: false,
           isSubscribed: false,
           subscriptionStatus: "cancelled",
-          monthly_tokens: 50, 
+          monthly_tokens: 50,
         });
 
         // Actualizar estado en subcolección

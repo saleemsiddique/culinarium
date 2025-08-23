@@ -16,16 +16,20 @@ export async function POST(request: Request) {
 
     // 1. Buscar si ya existe un customerId en Firebase
     const userDoc = await db.collection("user").doc(body.userId).get();
-    
+
     if (userDoc.exists) {
       const userData = userDoc.data();
       customerId = userData?.stripeCustomerId;
 
       // 2. Si no existe customerId, crear customer en Stripe
       if (!customerId) {
-        console.log("🆕 Creando nuevo customer en Stripe para userId:", body.userId);
-        
+        console.log(
+          "🆕 Creando nuevo customer en Stripe para userId:",
+          body.userId
+        );
+
         const customer = await stripe.customers.create({
+//          email: userData?.email, ESTO SE AGREGA ANTES DEL MERGE
           metadata: {
             userId: body.userId,
           },
@@ -44,7 +48,7 @@ export async function POST(request: Request) {
       }
     } else {
       return NextResponse.json(
-        { message: "Usuario no encontrado en Firebase" }, 
+        { message: "Usuario no encontrado en Firebase" },
         { status: 404 }
       );
     }
@@ -54,7 +58,9 @@ export async function POST(request: Request) {
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "hosted",
-      payment_method_types: ["card", "amazon_pay", "revolut_pay", "paypal"],
+      payment_method_types: isSubscription
+        ? ["card", "amazon_pay", "revolut_pay"]
+        : ["card", "amazon_pay", "revolut_pay", "paypal"],
       customer: customerId, // ¡ESTA ES LA LÍNEA CLAVE!
       line_items: [
         {
@@ -62,8 +68,9 @@ export async function POST(request: Request) {
           price: body.priceId,
         },
       ],
+      ...(isSubscription ? {} : { invoice_creation: { enabled: true } }),
       mode: isSubscription ? "subscription" : "payment",
-      success_url:  `${request.headers.get(
+      success_url: `${request.headers.get(
         "origin"
       )}/return?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/kitchen`,

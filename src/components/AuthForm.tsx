@@ -75,7 +75,7 @@ export function AuthForm({
       }
       
       // Una vez que el registro y el consentimiento se han gestionado en el UserContext, redirigimos
-      router.push("/kitchen");
+      router.push("/kitchen?onboarding=1");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ha ocurrido un error");
     } finally {

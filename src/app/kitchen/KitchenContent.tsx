@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation'; // Importa useRout
 import { auth } from '@/lib/firebase'; // Ensure this path is correct for your client-side Firebase setup
 import { onAuthStateChanged, User as FirebaseUser, signInAnonymously } from 'firebase/auth';
 import { useUser } from '@/context/user-context';
+import Onboarding from '@/components/onboarding';
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
 async function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement> {
@@ -136,6 +137,7 @@ const CulinariumForm: React.FC = () => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null); // State to hold Firebase user object
   const [loadingUser, setLoadingUser] = useState(true); // State to track user loading
   const { user, hasEnoughTokens, deductTokens } = useUser(); // Use the user context for token functionality
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Ingredientes disponibles (Columna 1)
   const [ingredients, setIngredients] = useState<string[]>([]);
@@ -191,8 +193,28 @@ const CulinariumForm: React.FC = () => {
     { label: 'India', value: 'indian', icon: <MdOutlineFastfood className="w-6 h-6" /> },
   ];
 
+  //Handle Exiting onboarding
+  const handleFinishOnboarding = () => {
+    setShowOnboarding(false);
+
+    // Quitar el parámetro de la URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete("onboarding");
+    router.replace(url.toString());
+  };
+
   // Listen for Firebase Auth state changes and sign in anonymously if no user
   useEffect(() => {
+    const onboardingParam = searchParams.get("onboarding");
+    if (onboardingParam === "1") {
+      setShowOnboarding(true);
+    }
+
+    const hasSeen = localStorage.getItem("hasSeenOnboardingKitchen");
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setFirebaseUser(currentUser);
@@ -208,7 +230,7 @@ const CulinariumForm: React.FC = () => {
       setLoadingUser(false); // User loading is complete
     });
     return () => unsubscribe(); // Cleanup subscription on component unmount
-  }, []);
+  }, [searchParams]);
 
   // Show toast temporarily
   useEffect(() => {
@@ -496,6 +518,12 @@ const CulinariumForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-[var(--background)] to-[var(--background)] py-10 flex items-center justify-center font-sans">
+      {showOnboarding && (
+        <Onboarding
+          onClose={handleFinishOnboarding}
+        />
+      )}
+      
       <Head>
         <title>Culinarium - Encuentra tu Receta</title>
         <meta name="description" content="Encuentra tu receta ideal con el formulario interactivo de Culinarium." />
