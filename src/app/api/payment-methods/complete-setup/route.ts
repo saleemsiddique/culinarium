@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // src/app/api/stripe/complete-setup/route.ts
 import { stripe } from "@/lib/stripe";
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -9,7 +11,6 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  Settings,
   CheckCircle,
   XCircle,
   Clock,

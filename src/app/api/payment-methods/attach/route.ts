@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {

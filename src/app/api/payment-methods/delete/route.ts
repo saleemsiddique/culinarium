@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // app/api/payment-methods/route.ts
 
 import { NextResponse } from "next/server";

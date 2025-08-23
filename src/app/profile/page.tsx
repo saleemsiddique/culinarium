@@ -311,7 +311,7 @@ function ProfileContent() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-orange-50 py-18 px-4">
       {/* Showing OnBoarding al hacer cliq al boton */}
-      {showOnboarding /* && <Onboarding onClose={() => setShowOnboarding(false)} /> */}
+      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} /> }
       
       <div className="max-w-6xl mx-auto">
         {/* Header with Profile Picture Placeholder */}
