@@ -130,7 +130,7 @@ export default function Footer() {
 function CookieSettingsLink() {
   return (
     <Link
-      href="consent/gestion-consentimientos"
+      href="/consent/gestion-consentimientos"
       className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800 hover:bg-orange-600 hover:text-white transition-colors duration-300 text-sm font-medium"
       aria-label="Gestionar consentimientos"
     >
