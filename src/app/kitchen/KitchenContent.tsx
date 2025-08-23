@@ -225,11 +225,6 @@ const CulinariumForm: React.FC = () => {
       setShowOnboarding(true);
     }
 
-    const hasSeen = localStorage.getItem("hasSeenOnboardingKitchen");
-    if (!hasSeen) {
-      setShowOnboarding(true);
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setFirebaseUser(currentUser);
