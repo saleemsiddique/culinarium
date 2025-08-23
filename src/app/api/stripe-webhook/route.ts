@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
 
       const PRICE_TO_TOKENS = {
         //One Tier Sub
-        price_1RrJVF2LSjDC5txTR6lOQslg: {
+        price_1RwHJCRpBiBhmezm4D1fPQt5: {
           type: "subscription",
           tokens: 300,
           name: "Culinarium premium",
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
           price: 7.99,
         },
         //Extra Tokens
-        price_1RrL5F2LSjDC5txTL3uBh13K: {
+        price_1RwHKLRpBiBhmezmK1AybT5C: {
           type: "tokens",
           tokens: 30,
           name: "Pack 30 tokens",

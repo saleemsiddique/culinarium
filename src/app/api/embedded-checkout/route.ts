@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     // Determinar si es suscripción o compra única
-    const isSubscription = body.priceId === "price_1RrJVF2LSjDC5txTR6lOQslg";
+    const isSubscription = body.priceId === "price_1RwHJCRpBiBhmezm4D1fPQt5";
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "hosted",
