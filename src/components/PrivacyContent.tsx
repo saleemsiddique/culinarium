@@ -16,12 +16,12 @@ const itemVariants = {
 const PrivacyContent = () => {
   return (
     <motion.main
-      className="bg-gray-950 text-gray-300 min-h-screen px-6 py-12 lg:py-24"
+      className="bg-gray-950 text-gray-300 min-h-screen w-screen flex flex-col justify-center px-6 py-12 lg:py-24"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div>
+      <div className="max-w-4xl w-full mx-auto flex flex-col overflow-y-auto">
         <motion.div variants={itemVariants}>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text">
             Política de Privacidad

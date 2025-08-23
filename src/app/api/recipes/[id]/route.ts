@@ -4,8 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, auth, admin } from '@/lib/firebase-admin';
 
-export async function GET(req: Request, { params }: any) {
-  const { id } = params as { id: string };
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params; // Await params before using
 
   try {
     if (!id) {
@@ -56,8 +56,8 @@ export async function GET(req: Request, { params }: any) {
 }
 
 // PUT /api/recipes/[id] - Update an existing recipe (e.g., add image)
-export async function PUT(req: NextRequest, { params }: any) {
-  const { id } = params as { id: string };
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params; // Await params before using
 
   try {
     if (!id) {
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest, { params }: any) {
       uid = decodedToken.uid;
     } catch (authError) {
       console.error('Error al verificar el token de autenticación:', authError);
-      return NextResponse.json({ error: 'Token de autenticación inválido o expirado.' }, { status: 401 });
+      return NextResponse.json({ error: 'Token de autenticación inválido or expirado.' }, { status: 401 });
     }
 
     // Check if recipe exists and user owns it
@@ -106,10 +106,10 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     console.log(`✅ Receta ${id} actualizada exitosamente para usuario ${uid}`);
 
-    return NextResponse.json({ 
-      message: 'Receta actualizada exitosamente', 
-      id: id, 
-      recipe: updatedRecipe 
+    return NextResponse.json({
+      message: 'Receta actualizada exitosamente',
+      id: id,
+      recipe: updatedRecipe
     }, { status: 200 });
 
   } catch (error: any) {

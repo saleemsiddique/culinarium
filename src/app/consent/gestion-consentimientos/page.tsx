@@ -363,16 +363,6 @@ export default function GestionConsentimientosPage() {
             {message && <p className="mt-4 text-green-500">{message}</p>}
             {error && <p className="mt-4 text-red-500">{error}</p>}
 
-            <div className="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
-              <h3 className="font-semibold text-gray-200">Registro local</h3>
-              <pre className="text-xs overflow-auto max-h-48 text-gray-400 bg-gray-900 rounded p-2 mt-2">
-                {JSON.stringify(localRecord, null, 2)}
-              </pre>
-              <p className="text-xs text-gray-500 mt-2">
-                El historial real se guarda en nuestro backend. Aquí verás la última elección local.
-              </p>
-            </div>
-
             <div className="mt-4 text-sm text-gray-500">
               <p>
                 Derechos: puedes revocar el consentimiento en cualquier momento. La revocación no afecta al tratamiento previo realizado de forma legítima.

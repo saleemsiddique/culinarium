@@ -144,7 +144,7 @@ export default function Header() {
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-6 p-4 flex-grow overflow-y-auto items-center">
+                  <div className="flex flex-col gap-2 p-4 flex-grow overflow-y-auto items-center">
                     <MobileMenuItem href="/kitchen" icon={<Plus />} label="Nueva Receta" onClick={() => setDrawerOpen(false)} />
                     <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Mis Recetas" onClick={() => setDrawerOpen(false)} />
                     <MobileMenuItem href="/profile" icon={<User />} label="Mi Perfil" onClick={() => setDrawerOpen(false)} />
@@ -181,6 +181,22 @@ export default function Header() {
                             ¡Comprar Más Tokens!
                           </motion.div>
                         </button>
+                        {/* Nuevo botón para el modal de Premium en móvil */}
+                        <motion.button
+                          onClick={() => {
+                            setShowPremium(true);
+                            setDrawerOpen(false); // Cierra el drawer al abrir el modal
+                          }}
+                          className="w-full py-3 mt-4 rounded-full text-lg font-bold shadow-lg transition-all duration-300
+                                     bg-gradient-to-r from-yellow-400 to-yellow-600 text-white
+                                     hover:from-yellow-500 hover:to-yellow-700 focus:outline-none focus:ring-4 focus:ring-yellow-500 text-center"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          {user?.isSubscribed ? 'Tu Plan Premium' : '¡Hacerme Premium!'}
+                        </motion.button>
                       </motion.div>
                     )}
                   </div>
@@ -267,7 +283,7 @@ export default function Header() {
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                         className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 p-4
-                                   bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-200 dark:border-zinc-700
+                                   bg-white rounded-lg shadow-xl border border-gray-200
                                    text-[var(--foreground)] z-50"
                       >
                         <h3 className="text-lg font-bold mb-2 text-center">Tus Tokens</h3>
@@ -279,7 +295,7 @@ export default function Header() {
                             <span>Extras:</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
                           </p>
                         </div>
-                        <div className="h-px bg-gray-200 dark:bg-zinc-700 my-3" />
+                        <div className="h-px bg-gray-200 my-3" />
                         <p className="flex justify-between items-center text-base font-semibold">
                           <span>Total:</span> <span className="text-[var(--highlight)] font-bold">{totalTokens}</span>
                         </p>

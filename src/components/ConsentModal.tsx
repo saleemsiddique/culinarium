@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 import { usePathname } from "next/navigation";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.5";
 const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
@@ -319,21 +320,23 @@ export default function ConsentModal() {
 
   if (loading || !show) return null;
 
+  useBodyScrollLock(true);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-[var(--background)] text-[var(--text)] p-6 rounded-lg max-w-lg w-full shadow-lg">
         <h2 className="text-xl font-bold mb-4">Política y Condiciones</h2>
         <p className="mb-4">
           Al continuar usando este sitio, confirmas que aceptas nuestros{" "}
-          <a href="/consent/terms" className="text-[var(--highlight)] underline">
+          <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline">
             Términos y Condiciones
           </a>
           ,{" "}
-          <a href="/consent/privacy" className="text-[var(--highlight)] underline">
+          <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline">
             Política de Privacidad
           </a>{" "}
           y{" "}
-          <a href="/consent/cookies" className="text-[var(--highlight)] underline">
+          <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline">
             Política de Cookies
           </a>
           .

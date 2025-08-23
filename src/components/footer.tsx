@@ -104,7 +104,6 @@ export default function Footer() {
                 </Link>
               </div>
               <p className="mt-8 text-sm text-gray-500">© Culinarium {year}. Todos los derechos reservados.</p>
-              <p className="mt-2 text-xs text-gray-600">Equipo: Saleem Siddique · Hakeem Siddique · Wassim Atiki</p>
             </div>
 
             {/* Contact and Micro Info */}
@@ -119,13 +118,6 @@ export default function Footer() {
               </div>
             </div>
           </div>
-
-          {/* Bottom stripe with micro info */}
-          <div className="mt-12 border-t border-gray-800 pt-6 text-center text-xs text-gray-600">
-            <p>
-              Este sitio utiliza procesadores como OpenAI, Stripe, Firebase, Vercel y GitHub para ofrecer sus servicios.
-            </p>
-          </div>
         </div>
       </motion.footer>
     </>
@@ -138,7 +130,7 @@ export default function Footer() {
 function CookieSettingsLink() {
   return (
     <Link
-      href="/gestion-consentimientos"
+      href="consent/gestion-consentimientos"
       className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800 hover:bg-orange-600 hover:text-white transition-colors duration-300 text-sm font-medium"
       aria-label="Gestionar consentimientos"
     >
