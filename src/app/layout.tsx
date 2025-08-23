@@ -24,10 +24,10 @@ export const metadata = {
     "dietas",
     "comida",
   ],
-  authors: [{ name: "Culinarium", url: "https://culinarium.com" }],
+  authors: [{ name: "Culinarium", url: "https://culinarium.io" }],
   creator: "Culinarium",
   publisher: "Culinarium",
-  metadataBase: new URL("https://culinarium.com"),
+  metadataBase: new URL("https://culinarium.io"),
   alternates: {
     canonical: "/",
   },
@@ -35,11 +35,11 @@ export const metadata = {
     title: "Culinarium – Generador de recetas con IA",
     description:
       "Culinarium te ayuda a crear recetas personalizadas según tus ingredientes, preferencias dietéticas y estilo de cocina.",
-    url: "https://culinarium.com",
+    url: "https://culinarium.io",
     siteName: "Culinarium",
     images: [
       {
-        url: "https://culinarium.com/og-image.png",
+        url: "https://culinarium.io/og-image.png",
         width: 1200,
         height: 630,
         alt: "Culinarium - Generador de recetas con IA",
@@ -53,8 +53,11 @@ export const metadata = {
     title: "Culinarium – Generador de recetas con IA",
     description:
       "Culinarium te ayuda a crear recetas personalizadas según tus ingredientes, preferencias dietéticas y estilo de cocina.",
-    images: ["https://culinarium.com/og-image.png"],
+    images: ["https://culinarium.io/og-image.png"],
     creator: "@CulinariumOfficial",
+  },
+  icons: {
+    icon: '/Logo-Culinarium.png', // Debe estar en /public
   },
 };
 
