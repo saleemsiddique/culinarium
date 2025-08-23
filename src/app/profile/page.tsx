@@ -23,7 +23,6 @@ import {
   LogOut,
   History,
   BookOpen,
-  Shield,
   Zap,
 } from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";

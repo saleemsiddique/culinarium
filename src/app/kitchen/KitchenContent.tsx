@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 "use client"
 // pages/culinarium-form.tsx
@@ -173,7 +174,7 @@ const CulinariumForm: React.FC = () => {
 
   // Función para calcular el costo de tokens basado en las selecciones del formulario
   const calculateTokenCost = (): number => {
-    let baseCost = 10; // Costo base fijo por ahora
+    const baseCost = 10; // Costo base fijo por ahora
 
     // En el futuro se pueden añadir modificadores aquí:
     // if (user?.isSubscribed) baseCost -= 2; // Descuento para suscriptores
