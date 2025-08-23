@@ -1,86 +1,220 @@
 "use client";
 import { motion } from "framer-motion";
 import { PiCookingPotFill } from "react-icons/pi";
-import { GiMeal } from "react-icons/gi";
-import { RiGroupLine } from "react-icons/ri";
+import { GiMeal, GiWeightScale } from "react-icons/gi";
+import { RiSparklingFill } from "react-icons/ri";
 
 const features = [
   {
     name: 'Generación de recetas con IA',
     description:
-      'Crea recetas personalizadas a partir de los ingredientes que tienes en casa, gracias a nuestra inteligencia artificial culinaria.',
+      'Crea recetas personalizadas a partir de los ingredientes que tienes en casa, gracias a nuestra inteligencia artificial culinaria avanzada.',
     icon: PiCookingPotFill,
-    color: 'from-orange-500 to-amber-500',
+    gradient: 'linear-gradient(135deg, #E67E22 0%, #C2651A 100%)',
   },
   {
-    name: 'Planificación semanal de comidas',
-    description: 'Organiza tus menús semanales de forma sencilla, guarda tus platos favoritos y recibe recomendaciones automáticas.',
+    name: 'Recetas inteligentes adaptadas',
+    description: 'Nuestra IA aprende de tus preferencias alimentarias y dietéticas para sugerirte las recetas perfectas para ti.',
     icon: GiMeal,
-    color: 'from-sky-500 to-blue-500',
+    gradient: 'linear-gradient(135deg, #2C3E50 0%, #1A252F 100%)',
   },
   {
-    name: 'Comunidad y Colaboración',
+    name: 'Experiencia culinaria mejorada',
     description:
-      'Comparte tus creaciones culinarias, descubre recetas de otros usuarios y colabora para mejorar la comunidad gastronómica.',
-    icon: RiGroupLine,
-    color: 'from-purple-500 to-fuchsia-500',
+      'Disfruta de una interfaz intuitiva que hace que cocinar sea más divertido y accesible para todos los niveles.',
+    icon: RiSparklingFill,
+    gradient: 'linear-gradient(135deg, #E67E22 20%, #2C3E50 80%)',
+  },
+  {
+    name: 'Cálculo de macros y calorías (Próximamente)',
+    description:
+      'Muy pronto podrás ver el desglose nutricional de cada receta y ajustar porciones para recalcular automáticamente.',
+    icon: GiWeightScale,
+    gradient: 'linear-gradient(135deg, #1ABC9C 0%, #16A085 100%)',
   },
 ];
 
+
 export default function InfoBox() {
   return (
-    <div className="bg-white py-24 sm:py-32 font-sans">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: -20 }}
+    <div style={{ 
+      backgroundColor: '#FDF5E6',
+      color: '#4A2C2A',
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      paddingTop: '50px',
+      paddingBottom: '50px'
+    }}>
+      <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
+        
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          style={{ textAlign: 'center', marginBottom: '5rem' }}
+        >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{
+              display: 'inline-block',
+              padding: '0.5rem 1.5rem',
+              background: 'linear-gradient(135deg, #E67E22, #C2651A)',
+              borderRadius: '50px',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              marginBottom: '2rem',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}
+          >
+            Cocina Inteligente
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-base font-semibold text-orange-600"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              fontWeight: '800',
+              color: '#2C3E50',
+              lineHeight: '1.1',
+              marginBottom: '1.5rem'
+            }}
           >
-            Cocina inteligente
-          </motion.h2>
+            Revoluciona tu forma de{' '}
+            <span style={{ 
+              background: 'linear-gradient(135deg, #E67E22, #C2651A)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              cocinar
+            </span>
+          </motion.h1>
+          
           <motion.p
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl"
+            transition={{ duration: 0.8, delay: 0.4 }}
+            style={{
+              fontSize: '1.2rem',
+              color: '#4A2C2A',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: '1.6'
+            }}
           >
-            Una nueva forma de crear y disfrutar recetas
+            Culinarium utiliza inteligencia artificial para transformar ingredientes simples 
+            en recetas extraordinarias, adaptadas perfectamente a tus gustos y necesidades.
           </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 text-lg text-gray-700 max-w-3xl mx-auto"
-          >
-            Culinarium te ayuda a cocinar de forma más creativa y eficiente. Nuestra app combina inteligencia
-            artificial y colaboración entre usuarios para ofrecerte recetas adaptadas a tus gustos.
-          </motion.p>
-        </div>
-        <div className="mx-auto mt-16 max-w-full lg:mt-24">
-          <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+        </motion.div>
+
+        {/* Features Grid */}
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: '2rem',
+          margin: '4rem 0 0 0'
+        }}>
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.name}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, delay: index * 0.15 }}
+              whileHover={{ 
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
+              style={{
+                position: 'relative',
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '24px',
+                padding: '3rem 2rem',
+                border: '2px solid rgba(230, 126, 34, 0.2)',
+                cursor: 'pointer',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Background decoration */}
+              <div style={{
+                position: 'absolute',
+                top: '-50%',
+                right: '-50%',
+                width: '200%',
+                height: '200%',
+                background: `conic-gradient(from 0deg at 50% 50%, ${feature.gradient.replace('linear-gradient(135deg, ', '').replace(')', '')}, transparent 70%)`,
+                opacity: '0.05',
+                transform: 'rotate(-45deg)'
+              }} />
+              
+              {/* Icon */}
               <motion.div
-                key={feature.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                whileHover={{ y: -10, boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1)' }}
-                className="relative flex flex-col items-center text-center p-10 bg-white/60 backdrop-blur-md rounded-3xl shadow-lg transform transition-all duration-300 ease-in-out border border-gray-100"
+                whileHover={{ rotate: 5, scale: 1.1 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  background: feature.gradient,
+                  borderRadius: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '2rem',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                }}
               >
-                <div className={`-mt-20 mb-8 size-20 flex items-center justify-center rounded-full shadow-2xl bg-gradient-to-br ${feature.color} ring-4 ring-white`}>
-                  <feature.icon aria-hidden="true" className="size-10 text-white" />
-                </div>
-                <dt className="text-xl font-bold text-gray-900 mb-2">{feature.name}</dt>
-                <dd className="text-base text-gray-600">{feature.description}</dd>
+                <feature.icon size={40} color="white" />
               </motion.div>
-            ))}
-          </dl>
+              
+              {/* Content */}
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#2C3E50',
+                marginBottom: '1rem',
+                lineHeight: '1.3'
+              }}>
+                {feature.name}
+              </h3>
+              
+              <p style={{
+                fontSize: '1rem',
+                color: '#4A2C2A',
+                lineHeight: '1.6',
+                opacity: '0.8'
+              }}>
+                {feature.description}
+              </p>
+              
+              {/* Decorative element */}
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: '60px' }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.5 + index * 0.1 }}
+                style={{
+                  height: '4px',
+                  background: feature.gradient,
+                  borderRadius: '2px',
+                  marginTop: '1.5rem'
+                }}
+              />
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>

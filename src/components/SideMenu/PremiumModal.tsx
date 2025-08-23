@@ -4,6 +4,7 @@ import { CustomUser } from "@/context/user-context";
 import EmbeddedCheckoutButton from "../EmbeddedCheckoutForm";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface PremiumModalProps {
   onClose: () => void;
@@ -15,6 +16,8 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
   onClose,
   user,
 }) => {
+  useBodyScrollLock(true); // Bloquea el scroll mientras el modal esté montado
+
   const isSubscribed = user?.isSubscribed || false;
   const features = [
     "300 tokens permiten acceder a 30 recetas distintas",
@@ -71,43 +74,43 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
             </div>
 
             {isSubscribed ? (
-                <div className="flex-grow flex flex-col items-center justify-center text-center px-2 -mx-2 pb-2">
-                    <div className="p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-200 w-full max-w-md">
-                        <div className="w-20 h-20 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-                            <Star className="w-10 h-10 text-white" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                            ¡Ya eres un suscriptor Premium!
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                            Mantienes tus tokens y acceso a todas las funcionalidades premium.
-                        </p>
-                        <p className="text-gray-600 text-sm mt-4">
-                            Tu suscripción se renovará automáticamente el{" "}
-                            <span className="font-semibold">
-                                {user?.tokens_reset_date ? formatDate(user.tokens_reset_date.toDate()) : 'N/A'}
-                            </span>
-                            .
-                        </p>
-                    </div>
+              <div className="flex-grow flex flex-col items-center justify-center text-center px-2 -mx-2 pb-2">
+                <div className="p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-200 w-full max-w-md">
+                  <div className="w-20 h-20 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                    <Star className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    ¡Ya eres un suscriptor Premium!
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Mantienes tus tokens y acceso a todas las funcionalidades premium.
+                  </p>
+                  <p className="text-gray-600 text-sm mt-4">
+                    Tu suscripción se renovará automáticamente el{" "}
+                    <span className="font-semibold">
+                      {user?.tokens_reset_date ? formatDate(user.tokens_reset_date.toDate()) : 'N/A'}
+                    </span>
+                    .
+                  </p>
                 </div>
+              </div>
             ) : (
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 mb-6 border border-amber-100">
-                    <div className="text-center mb-4">
-                        <span className="text-4xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                            €7.99
-                        </span>
-                        <span className="text-gray-600 ml-2">/mes</span>
-                    </div>
-                    <ul className="space-y-3 text-left">
-                        {features.map((item) => (
-                            <li key={item} className="flex items-start text-sm md:text-base">
-                                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mr-3" />
-                                <span className="text-gray-700">{item}</span>
-                            </li>
-                        ))}
-                    </ul>
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 mb-6 border border-amber-100">
+                <div className="text-center mb-4">
+                  <span className="text-4xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
+                    €7.99
+                  </span>
+                  <span className="text-gray-600 ml-2">/mes</span>
                 </div>
+                <ul className="space-y-3 text-left">
+                  {features.map((item) => (
+                    <li key={item} className="flex items-start text-sm md:text-base">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mr-3" />
+                      <span className="text-gray-700">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 

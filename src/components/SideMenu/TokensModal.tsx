@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { Zap, X } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
 import TokenPurchaseCards from "@/components/TokenPurchaseCards";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface TokensModalProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ interface TokensModalProps {
 }
 
 export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
+  useBodyScrollLock(true); // Bloquea el scroll mientras el modal esté montado
+
   const extra = user?.extra_tokens || 0;
   const monthly = user?.monthly_tokens || 0;
 
@@ -25,29 +28,29 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"> {/* Cambiado p-6 a p-4 para mejor ajuste en móvil */}
       {/* Modal container - Aumentado el tamaño máximo y altura */}
-      <div 
+      <div
         className="rounded-3xl p-6 md:p-8 w-full max-w-7xl max-h-[95vh] shadow-2xl relative flex flex-col"
         style={{ backgroundColor: 'var(--background)' }}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <div 
+            <div
               className="w-16 h-16 rounded-full flex items-center justify-center shadow-md"
-              style={{ 
-                background: 'linear-gradient(135deg, var(--highlight) 0%, var(--highlight-dark) 100%)' 
+              style={{
+                background: 'linear-gradient(135deg, var(--highlight) 0%, var(--highlight-dark) 100%)'
               }}
             >
               <Zap className="w-8 h-8" style={{ color: 'var(--text2)' }} />
             </div>
             <div>
-              <h2 
+              <h2
                 className="text-2xl font-bold mb-1"
                 style={{ color: 'var(--foreground)' }}
               >
                 Comprar Tokens Extra
               </h2>
-              <p 
+              <p
                 className="text-sm opacity-80"
                 style={{ color: 'var(--foreground)' }}
               >
@@ -70,52 +73,52 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
         {/* Contenido - Añadido overflow-y-auto y flex-grow para desplazamiento */}
         <div className="flex-grow overflow-y-auto p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-            <TokenPurchaseCards 
-              user={user} 
-              count={30} 
-              price={0.99} 
-              label="Uso puntual (3 recetas)" 
-              priceId="price_1RwHKLRpBiBhmezmK1AybT5C" 
-              labelPromo="Oferta" 
+            <TokenPurchaseCards
+              user={user}
+              count={30}
+              price={0.99}
+              label="Uso puntual (3 recetas)"
+              priceId="price_1RwHKLRpBiBhmezmK1AybT5C"
+              labelPromo="Oferta"
               promoType="limited"
             />
-            <TokenPurchaseCards 
-              user={user} 
-              count={60} 
-              price={1.99} 
-              label="Uso ocasional (6 recetas)" 
-              priceId="price_1RwHL6RpBiBhmezmsEhJyMC1" 
+            <TokenPurchaseCards
+              user={user}
+              count={60}
+              price={1.99}
+              label="Uso ocasional (6 recetas)"
+              priceId="price_1RwHL6RpBiBhmezmsEhJyMC1"
             />
-            <TokenPurchaseCards 
-              user={user} 
-              count={120} 
-              price={3.49} 
-              label="Uso semanal (12 recetas)" 
-              priceId="price_1RwHLWRpBiBhmezmY3vPGDxT" 
+            <TokenPurchaseCards
+              user={user}
+              count={120}
+              price={3.49}
+              label="Uso semanal (12 recetas)"
+              priceId="price_1RwHLWRpBiBhmezmY3vPGDxT"
             />
-            <TokenPurchaseCards 
-              user={user} 
-              count={250} 
-              price={6.49} 
-              label="Uso frecuente (25 recetas)" 
+            <TokenPurchaseCards
+              user={user}
+              count={250}
+              price={6.49}
+              label="Uso frecuente (25 recetas)"
               priceId="price_1RwHLrRpBiBhmezmFamEW9Ct"
             />
-            <TokenPurchaseCards 
-              user={user} 
-              count={600} 
-              price={13.99} 
-              label="Uso intensivo (60 recetas)" 
-              priceId="price_1RwHMCRpBiBhmezmRzyb4DAm" 
-              labelPromo="Más Popular" 
+            <TokenPurchaseCards
+              user={user}
+              count={600}
+              price={13.99}
+              label="Uso intensivo (60 recetas)"
+              priceId="price_1RwHMCRpBiBhmezmRzyb4DAm"
+              labelPromo="Más Popular"
               promoType="popular"
             />
-            <TokenPurchaseCards 
-              user={user} 
-              count={1200} 
-              price={24.99} 
-              label="Uso profesional (120 recetas)" 
-              priceId="price_1RwHMbRpBiBhmezmgyMbGrJq" 
-              labelPromo="Mejor Valor" 
+            <TokenPurchaseCards
+              user={user}
+              count={1200}
+              price={24.99}
+              label="Uso profesional (120 recetas)"
+              priceId="price_1RwHMbRpBiBhmezmgyMbGrJq"
+              labelPromo="Mejor Valor"
               promoType="value"
             />
           </div>

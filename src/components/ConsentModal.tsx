@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 import { usePathname } from "next/navigation";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.5";
 const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
@@ -318,6 +319,8 @@ export default function ConsentModal() {
   };
 
   if (loading || !show) return null;
+
+  useBodyScrollLock(true);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

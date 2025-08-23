@@ -73,7 +73,7 @@ export function AuthForm({
           // noop
         }
       }
-      
+
       // Una vez que el registro y el consentimiento se han gestionado en el UserContext, redirigimos
       router.push("/kitchen");
     } catch (err) {
@@ -136,7 +136,8 @@ export function AuthForm({
         </button>
       </div>
       {type === "login" ? (
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-sm w-72">
+        {/* 
           <div className="flex items-center gap-2">
             <Checkbox
               id="remember"
@@ -150,7 +151,11 @@ export function AuthForm({
               Recordarme
             </label>
           </div>
-          <Link href="/auth/forgot-password" className="text-blue-500 hover:underline">
+        */}
+          <Link
+            href="/auth/forgot-password"
+            className="text-blue-500 hover:underline"
+          >
             ¿Olvidaste tu contraseña?
           </Link>
         </div>

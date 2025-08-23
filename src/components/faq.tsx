@@ -8,32 +8,66 @@ const faqData = [
   {
     question: "¿Cómo funciona la generación de recetas con IA?",
     answer:
-      "Nuestra inteligencia artificial analiza los ingredientes que tienes disponibles y genera recetas personalizadas basadas en tus preferencias dietéticas y estilo de cocina favorito.",
-  },
-  {
-    question: "¿Puedo guardar mis recetas favoritas?",
-    answer:
-      "Sí, puedes guardar todas tus recetas favoritas en tu perfil personal y crear colecciones temáticas. También puedes organizarlas por categorías y compartirlas con la comunidad.",
-  },
-  {
-    question: "¿La app funciona sin conexión a internet?",
-    answer:
-      "Algunas funciones básicas están disponibles offline, como consultar recetas guardadas. Sin embargo, necesitarás conexión para generar nuevas recetas con IA y sincronizar tus datos.",
-  },
-  {
-    question: "¿Cómo puedo cancelar mi suscripción?",
-    answer:
-      "Puedes cancelar tu suscripción en cualquier momento desde la configuración de tu cuenta. La cancelación será efectiva al final del período de facturación actual.",
+      "Nuestra plataforma utiliza inteligencia artificial de última generación, impulsada por la tecnología de OpenAI, para analizar tus ingredientes y generar recetas personalizadas adaptadas a tus gustos y necesidades."
   },
   {
     question: "¿Hay opciones para dietas especiales?",
     answer:
-      "Absolutamente. Culinarium soporta múltiples tipos de dietas, incluyendo vegetariana, vegana, keto, sin gluten y más. Puedes configurar tus preferencias en tu perfil.",
+      "Absolutamente. Culinarium soporta múltiples tipos de dietas, incluyendo vegetariana, vegana, keto, sin gluten y más.",
   },
   {
-    question: "¿Puedo compartir recetas con otros usuarios?",
+    question: "¿Hay recetas en varios idiomas?",
     answer:
-      "Sí, Culinarium tiene una comunidad activa donde puedes compartir tus creaciones, valorar recetas de otros usuarios y seguir a chefs que te inspiren.",
+      "Actualmente solo están disponibles en español. Próximamente añadiremos soporte para inglés.",
+  },
+  {
+    question: "¿Qué pasa si se me acaban los tokens?",
+    answer:
+      "Podrás comprar paquetes adicionales desde tu cuenta en cualquier momento para seguir generando recetas. O también puedes esperar a la siguiente vez que se reinicien los tokens de tu plan actual, aunque sea el gratuito. Puedes revisar la fecha de renovación de tokens en tu perfil.",
+  },
+  {
+    question: "¿Tienen una versión gratuita?",
+    answer:
+      "Sí, ofrecemos un plan gratuito que incluye 30 tokens mensuales para que puedas probar nuestro servicio.",
+  },
+  {
+    question: "¿Puedo cambiar de plan o paquete de tokens después de contratar?",
+    answer:
+      "Sí, puedes comprar paquetes adicionales o cambiar tu suscripción cuando lo necesites.",
+  },
+  { 
+    question: "¿Cómo puedo cancelar mi suscripción?", 
+    answer: "Puedes cancelar tu suscripción en cualquier momento desde la pagina de perfil. La cancelación será efectiva al final del período de facturación actual.",
+  },
+  {
+    question: "¿Cómo se realiza el pago de la suscripción?",
+    answer:
+      "El pago se gestiona de forma segura a través de Stripe, aceptando tarjetas de crédito y débito.",
+  },
+  {
+    question: "¿Ofrecen reembolsos?",
+    answer:
+      "No ofrecemos reembolsos. Una vez compras tokens, se quedan en la pagina para consumo.",
+  },
+  {
+    question: "¿Qué pasa si mi pago falla?",
+    answer:
+      "Si el pago falla, recibirás un aviso por email y tendrás varios intentos para solucionarlo antes de que tu suscripción se pause.",
+  },
+  {
+    question: "¿Ofrecen soporte técnico?",
+    answer:
+      "Sí, puedes contactarnos por email enviandonos un mensaje a culinariumofficial@gmail.com.",
+  },
+  {
+    question: "¿Puedo sugerir nuevas funcionalidades o mejoras?",
+    answer:
+      "Sí, nos encanta recibir sugerencias. Puedes enviarlas a través de nuestro correo culinariumofficial@gmail.com.",
+  },
+  {
+    question: "¿Guardan los datos de mi tarjeta de crédito?",
+    answer:
+      "No, el procesamiento de pagos lo gestiona Stripe, que es una plataforma segura y certificada PCI DSS.",
   },
 ];
 
@@ -64,8 +98,8 @@ export default function FAQ() {
   };
 
   return (
-    <div className="pb-24 sm:pb-32 w-full font-sans">
-      <div className="mx-auto max-w-4xl px-6 lg:px-8">
+    <div className="pb-12 sm:pb-12 w-full font-sans">
+      <div className="mx-auto max-w-4xl pt-16 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -134,9 +168,9 @@ export default function FAQ() {
             </motion.div>
           ))}
         </motion.div>
-        
+
         <div className=" mt-12 justify-center w-full text-center">
-          <ButtonPrimary route={"/auth/login"} description={"Get Started"}/>
+          <ButtonPrimary route={"/auth/login"} description={"Get Started"} />
         </div>
 
         <div className="mt-16 text-center">
