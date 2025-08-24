@@ -18,6 +18,11 @@
   --radius: 0.625rem;
 }
 
+.form-custom-shadow {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -6,9 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
 import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
+import { FaCoins } from 'react-icons/fa';
 import { useRouter, useSearchParams } from 'next/navigation'; // Importamos useSearchParams
 import Image from "next/image";
 import { auth } from '@/lib/firebase'; // Necesitamos el auth del cliente para obtener el token
+import { ChefHat } from 'lucide-react';
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
@@ -40,8 +42,8 @@ const RecipePage: React.FC = () => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   // Usar useMemo para que placeholderImageUrl no cambie en cada render
-  const placeholderImageUrl = useMemo(() => 
-    `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`, 
+  const placeholderImageUrl = useMemo(() =>
+    `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`,
     []
   );
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
@@ -49,14 +51,14 @@ const RecipePage: React.FC = () => {
   // Helper to get cuisine style icon
   const getCuisineIcon = (style: string | null) => {
     switch (style) {
-      case 'japanese': return <GiSushis className="w-6 h-6 text-indigo-600" />;
-      case 'mexican': return <GiTacos className="w-6 h-6 text-indigo-600" />;
-      case 'italian': return <GiPizzaSlice className="w-6 h-6 text-indigo-600" />;
-      case 'american': return <GiHamburger className="w-6 h-6 text-indigo-600" />;
-      case 'spanish': return <GiBowlOfRice className="w-6 h-6 text-indigo-600" />;
-      case 'jamaican': return <GiChopsticks className="w-6 h-6 text-indigo-600 rotate-45" />;
-      case 'indian': return <MdOutlineFastfood className="w-6 h-6 text-indigo-600" />;
-      default: return <IoRestaurantOutline className="w-6 h-6 text-indigo-600" />;
+      case 'japanese': return <GiSushis className="w-6 h-6 text-[var(--highlight)]" />;
+      case 'mexican': return <GiTacos className="w-6 h-6 text-[var(--highlight)]" />;
+      case 'italian': return <GiPizzaSlice className="w-6 h-6 text-[var(--highlight)]" />;
+      case 'american': return <GiHamburger className="w-6 h-6 text-[var(--highlight)]" />;
+      case 'spanish': return <GiBowlOfRice className="w-6 h-6 text-[var(--highlight)]" />;
+      case 'jamaican': return <GiChopsticks className="w-6 h-6 text-[var(--highlight)] rotate-45" />;
+      case 'indian': return <MdOutlineFastfood className="w-6 h-6 text-[var(--highlight)]" />;
+      default: return <IoRestaurantOutline className="w-6 h-6 text-[var(--highlight)]" />;
     }
   };
 
@@ -128,12 +130,12 @@ const RecipePage: React.FC = () => {
   // Watch for image updates from background generation
   useEffect(() => {
     if (!recipe) return;
-    
+
     // If recipe doesn't have an image and it's not an error recipe
     const isError = recipe.titulo?.startsWith('ERROR:');
     if (!recipe.img_url && !isError) {
       setIsGeneratingImage(true);
-      
+
       // Check periodically if the image has been generated
       const checkForImage = () => {
         if (typeof window !== 'undefined') {
@@ -153,7 +155,7 @@ const RecipePage: React.FC = () => {
       // Check immediately and then every 2 seconds
       checkForImage();
       const interval = setInterval(checkForImage, 2000);
-      
+
       // Clean up after 30 seconds (image generation timeout)
       const timeout = setTimeout(() => {
         console.log('⏰ Timeout: stopping image generation check');
@@ -176,9 +178,9 @@ const RecipePage: React.FC = () => {
     // Si no, volvemos al formulario para generar una nueva.
     const id = searchParams.get('id');
     if (id) {
-        router.push('/kitchen/recipes/list');
+      router.push('/kitchen/recipes/list');
     } else {
-        router.push('/kitchen');
+      router.push('/kitchen');
     }
   };
 
@@ -186,19 +188,25 @@ const RecipePage: React.FC = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('generatedRecipe');
     }
-    // Usar regenerate=1 para indicar que es una regeneración (5 tokens)
-    router.push('/kitchen?auto=1&regenerate=1');
+    // Si la receta se cargó por ID, ir a la cocina sin parámetros
+    // Si no, usar regenerate=1 para indicar que es una regeneración (5 tokens)
+    const id = searchParams.get('id');
+    if (id) {
+      router.push('/kitchen');
+    } else {
+      router.push('/kitchen?auto=1&regenerate=1');
+    }
   };
 
   if (loadingRecipe || !recipe) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center font-sans">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-t-4 border-blue-500 border-t-transparent rounded-full"
+          className="w-16 h-16 border-4 border-t-4 border-[var(--primary)] border-t-transparent rounded-full"
         ></motion.div>
-        <p className="ml-4 text-xl font-semibold text-gray-800">Cargando receta...</p>
+        <p className="ml-4 text-xl font-semibold text-[var(--foreground)]">Cargando receta...</p>
       </div>
     );
   }
@@ -207,7 +215,7 @@ const RecipePage: React.FC = () => {
   const isErrorRecipe = recipe.titulo.startsWith('ERROR:');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br pt-[5%] from-green-50 to-blue-100 py-10 flex items-center justify-center font-sans">
+    <div className="min-h-screen bg-[var(--background)] py-[5%] flex items-center justify-center font-sans">
       <Head>
         <title>Culinarium - {recipe.titulo}</title>
         <meta name="description" content={`Receta para ${recipe.titulo} generada por Culinarium.`} />
@@ -226,7 +234,7 @@ const RecipePage: React.FC = () => {
             onClick={handleGoBack}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center self-start px-6 py-3 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors text-lg font-semibold"
+            className="flex items-center self-start px-6 py-3 bg-[var(--primary)] text-[var(--text2)] rounded-full shadow-md hover:bg-[var(--primary)]/80 transition-colors text-lg font-semibold"
             aria-label="Volver"
           >
             <IoArrowBackCircleOutline className="w-6 h-6 mr-2" />
@@ -235,7 +243,7 @@ const RecipePage: React.FC = () => {
 
           {/* Recipe Header */}
           <section className="text-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[var(--foreground)] mb-4 leading-tight">
               {isErrorRecipe ? (
                 <span className="text-red-600 flex items-center justify-center">
                   <IoWarningOutline className="w-10 h-10 mr-3" />
@@ -245,7 +253,7 @@ const RecipePage: React.FC = () => {
                 recipe.titulo
               )}
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-[var(--foreground)]/80 max-w-3xl mx-auto">
               {recipe.descripcion}
             </p>
           </section>
@@ -265,7 +273,7 @@ const RecipePage: React.FC = () => {
               unoptimized
               onError={() => setImageSrc(placeholderImageUrl)}
             />
-            
+
             {/* Loading overlay for image generation */}
             <AnimatePresence>
               {isGeneratingImage && (
@@ -279,9 +287,9 @@ const RecipePage: React.FC = () => {
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      className="w-8 h-8 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full"
+                      className="w-8 h-8 border-2 border-t-2 border-[var(--primary)] border-t-transparent rounded-full"
                     ></motion.div>
-                    <p className="text-sm font-medium text-gray-700 text-center">
+                    <p className="text-sm font-medium text-[var(--foreground)] text-center">
                       Generando imagen...
                     </p>
                   </div>
@@ -293,37 +301,37 @@ const RecipePage: React.FC = () => {
           {/* Metadata Section */}
           {!isErrorRecipe && (
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-blue-50 p-4 rounded-xl shadow-sm flex items-center space-x-3">
-                <IoTimeOutline className="w-8 h-8 text-blue-600" />
+              <div className="bg-[var(--primary)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
+                <IoTimeOutline className="w-8 h-8 text-[var(--primary)]" />
                 <div>
-                  <h3 className="text-md font-semibold text-gray-700">Tiempo Total</h3>
-                  <p className="text-lg font-bold text-blue-800">{recipe.tiempo_total_min} min</p>
+                  <h3 className="text-md font-semibold text-[var(--foreground)]">Tiempo Total</h3>
+                  <p className="text-lg font-bold text-[var(--primary)]">{recipe.tiempo_total_min} min</p>
                 </div>
               </div>
-              <div className="bg-green-50 p-4 rounded-xl shadow-sm flex items-center space-x-3">
-                <IoPeopleOutline className="w-8 h-8 text-green-600" />
+              <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
+                <IoPeopleOutline className="w-8 h-8 text-[var(--highlight)]" />
                 <div>
-                  <h3 className="text-md font-semibold text-gray-700">Porciones</h3>
-                  <p className="text-lg font-bold text-green-800">{recipe.porciones}</p>
+                  <h3 className="text-md font-semibold text-[var(--foreground)]">Porciones</h3>
+                  <p className="text-lg font-bold text-[var(--highlight)]">{recipe.porciones}</p>
                 </div>
               </div>
               {recipe.estilo && (
-                <div className="bg-indigo-50 p-4 rounded-xl shadow-sm flex items-center space-x-3">
+                <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                   {getCuisineIcon(recipe.estilo)}
                   <div>
-                    <h3 className="text-md font-semibold text-gray-700">Estilo</h3>
-                    <p className="text-lg font-bold text-indigo-800 capitalize">{recipe.estilo}</p>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">Estilo</h3>
+                    <p className="text-lg font-bold text-[var(--highlight)] capitalize">{recipe.estilo}</p>
                   </div>
                 </div>
               )}
               {recipe.restricciones && recipe.restricciones.length > 0 && (
-                <div className="bg-teal-50 p-4 rounded-xl shadow-sm flex items-center space-x-3">
-                  <GiFruitBowl className="w-8 h-8 text-teal-600" />
+                <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
+                  <GiFruitBowl className="w-8 h-8 text-[var(--highlight)]" />
                   <div>
-                    <h3 className="text-md font-semibold text-gray-700">Restricciones</h3>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">Restricciones</h3>
                     <div className="flex flex-wrap gap-1">
                       {recipe.restricciones.map((r, i) => (
-                        <span key={i} className="text-sm font-bold text-teal-800 bg-teal-200 px-2 py-0.5 rounded-full">
+                        <span key={i} className="text-sm font-bold text-[var(--highlight)] bg-[var(--highlight)]/20 px-2 py-0.5 rounded-full">
                           {getRestrictionLabel(r)}
                         </span>
                       ))}
@@ -338,9 +346,9 @@ const RecipePage: React.FC = () => {
           {!isErrorRecipe && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Ingredients List */}
-              <section className="bg-gray-50 p-6 rounded-2xl shadow-inner">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                  <span className="mr-3 text-orange-500 text-4xl">🥕</span> Ingredientes
+              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
+                <h2 className="text-3xl font-bold text-[var(--foreground)] mb-6 flex items-center">
+                  <span className="mr-3 text-[var(--highlight)] text-4xl">🥕</span> Ingredientes
                 </h2>
                 <ul className="list-none space-y-3">
                   {recipe.ingredientes.map((ingredient, index) => (
@@ -349,9 +357,9 @@ const RecipePage: React.FC = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="flex items-start text-lg text-gray-700 border-b border-gray-200 pb-2 last:border-b-0"
+                      className="flex items-start text-lg text-[var(--foreground)] border-b border-[var(--foreground)]/20 pb-2 last:border-b-0"
                     >
-                      <span className="text-blue-500 mr-3 mt-1">●</span>
+                      <span className="text-[var(--primary)] mr-3 mt-1">●</span>
                       {`${ingredient.cantidad} ${ingredient.unidad} de ${ingredient.nombre}`}
                     </motion.li>
                   ))}
@@ -359,9 +367,9 @@ const RecipePage: React.FC = () => {
               </section>
 
               {/* Instructions List */}
-              <section className="bg-gray-50 p-6 rounded-2xl shadow-inner">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                  <span className="mr-3 text-purple-500 text-4xl">👨‍🍳</span> Instrucciones
+              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
+                <h2 className="text-3xl font-bold text-[var(--foreground)] mb-6 flex items-center">
+                  <span className="mr-3 text-[var(--highlight)] text-4xl">👨‍🍳</span> Instrucciones
                 </h2>
                 <ol className="list-decimal list-inside space-y-4 list-none">
                   {recipe.instrucciones.map((instruction, index) => (
@@ -370,9 +378,9 @@ const RecipePage: React.FC = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="text-lg text-gray-700 leading-relaxed"
+                      className="text-lg text-[var(--foreground)] leading-relaxed"
                     >
-                      <span className="font-semibold text-purple-700">Paso {instruction.paso}:</span> {instruction.texto}
+                      <span className="font-semibold text-[var(--primary)]">Paso {instruction.paso}:</span> {instruction.texto}
                     </motion.li>
                   ))}
                 </ol>
@@ -402,19 +410,34 @@ const RecipePage: React.FC = () => {
             </section>
           )}
 
-          {/* Footer Back Button */}
+          {/* Footer Generate Another Recipe Button */}
           <motion.button
             type="button"
             onClick={handleGenerateAnother}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center mt-10 px-8 py-4 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-colors text-xl font-semibold"
-            aria-label="Generar otra receta"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 flex flex-col items-center gap-1 bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
+            aria-label={searchParams.get('id') ? "Ir a la cocina" : "Generar otra receta"}
           >
-            <IoReloadOutline  className="w-7 h-7 mr-3" />
-            <span className="flex flex-col items-center">
-              <span>¡Quiero otra Receta!</span>
+            <span className="flex items-center gap-2">
+              {searchParams.get('id') ? (
+                <>
+                  <ChefHat className="text-2xl" />
+                  Ir a la Cocina
+                </>
+              ) : (
+                <>
+                  <IoReloadOutline className="text-2xl" />
+                  ¡Quiero otra Receta!
+                </>
+              )}
             </span>
+            {!searchParams.get('id') && (
+              <span className="text-sm font-light mt-1 flex items-center gap-1">
+                <FaCoins className="text-yellow-300" />
+                Costo: 5 tokens
+              </span>
+            )}
           </motion.button>
         </div>
       </motion.div>
