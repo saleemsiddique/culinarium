@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
 import LoaderSkeleton from "@/components/LoaderSkeleton";
@@ -15,13 +15,6 @@ export function AuthRedirect({
   redirectTo = "/kitchen" 
 }: AuthRedirectProps) {
   const { user, loading } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && user) {
-      router.push(redirectTo);
-    }
-  }, [user, loading, router, redirectTo]);
 
   // Mostrar loading mientras se verifica la autenticación
   if (loading) {

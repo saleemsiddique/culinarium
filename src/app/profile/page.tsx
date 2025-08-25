@@ -62,13 +62,6 @@ function ProfileContent() {
 
   const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
 
-  useEffect(() => {
-    const hasSeen = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeen) {
-      setShowOnboarding(true);
-    }
-  }, []);
-
   const handleLogout = async () => {
     try {
       await logout();

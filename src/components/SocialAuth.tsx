@@ -17,8 +17,16 @@ export function SocialAuth() {
   const handleGoogleLogin = async () => {
     setLoading("google");
     try {
-      await loginWithGoogle();
-      router.push("/kitchen");
+      const result = await loginWithGoogle(); 
+      console.log("Resultado de loginWithGoogle:", result);
+      
+      if (result?.isNewUser) {
+        console.log("Navegando a onboarding");
+        router.push("/kitchen?onboarding=1"); 
+      } else {
+        console.log("Navegando a cocina");
+        router.push("/kitchen");
+      }
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error);
       // Aquí podrías mostrar un toast o mensaje de error

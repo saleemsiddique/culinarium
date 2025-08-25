@@ -222,8 +222,10 @@ const CulinariumForm: React.FC = () => {
   useEffect(() => {
     const onboardingParam = searchParams.get("onboarding");
     if (onboardingParam === "1") {
+      console.log("Iniciando onboarding " + onboardingParam);
       setShowOnboarding(true);
     }
+
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {

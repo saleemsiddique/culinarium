@@ -28,6 +28,7 @@ import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
 } from "firebase/auth";
+import router from "next/router";
 
 export interface CustomUser {
   uid: string;
@@ -57,7 +58,7 @@ interface UserContextType {
     name: string,
     surname: string
   ) => Promise<string>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<{ user: CustomUser; isNewUser: boolean }>;
   logout: () => Promise<void>;
   updateUserName: (newName: string) => Promise<void>;
   deductTokens: (amount: number) => Promise<void>;
@@ -331,51 +332,56 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const userInfo = result.user;
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  const userInfo = result.user;
 
-    const email = userInfo.email;
-    if (!email) throw new Error("No se pudo obtener el email");
+  const email = userInfo.email;
+  if (!email) throw new Error("No se pudo obtener el email");
 
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
+  const usersRef = collection(db, "user");
+  const q = query(usersRef, where("email", "==", email));
+  const snapshot = await getDocs(q);
 
-    let userData: CustomUser;
+  let userData: CustomUser;
+  let isNewUser = false; // ✅ Flag para detectar usuario nuevo
 
-    if (snapshot.empty) {
-      // Nuevo usuario con Google, creamos copia en Firestore
-      userData = {
-        uid: userInfo.uid, // ✅ Usar el uid de Firebase Auth
-        email: email,
-        firstName: userInfo.displayName?.split(" ")[0] || "",
-        lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
-        created_at: Timestamp.now(),
-        extra_tokens: 0,
-        isSubscribed: false,
-        lastRenewal: Timestamp.now(),
-        monthly_tokens: 50,
-        stripeCustomerId: "",
-        subscriptionId: "",
-        subscriptionStatus: "cancelled",
-        subscriptionCanceled: false,
-        tokens_reset_date: Timestamp.now(),
-      };
+  if (snapshot.empty) {
+    // ✅ Nuevo usuario con Google, creamos copia en Firestore
+    isNewUser = true; // Marcamos como usuario nuevo
+    
+    userData = {
+      uid: userInfo.uid,
+      email: email,
+      firstName: userInfo.displayName?.split(" ")[0] || "",
+      lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
+      created_at: Timestamp.now(),
+      extra_tokens: 0,
+      isSubscribed: false,
+      lastRenewal: Timestamp.now(),
+      monthly_tokens: 50,
+      stripeCustomerId: "",
+      subscriptionId: "",
+      subscriptionStatus: "cancelled",
+      subscriptionCanceled: false,
+      tokens_reset_date: Timestamp.now(),
+    };
 
-      const docRef = doc(db, "user", userInfo.uid);
-      await setDoc(docRef, userData);
-    } else {
-      userData = snapshot.docs[0].data() as CustomUser;
-      // ✅ Añadir el ID del documento
-      userData.uid = snapshot.docs[0].id;
+    const docRef = doc(db, "user", userInfo.uid);
+    await setDoc(docRef, userData);
+  } else {
+    userData = snapshot.docs[0].data() as CustomUser;
+    userData.uid = snapshot.docs[0].id;
+    userData = await checkAndResetMonthlyTokens(userData);
+  }
 
-      // ✅ Verificar y resetear tokens si es necesario (solo para usuarios existentes)
-      userData = await checkAndResetMonthlyTokens(userData);
-    }
+  setUser(userData);
 
-    setUser(userData);
+  return {
+    user: userData,
+    isNewUser: isNewUser
   };
+};
 
   const logout = async () => {
     await signOut(auth);
