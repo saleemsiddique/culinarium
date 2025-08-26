@@ -29,12 +29,12 @@ export async function POST(request: Request) {
         );
 
         const customer = await stripe.customers.create({
-//          email: userData?.email, ESTO SE AGREGA ANTES DEL MERGE
+          email: userData?.email, //ESTO SE AGREGA ANTES DEL MERGE
           metadata: {
             userId: body.userId,
           },
         });
-
+        console.log(customer.email);
         customerId = customer.id;
 
         // 3. Guardar el customerId en Firebase
