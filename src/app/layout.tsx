@@ -75,7 +75,7 @@ export default function RootLayout({
                 <Header />
 
                 {/* Modal que solo aparece si es necesario */}
-                <ConsentModal />
+                {/*<ConsentModal />*/}
 
                 {/* Contenedor que crece */}
                 <div className="flex-1 flex">{children}</div>

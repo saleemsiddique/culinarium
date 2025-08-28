@@ -1,25 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-"use client"
+"use client";
 // pages/culinarium-form.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import Head from 'next/head';
-import { motion, AnimatePresence } from 'framer-motion';
-import { IoCloseCircleOutline, IoAddCircleOutline, IoChevronDownCircleOutline, IoChevronUpCircleOutline } from 'react-icons/io5';
-import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice } from 'react-icons/gi';
-import { MdOutlineFastfood } from 'react-icons/md';
-import { useRouter, useSearchParams } from 'next/navigation'; // Importa useRouter
+import React, { useState, useEffect, useRef } from "react";
+import Head from "next/head";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  IoCloseCircleOutline,
+  IoAddCircleOutline,
+  IoChevronDownCircleOutline,
+  IoChevronUpCircleOutline,
+} from "react-icons/io5";
+import {
+  GiChopsticks,
+  GiSushis,
+  GiTacos,
+  GiHamburger,
+  GiPizzaSlice,
+  GiBowlOfRice,
+} from "react-icons/gi";
+import { MdOutlineFastfood } from "react-icons/md";
+import { useRouter, useSearchParams } from "next/navigation"; // Importa useRouter
 
 // Import Firebase client-side auth
-import { auth } from '@/lib/firebase'; // Ensure this path is correct for your client-side Firebase setup
-import { onAuthStateChanged, User as FirebaseUser, signInAnonymously } from 'firebase/auth';
-import { useUser } from '@/context/user-context';
-import Onboarding from '@/components/onboarding';
-import { FaUserClock, FaSpinner, FaUtensils, FaCoins } from 'react-icons/fa';
+import { auth } from "@/lib/firebase"; // Ensure this path is correct for your client-side Firebase setup
+import {
+  onAuthStateChanged,
+  User as FirebaseUser,
+  signInAnonymously,
+} from "firebase/auth";
+import { useUser } from "@/context/user-context";
+import Onboarding from "@/components/onboarding";
+import { FaUserClock, FaSpinner, FaUtensils, FaCoins } from "react-icons/fa";
+import { useIngredientHistory } from "@/hooks/useIngredientHistory";
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
-async function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement> {
+async function loadImageFromDataUrl(
+  dataUrl: string
+): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -37,19 +56,28 @@ function getScaledDimensions(
   const widthRatio = maxWidth / srcWidth;
   const heightRatio = maxHeight / srcHeight;
   const scale = Math.min(1, widthRatio, heightRatio);
-  return { width: Math.round(srcWidth * scale), height: Math.round(srcHeight * scale) };
+  return {
+    width: Math.round(srcWidth * scale),
+    height: Math.round(srcHeight * scale),
+  };
 }
 
 function estimateBytesFromDataUrl(dataUrl: string): number {
-  const base64 = dataUrl.split(',')[1] || '';
+  const base64 = dataUrl.split(",")[1] || "";
   const len = base64.length;
-  const padding = (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
   return Math.max(0, Math.floor((len * 3) / 4) - padding);
 }
 
 async function compressDataUrlToJpeg(
   inputDataUrl: string,
-  options?: { maxBytes?: number; maxWidth?: number; maxHeight?: number; initialQuality?: number; minQuality?: number }
+  options?: {
+    maxBytes?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    initialQuality?: number;
+    minQuality?: number;
+  }
 ): Promise<string> {
   const {
     maxBytes = 1000_000,
@@ -70,17 +98,22 @@ async function compressDataUrlToJpeg(
 
   // Intentos acotados: reduce calidad y, si no basta, reduce dimensiones
   for (let pass = 0; pass < 8; pass++) {
-    const { width, height } = getScaledDimensions(img.naturalWidth, img.naturalHeight, currentMaxWidth, currentMaxHeight);
-    const canvas = document.createElement('canvas');
+    const { width, height } = getScaledDimensions(
+      img.naturalWidth,
+      img.naturalHeight,
+      currentMaxWidth,
+      currentMaxHeight
+    );
+    const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('No se pudo obtener el contexto de canvas');
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("No se pudo obtener el contexto de canvas");
     ctx.drawImage(img, 0, 0, width, height);
 
     // Bucle de calidad descendente en este tamaño
     for (let qStep = 0; qStep < 5; qStep++) {
-      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      const dataUrl = canvas.toDataURL("image/jpeg", quality);
       if (estimateBytesFromDataUrl(dataUrl) <= maxBytes) {
         return dataUrl;
       }
@@ -95,14 +128,19 @@ async function compressDataUrlToJpeg(
   }
 
   // Último intento a calidad mínima
-  const { width: finalW, height: finalH } = getScaledDimensions(img.naturalWidth, img.naturalHeight, Math.max(512, Math.floor(maxWidth * 0.6)), Math.max(512, Math.floor(maxHeight * 0.6)));
-  const finalCanvas = document.createElement('canvas');
+  const { width: finalW, height: finalH } = getScaledDimensions(
+    img.naturalWidth,
+    img.naturalHeight,
+    Math.max(512, Math.floor(maxWidth * 0.6)),
+    Math.max(512, Math.floor(maxHeight * 0.6))
+  );
+  const finalCanvas = document.createElement("canvas");
   finalCanvas.width = finalW;
   finalCanvas.height = finalH;
-  const finalCtx = finalCanvas.getContext('2d');
-  if (!finalCtx) throw new Error('No se pudo obtener el contexto de canvas');
+  const finalCtx = finalCanvas.getContext("2d");
+  if (!finalCtx) throw new Error("No se pudo obtener el contexto de canvas");
   finalCtx.drawImage(img, 0, 0, finalW, finalH);
-  return finalCanvas.toDataURL('image/jpeg', 0.5);
+  return finalCanvas.toDataURL("image/jpeg", 0.5);
 }
 
 // Componente para las etiquetas (tags)
@@ -143,20 +181,27 @@ const CulinariumForm: React.FC = () => {
 
   // Ingredientes disponibles (Columna 1)
   const [ingredients, setIngredients] = useState<string[]>([]);
-  const [currentIngredient, setCurrentIngredient] = useState<string>('');
+  const [currentIngredient, setCurrentIngredient] = useState<string>("");
   const [ingredientError, setIngredientError] = useState<boolean>(false);
+
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const { ingredientHistory, /*addToHistory,*/ getSuggestions } =
+    useIngredientHistory();
 
   // Nuevo estado: tiempo disponible
   const [availableTime, setAvailableTime] = useState<string>("30");
 
   // Estados para API
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [error, setError] = useState<string | null>(null);
-  const [isLoadingOverlayVisible, setIsLoadingOverlayVisible] = useState<boolean>(false); // Loading overlay visibility
+  const [isLoadingOverlayVisible, setIsLoadingOverlayVisible] =
+    useState<boolean>(false); // Loading overlay visibility
 
   // Ingredientes a evitar (Columna 3)
   const [excludedIngredients, setExcludedIngredients] = useState<string[]>([]);
-  const [currentExcluded, setCurrentExcluded] = useState<string>('');
+  const [currentExcluded, setCurrentExcluded] = useState<string>("");
 
   // Toast state
   const [toastMessage, setToastMessage] = useState<string>("");
@@ -185,27 +230,55 @@ const CulinariumForm: React.FC = () => {
   };
 
   const mealTimes = [
-    { label: 'Desayuno', value: 'breakfast' },
-    { label: 'Comida', value: 'lunch' },
-    { label: 'Cena', value: 'dinner' },
-    { label: 'Snack', value: 'snack' },
+    { label: "Desayuno", value: "breakfast" },
+    { label: "Comida", value: "lunch" },
+    { label: "Cena", value: "dinner" },
+    { label: "Snack", value: "snack" },
   ];
   const MAX_DINERS = 8;
   const dietaryOptions = [
-    { label: 'Vegetariano', value: 'vegetarian' },
-    { label: 'Vegano', value: 'vegan' },
-    { label: 'Sin Gluten', value: 'gluten-free' },
-    { label: 'Sin Lactosa', value: 'lactose-free' },
-    { label: 'Keto', value: 'keto' },
+    { label: "Vegetariano", value: "vegetarian" },
+    { label: "Vegano", value: "vegan" },
+    { label: "Sin Gluten", value: "gluten-free" },
+    { label: "Sin Lactosa", value: "lactose-free" },
+    { label: "Keto", value: "keto" },
   ];
   const cuisineStyles = [
-    { label: 'Japonesa', value: 'japanese', icon: <GiSushis className="w-6 h-6" /> },
-    { label: 'Mexicana', value: 'mexican', icon: <GiTacos className="w-6 h-6" /> },
-    { label: 'Italiana', value: 'italian', icon: <GiPizzaSlice className="w-6 h-6" /> },
-    { label: 'Americana', value: 'american', icon: <GiHamburger className="w-6 h-6" /> },
-    { label: 'Española', value: 'spanish', icon: <GiBowlOfRice className="w-6 h-6" /> },
-    { label: 'Jamaiquina', value: 'jamaican', icon: <GiChopsticks className="w-6 h-6 rotate-45" /> },
-    { label: 'India', value: 'indian', icon: <MdOutlineFastfood className="w-6 h-6" /> },
+    {
+      label: "Japonesa",
+      value: "japanese",
+      icon: <GiSushis className="w-6 h-6" />,
+    },
+    {
+      label: "Mexicana",
+      value: "mexican",
+      icon: <GiTacos className="w-6 h-6" />,
+    },
+    {
+      label: "Italiana",
+      value: "italian",
+      icon: <GiPizzaSlice className="w-6 h-6" />,
+    },
+    {
+      label: "Americana",
+      value: "american",
+      icon: <GiHamburger className="w-6 h-6" />,
+    },
+    {
+      label: "Española",
+      value: "spanish",
+      icon: <GiBowlOfRice className="w-6 h-6" />,
+    },
+    {
+      label: "Jamaiquina",
+      value: "jamaican",
+      icon: <GiChopsticks className="w-6 h-6 rotate-45" />,
+    },
+    {
+      label: "India",
+      value: "indian",
+      icon: <MdOutlineFastfood className="w-6 h-6" />,
+    },
   ];
 
   //Handle Exiting onboarding
@@ -218,13 +291,16 @@ const CulinariumForm: React.FC = () => {
     router.replace(url.toString());
   };
 
-  // Listen for Firebase Auth state changes and sign in anonymously if no user
+  // Onboarding effect
   useEffect(() => {
     const onboardingParam = searchParams.get("onboarding");
     if (onboardingParam === "1") {
       setShowOnboarding(true);
     }
+  }, [searchParams]);
 
+  // Listen for Firebase Auth state changes and sign in anonymously if no user
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setFirebaseUser(currentUser);
@@ -234,59 +310,85 @@ const CulinariumForm: React.FC = () => {
           setFirebaseUser(anonymousUserCredential.user);
         } catch (anonError) {
           console.error("Error signing in anonymously:", anonError);
-          setToastMessage("Error de autenticación. Intenta recargar la página.");
+          setToastMessage(
+            "Error de autenticación. Intenta recargar la página."
+          );
         }
       }
-      setLoadingUser(false); // User loading is complete
+      setLoadingUser(false);
     });
-    return () => unsubscribe(); // Cleanup subscription on component unmount
-  }, [searchParams]);
+    return () => unsubscribe();
+  }, []);
 
   // Show toast temporarily
   useEffect(() => {
     if (toastMessage) {
-      const timer = setTimeout(() => setToastMessage(''), 3000);
+      const timer = setTimeout(() => setToastMessage(""), 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
   // Handlers ingredientes disponibles
   const handleAddIngredient = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       const value = currentIngredient.trim();
       e.preventDefault();
       if (!value) {
-        setCurrentIngredient('');
+        setCurrentIngredient("");
         return;
       }
-      if (ingredients.includes(value)) {
-        setToastMessage('Ingrediente ya añadido');
+      // Comparar ambos valores en minúsculas
+      const normalizedValue = value.toLowerCase();
+      const isDuplicate = ingredients.some(
+        (ing) => ing.toLowerCase() === normalizedValue
+      );
+
+      if (isDuplicate) {
+        setToastMessage("Ingrediente ya añadido");
       } else {
         setIngredients((prev) => [...prev, value]);
+        //addToHistory(value);
         setIngredientError(false); // Clear error when an ingredient is added
       }
-      setCurrentIngredient('');
+      setCurrentIngredient("");
+      setShowSuggestions(false);
     }
   };
+
   const handleRemoveIngredient = (label: string) => {
     setIngredients((prev) => prev.filter((ing) => ing !== label));
   };
 
+  const handleSelectSuggestion = (suggestion: string) => {
+    if (!ingredients.includes(suggestion)) {
+      setIngredients((prev) => [...prev, suggestion]);
+      //addToHistory(suggestion);
+      setCurrentIngredient("");
+      setShowSuggestions(false);
+      setIngredientError(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentIngredient(e.target.value);
+    setShowSuggestions(e.target.value.length >= 2);
+  };
+
   // Handlers ingredientes a evitar
   const handleAddExcluded = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       const value = currentExcluded.trim();
       e.preventDefault();
       if (!value) {
-        setCurrentExcluded('');
+        setCurrentExcluded("");
         return;
       }
       if (excludedIngredients.includes(value)) {
-        setToastMessage('Ingrediente a evitar ya añadido');
+        setToastMessage("Ingrediente a evitar ya añadido");
       } else {
         setExcludedIngredients((prev) => [...prev, value]);
       }
-      setCurrentExcluded('');
+      setCurrentExcluded("");
     }
   };
   const handleRemoveExcluded = (label: string) => {
@@ -295,7 +397,9 @@ const CulinariumForm: React.FC = () => {
 
   const handleDietaryChange = (option: string) => {
     setDietaryRestrictions((prev) =>
-      prev.includes(option) ? prev.filter((item) => item !== option) : [...prev, option]
+      prev.includes(option)
+        ? prev.filter((item) => item !== option)
+        : [...prev, option]
     );
   };
 
@@ -309,24 +413,33 @@ const CulinariumForm: React.FC = () => {
       return;
     }
     if (!user || !firebaseUser) {
-      setToastMessage("Por favor, regístrate o inicia sesión para generar recetas.");
+      setToastMessage(
+        "Por favor, regístrate o inicia sesión para generar recetas."
+      );
       return;
     }
 
     // Check if the user is anonymous (not registered)
     if (firebaseUser.isAnonymous) {
-      setToastMessage("Por favor, regístrate para generar recetas y gestionar tus tokens.");
+      setToastMessage(
+        "Por favor, regístrate para generar recetas y gestionar tus tokens."
+      );
       return;
     }
 
     // Detectar si es una regeneración (5 tokens) o nueva receta (usando función calculateTokenCost)
-    const isRegeneration = searchParams.get('regenerate') === '1';
+    const isRegeneration = searchParams.get("regenerate") === "1";
     const TOKENS_PER_RECIPE = isRegeneration ? 5 : calculateTokenCost();
-    const recipeType = isRegeneration ? 'regenerar una receta' : 'generar una receta';
+    const recipeType = isRegeneration
+      ? "regenerar una receta"
+      : "generar una receta";
 
     if (!hasEnoughTokens(TOKENS_PER_RECIPE)) {
-      const currentTokens = (user.monthly_tokens || 0) + (user.extra_tokens || 0);
-      setToastMessage(`⚡ Necesitas ${TOKENS_PER_RECIPE} tokens para ${recipeType}. Tienes ${currentTokens} tokens disponibles. Compra más tokens desde el menú lateral.`);
+      const currentTokens =
+        (user.monthly_tokens || 0) + (user.extra_tokens || 0);
+      setToastMessage(
+        `⚡ Necesitas ${TOKENS_PER_RECIPE} tokens para ${recipeType}. Tienes ${currentTokens} tokens disponibles. Compra más tokens desde el menú lateral.`
+      );
       return;
     }
 
@@ -349,11 +462,11 @@ const CulinariumForm: React.FC = () => {
     }
 
     if (!isValid) {
-      setStatus('idle'); // Stay idle if validation fails
+      setStatus("idle"); // Stay idle if validation fails
       return;
     }
 
-    setStatus('loading');
+    setStatus("loading");
     setIsLoadingOverlayVisible(true); // Show loading overlay for the entire process
     setError(null);
 
@@ -361,36 +474,49 @@ const CulinariumForm: React.FC = () => {
 
     try {
       // STEP 1: Generate recipe text (fast loading)
-      const formData = { ingredients, mealTime, diners, dietaryRestrictions, excludedIngredients, cuisineStyle, availableTime };
+      const formData = {
+        ingredients,
+        mealTime,
+        diners,
+        dietaryRestrictions,
+        excludedIngredients,
+        cuisineStyle,
+        availableTime,
+      };
       // Guardar último formulario para autogeneración futura
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         try {
-          sessionStorage.setItem('lastFormData', JSON.stringify(formData));
-        } catch { }
+          sessionStorage.setItem("lastFormData", JSON.stringify(formData));
+        } catch {}
       }
       // Get authentication token
       const idToken = await firebaseUser.getIdToken();
 
-      const openaiRes = await fetch('/api/openai', {
-        method: 'POST',
+      const openaiRes = await fetch("/api/openai", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!openaiRes.ok) {
         const errorData = await openaiRes.json();
-        throw new Error(errorData.error || `Error OpenAI: Status ${openaiRes.status}`);
+        throw new Error(
+          errorData.error || `Error OpenAI: Status ${openaiRes.status}`
+        );
       }
       recipeDataFromAI = await openaiRes.json();
-      console.log('✅ Respuesta IA:', recipeDataFromAI);
+      console.log("✅ Respuesta IA:", recipeDataFromAI);
 
       // NEW: Check if AI actually generated an error recipe based on title prefix
-      if (recipeDataFromAI?.receta?.titulo?.startsWith('ERROR:')) {
+      if (recipeDataFromAI?.receta?.titulo?.startsWith("ERROR:")) {
         // If the AI explicitly returned an error recipe, throw an error to stop the process
-        throw new Error(recipeDataFromAI.receta.descripcion || "La IA no pudo generar una receta válida con los ingredientes proporcionados.");
+        throw new Error(
+          recipeDataFromAI.receta.descripcion ||
+            "La IA no pudo generar una receta válida con los ingredientes proporcionados."
+        );
       }
 
       // STEP 1.5: Deduct tokens after successful recipe generation
@@ -398,100 +524,137 @@ const CulinariumForm: React.FC = () => {
         await deductTokens(TOKENS_PER_RECIPE);
         console.log(`✅ ${TOKENS_PER_RECIPE} tokens deducidos exitosamente`);
       } catch (tokenError) {
-        console.error('Error al deducir tokens:', tokenError);
-        throw new Error('Error al procesar el pago de tokens. Por favor, intenta de nuevo.');
+        console.error("Error al deducir tokens:", tokenError);
+        throw new Error(
+          "Error al procesar el pago de tokens. Por favor, intenta de nuevo."
+        );
       }
 
       // STEP 2: Save recipe WITHOUT image first (so user can see it immediately)
       const saveIdToken = await firebaseUser.getIdToken();
-      const saveRecipeRes = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe: recipeDataFromAI.receta, idToken: saveIdToken }),
+      const saveRecipeRes = await fetch("/api/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipe: recipeDataFromAI.receta,
+          idToken: saveIdToken,
+        }),
       });
 
       if (!saveRecipeRes.ok) {
         const errorData = await saveRecipeRes.json();
-        throw new Error(errorData.error || `Error al guardar receta: Status ${saveRecipeRes.status}`);
+        throw new Error(
+          errorData.error ||
+            `Error al guardar receta: Status ${saveRecipeRes.status}`
+        );
       }
 
       const savedRecipeData = await saveRecipeRes.json();
-      console.log('✅ Receta guardada en Firestore (sin imagen):', savedRecipeData);
+      console.log(
+        "✅ Receta guardada en Firestore (sin imagen):",
+        savedRecipeData
+      );
 
-      setStatus('success');
-      const actionMessage = isRegeneration ? 'regenerada' : 'generada';
-      setToastMessage(`¡Receta ${actionMessage} exitosamente! Se han descontado ${TOKENS_PER_RECIPE} tokens.`);
+      setStatus("success");
+      const actionMessage = isRegeneration ? "regenerada" : "generada";
+      setToastMessage(
+        `¡Receta ${actionMessage} exitosamente! Se han descontado ${TOKENS_PER_RECIPE} tokens.`
+      );
 
       // STEP 3: Store recipe in sessionStorage and navigate (user sees recipe immediately)
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('generatedRecipe', JSON.stringify(recipeDataFromAI.receta));
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "generatedRecipe",
+          JSON.stringify(recipeDataFromAI.receta)
+        );
       }
 
       // Hide loading overlay and navigate to show recipe
       setIsLoadingOverlayVisible(false);
-      router.push('/kitchen/recipes');
+      router.push("/kitchen/recipes");
 
       // STEP 4: Generate image in background (non-blocking)
       // This happens after navigation, so user doesn't wait for image
-      generateImageInBackground(recipeDataFromAI.receta, firebaseUser, savedRecipeData.id);
-
+      generateImageInBackground(
+        recipeDataFromAI.receta,
+        firebaseUser,
+        savedRecipeData.id
+      );
     } catch (err: any) {
-      console.error('❌ Error general en el proceso:', err);
+      console.error("❌ Error general en el proceso:", err);
       setError(err.message);
-      setStatus('error');
+      setStatus("error");
       setToastMessage(`Error: ${err.message}`); // Display error to user
       setIsLoadingOverlayVisible(false); // Hide loading overlay on error
     }
   };
 
   // Background image generation function
-  const generateImageInBackground = async (recipe: any, firebaseUser: any, recipeId: string) => {
+  const generateImageInBackground = async (
+    recipe: any,
+    firebaseUser: any,
+    recipeId: string
+  ) => {
     try {
-      console.log('🖼️ Iniciando generación de imagen en segundo plano para receta ID:', recipeId);
+      console.log(
+        "🖼️ Iniciando generación de imagen en segundo plano para receta ID:",
+        recipeId
+      );
 
-      const imageRes = await fetch('/api/recipe-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe })
+      const imageRes = await fetch("/api/recipe-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipe }),
       });
 
-      console.log('📸 Solicitud /api/recipe-image status:', imageRes.status);
+      console.log("📸 Solicitud /api/recipe-image status:", imageRes.status);
       const imageData = await imageRes.json().catch(() => ({}));
-      console.log('📸 Respuesta /api/recipe-image:', imageData);
+      console.log("📸 Respuesta /api/recipe-image:", imageData);
 
       if (imageRes.ok && imageData?.img_url) {
         // Compress image
-        const compressedDataUrl = await compressDataUrlToJpeg(imageData.img_url, {
-          maxBytes: 1000_000,
-          maxWidth: 1024,
-          maxHeight: 1024,
-        });
+        const compressedDataUrl = await compressDataUrlToJpeg(
+          imageData.img_url,
+          {
+            maxBytes: 1000_000,
+            maxWidth: 1024,
+            maxHeight: 1024,
+          }
+        );
 
         // Update recipe with image using PUT endpoint
         const updatedRecipe = { ...recipe, img_url: compressedDataUrl };
         const saveIdToken = await firebaseUser.getIdToken();
         const updateRecipeRes = await fetch(`/api/recipes/${recipeId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ recipe: updatedRecipe, idToken: saveIdToken }),
         });
 
         if (updateRecipeRes.ok) {
-          console.log('✅ Imagen generada y receta actualizada en segundo plano');
+          console.log(
+            "✅ Imagen generada y receta actualizada en segundo plano"
+          );
 
           // Update sessionStorage so the image appears when user refreshes
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('generatedRecipe', JSON.stringify(updatedRecipe));
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem(
+              "generatedRecipe",
+              JSON.stringify(updatedRecipe)
+            );
           }
         } else {
           const errorData = await updateRecipeRes.json().catch(() => ({}));
-          console.warn('⚠️ No se pudo actualizar la receta con la imagen:', errorData);
+          console.warn(
+            "⚠️ No se pudo actualizar la receta con la imagen:",
+            errorData
+          );
         }
       } else {
-        console.warn('⚠️ No se pudo generar la imagen en segundo plano');
+        console.warn("⚠️ No se pudo generar la imagen en segundo plano");
       }
     } catch (imgErr) {
-      console.error('❌ Error generando imagen en segundo plano:', imgErr);
+      console.error("❌ Error generando imagen en segundo plano:", imgErr);
       // No mostramos error al usuario ya que la receta ya se generó exitosamente
     }
   };
@@ -499,19 +662,42 @@ const CulinariumForm: React.FC = () => {
   // Auto-generar una receta si venimos con ?auto=1 usando el último formulario guardado
   useEffect(() => {
     if (loadingUser) return;
-    const auto = searchParams.get('auto');
-    if (auto === '1' && !autoTriggered) {
-      const stored = typeof window !== 'undefined' ? sessionStorage.getItem('lastFormData') : null;
+    const auto = searchParams.get("auto");
+    if (auto === "1" && !autoTriggered) {
+      const stored =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("lastFormData")
+          : null;
       if (stored) {
         try {
           const data = JSON.parse(stored);
-          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : []);
-          setMealTime(typeof data.mealTime === 'string' || data.mealTime === null ? data.mealTime : null);
-          setDiners(typeof data.diners === 'number' ? data.diners : 1);
-          setDietaryRestrictions(Array.isArray(data.dietaryRestrictions) ? data.dietaryRestrictions : []);
-          setExcludedIngredients(Array.isArray(data.excludedIngredients) ? data.excludedIngredients : []);
-          setCuisineStyle(typeof data.cuisineStyle === 'string' || data.cuisineStyle === null ? data.cuisineStyle : null);
-          setAvailableTime(typeof data.availableTime === 'string' ? data.availableTime : '30');
+          setIngredients(
+            Array.isArray(data.ingredients) ? data.ingredients : []
+          );
+          setMealTime(
+            typeof data.mealTime === "string" || data.mealTime === null
+              ? data.mealTime
+              : null
+          );
+          setDiners(typeof data.diners === "number" ? data.diners : 1);
+          setDietaryRestrictions(
+            Array.isArray(data.dietaryRestrictions)
+              ? data.dietaryRestrictions
+              : []
+          );
+          setExcludedIngredients(
+            Array.isArray(data.excludedIngredients)
+              ? data.excludedIngredients
+              : []
+          );
+          setCuisineStyle(
+            typeof data.cuisineStyle === "string" || data.cuisineStyle === null
+              ? data.cuisineStyle
+              : null
+          );
+          setAvailableTime(
+            typeof data.availableTime === "string" ? data.availableTime : "30"
+          );
         } catch {
           // Si falla el parseo, evitamos bucles
         }
@@ -528,15 +714,14 @@ const CulinariumForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-[var(--background)] to-[var(--background)] py-10 flex items-center justify-center font-sans">
-      {showOnboarding && (
-        <Onboarding
-          onClose={handleFinishOnboarding}
-        />
-      )}
-      
+      {showOnboarding && <Onboarding onClose={handleFinishOnboarding} />}
+
       <Head>
         <title>Culinarium - Encuentra tu Receta</title>
-        <meta name="description" content="Encuentra tu receta ideal con el formulario interactivo de Culinarium." />
+        <meta
+          name="description"
+          content="Encuentra tu receta ideal con el formulario interactivo de Culinarium."
+        />
       </Head>
 
       <motion.div
@@ -550,22 +735,94 @@ const CulinariumForm: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}
             <div className="lg:col-span-1 flex flex-col">
-              <section className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex-grow ${ingredientError ? 'border-2 border-[var(--highlight)]' : ''}`}>
+              <section
+                className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex-grow ${
+                  ingredientError ? "border-2 border-[var(--highlight)]" : ""
+                }`}
+              >
                 <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4 flex items-center">
-                  <span className="mr-2 text-[var(--highlight)] text-3xl">🍳</span> ¿Qué tienes a mano?
+                  <span className="mr-2 text-[var(--highlight)] text-3xl">
+                    🍳
+                  </span>{" "}
+                  ¿Qué tienes a mano?
                 </h2>
                 <p className="text-[var(--foreground)] mb-4 text-sm">
-                  Escribe un ingrediente y presiona <b>Enter</b> para añadirlo. Toca para borrar.
+                  Escribe un ingrediente y presiona <b>Enter</b> para añadirlo.
+                  Toca para borrar.
                 </p>
-                <input
-                  type="text"
-                  value={currentIngredient}
-                  onChange={(e) => setCurrentIngredient(e.target.value)}
-                  onKeyDown={handleAddIngredient}
-                  placeholder="Ej: Pollo, arroz, tomate..."
-                  className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${ingredientError ? 'border-[var(--highlight)]' : 'border-[var(--primary)]'}`}
-                  aria-label="Añadir ingrediente"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={currentIngredient}
+                    onChange={handleInputChange}
+                    onKeyDown={handleAddIngredient}
+                    onFocus={() =>
+                      setShowSuggestions(currentIngredient.length >= 2)
+                    }
+                    onBlur={() =>
+                      setTimeout(() => setShowSuggestions(false), 200)
+                    }
+                    placeholder="Ej: Pollo, arroz, tomate..."
+                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${
+                      ingredientError
+                        ? "border-[var(--highlight)]"
+                        : "border-[var(--primary)]"
+                    }`}
+                    aria-label="Añadir ingrediente"
+                    autoComplete="off"
+                  />
+
+                  {showSuggestions &&
+                    getSuggestions(currentIngredient, ingredients).length >
+                      0 && (
+                      <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-[var(--primary)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        {getSuggestions(currentIngredient, ingredients).map(
+                          (suggestion, index) => (
+                            <button
+                              key={`${suggestion}-${index}`}
+                              onClick={() => handleSelectSuggestion(suggestion)}
+                              className="w-full text-left px-4 py-2 hover:bg-[var(--highlight)]/10 focus:bg-[var(--highlight)]/20 focus:outline-none transition-colors first:rounded-t-xl last:rounded-b-xl flex justify-between items-center"
+                            >
+                              <span className="text-[var(--foreground)]">
+                                {suggestion}
+                              </span>
+                              <span className="text-xs text-[var(--muted)]">
+                                • Usado antes
+                              </span>
+                            </button>
+                          )
+                        )}
+                      </div>
+                    )}
+                </div>
+
+                {/* Sugerencias rápidas cuando no hay input */}
+                {currentIngredient === "" &&
+                  ingredientHistory
+                    .filter((ing) => !ingredients.includes(ing))
+                    .slice(0, 6).length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-[var(--muted)] mb-2">
+                        Ingredientes sugeridos:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {ingredientHistory
+                          .filter((ing) => !ingredients.includes(ing))
+                          .slice(0, 6)
+                          .map((ingredient) => (
+                            <button
+                              key={ingredient}
+                              onClick={() => handleSelectSuggestion(ingredient)}
+                              type="button"
+                              className="px-3 py-1 bg-[var(--highlight)]/10 text-[var(--highlight)] text-sm rounded-full hover:bg-[var(--highlight)]/20 transition-colors border border-[var(--highlight)]/30"
+                            >
+                              + {ingredient}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
                 {ingredientError && (
                   <p className="text-[var(--highlight)] text-sm mt-2">
                     ¡Por favor, añade al menos un ingrediente!
@@ -573,7 +830,13 @@ const CulinariumForm: React.FC = () => {
                 )}
                 <div className="mt-4 flex flex-wrap max-h-[250px] overflow-y-auto custom-scrollbar">
                   <AnimatePresence>
-                    {ingredients.map((ing) => (<Tag key={ing} label={ing} onRemove={handleRemoveIngredient} />))}
+                    {ingredients.map((ing) => (
+                      <Tag
+                        key={ing}
+                        label={ing}
+                        onRemove={handleRemoveIngredient}
+                      />
+                    ))}
                   </AnimatePresence>
                 </div>
                 {ingredients.length === 0 && !ingredientError && (
@@ -582,12 +845,15 @@ const CulinariumForm: React.FC = () => {
                   </p>
                 )}
                 <p className="md:hidden text-[var(--highlight)] text-sm mt-2 flex items-center">
-                  <IoAddCircleOutline className="w-5 h-5 mr-1" /> Toca los ingredientes para borrarlos.
+                  <IoAddCircleOutline className="w-5 h-5 mr-1" /> Toca los
+                  ingredientes para borrarlos.
                 </p>
 
                 {/* NUEVA SECCIÓN: Tiempo disponible */}
                 <section className="mt-6">
-                  <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">¿Cuánto tiempo tienes?</h3>
+                  <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
+                    ¿Cuánto tiempo tienes?
+                  </h3>
                   <select
                     value={availableTime}
                     onChange={(e) => setAvailableTime(e.target.value)}
@@ -608,11 +874,16 @@ const CulinariumForm: React.FC = () => {
             <div className="lg:col-span-1 flex flex-col space-y-6">
               {/* Sección de Momento del Día */}
               <section
-                className={`bg-[var(--background)] p-4 rounded-2xl shadow-inner flex flex-col justify-between ${mealTimeError ? 'border-2 border-[var(--highlight)]' : ''}`}
-                style={{ minHeight: '250px', maxHeight: '350px' }}
+                className={`bg-[var(--background)] p-4 rounded-2xl shadow-inner flex flex-col justify-between ${
+                  mealTimeError ? "border-2 border-[var(--highlight)]" : ""
+                }`}
+                style={{ minHeight: "250px", maxHeight: "350px" }}
               >
                 <h2 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center justify-center">
-                  <span className="mr-2 text-[var(--highlight)] text-xl">☀️</span> ¿Para cuándo es?
+                  <span className="mr-2 text-[var(--highlight)] text-xl">
+                    ☀️
+                  </span>{" "}
+                  ¿Para cuándo es?
                 </h2>
                 <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">
                   {mealTimes.map((time) => (
@@ -626,16 +897,17 @@ const CulinariumForm: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className={`flex flex-col items-center justify-center  p-2 rounded-xl border-2 transition-all duration-200
-                        ${mealTime === time.value
-                          ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
-                          : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
+                        ${
+                          mealTime === time.value
+                            ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
+                            : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
                         }`}
                     >
                       <span className="text-2xl mb-0.5">
-                        {time.value === 'breakfast' && '☕'}
-                        {time.value === 'lunch' && '🍲'}
-                        {time.value === 'dinner' && '🌙'}
-                        {time.value === 'snack' && '🍎'}
+                        {time.value === "breakfast" && "☕"}
+                        {time.value === "lunch" && "🍲"}
+                        {time.value === "dinner" && "🌙"}
+                        {time.value === "snack" && "🍎"}
                       </span>
                       <span className="font-semibold text-center leading-tight">
                         {time.label}
@@ -651,9 +923,16 @@ const CulinariumForm: React.FC = () => {
               </section>
 
               {/* Sección de Número de Personas */}
-              <section className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex flex-col justify-center h-full relative ${!user?.isSubscribed ? 'opacity-60' : ''}`}>
+              <section
+                className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex flex-col justify-center h-full relative ${
+                  !user?.isSubscribed ? "opacity-60" : ""
+                }`}
+              >
                 <h2 className="text-xl font-bold text-[var(--foreground)] mb-4 text-center flex items-center justify-center">
-                  <span className="mr-2 text-[var(--primary)] text-2xl">👨‍👩‍👧‍👦</span> ¿Cuántos van a comer?
+                  <span className="mr-2 text-[var(--primary)] text-2xl">
+                    👨‍👩‍👧‍👦
+                  </span>{" "}
+                  ¿Cuántos van a comer?
                   {!user?.isSubscribed && (
                     <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">
                       PREMIUM
@@ -663,25 +942,40 @@ const CulinariumForm: React.FC = () => {
                 <div className="flex items-center justify-center space-x-4">
                   <motion.button
                     type="button"
-                    onClick={() => user?.isSubscribed && setDiners(Math.max(1, diners - 1))}
+                    onClick={() =>
+                      user?.isSubscribed && setDiners(Math.max(1, diners - 1))
+                    }
                     whileHover={{ scale: user?.isSubscribed ? 1.1 : 1 }}
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners <= 1}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${!user?.isSubscribed || diners <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--primary)]/30'}`}
+                      ${
+                        !user?.isSubscribed || diners <= 1
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-[var(--primary)]/30"
+                      }`}
                     aria-label="Disminuir número de comensales"
                   >
                     <IoCloseCircleOutline className="w-7 h-7" />
                   </motion.button>
-                  <span className="text-5xl font-bold text-[var(--foreground)] w-20 text-center">{diners}</span>
+                  <span className="text-5xl font-bold text-[var(--foreground)] w-20 text-center">
+                    {diners}
+                  </span>
                   <motion.button
                     type="button"
-                    onClick={() => user?.isSubscribed && setDiners(Math.min(MAX_DINERS, diners + 1))}
+                    onClick={() =>
+                      user?.isSubscribed &&
+                      setDiners(Math.min(MAX_DINERS, diners + 1))
+                    }
                     whileHover={{ scale: user?.isSubscribed ? 1.1 : 1 }}
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners >= MAX_DINERS}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${!user?.isSubscribed || diners >= MAX_DINERS ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--primary)]/30'}`}
+                      ${
+                        !user?.isSubscribed || diners >= MAX_DINERS
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-[var(--primary)]/30"
+                      }`}
                     aria-label="Aumentar número de comensales"
                   >
                     <IoAddCircleOutline className="w-7 h-7" />
@@ -696,45 +990,79 @@ const CulinariumForm: React.FC = () => {
               <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
                 <button
                   type="button"
-                  onClick={() => setShowDietaryRestrictions(!showDietaryRestrictions)}
+                  onClick={() =>
+                    setShowDietaryRestrictions(!showDietaryRestrictions)
+                  }
                   className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
                   <span className="flex items-center">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">🚫</span> ¿Alguna restricción?
+                    <span className="mr-2 text-[var(--primary)] text-3xl">
+                      🚫
+                    </span>{" "}
+                    ¿Alguna restricción?
                     {!user?.isSubscribed && (
                       <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">
                         PREMIUM
                       </span>
                     )}
                   </span>
-                  <motion.span animate={{ rotate: showDietaryRestrictions ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                    {showDietaryRestrictions ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                  <motion.span
+                    animate={{ rotate: showDietaryRestrictions ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {showDietaryRestrictions ? (
+                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    ) : (
+                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    )}
                   </motion.span>
                 </button>
                 <AnimatePresence>
                   {showDietaryRestrictions && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
                       <p className="text-[var(--foreground)] mb-4 text-sm">
                         {user?.isSubscribed
                           ? "Selecciona si hay alguna preferencia dietética."
                           : "Con Premium puedes configurar estas restricciones dietéticas:"}
                       </p>
-                      <div className="flex flex-wrap gap-3 mb-6">{dietaryOptions.map(opt => (
-                        <motion.button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => user?.isSubscribed && handleDietaryChange(opt.value)}
-                          whileHover={{ scale: user?.isSubscribed ? 1.05 : 1 }}
-                          whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
-                          disabled={!user?.isSubscribed}
-                          className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${!user?.isSubscribed ? 'opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400' :
-                            dietaryRestrictions.includes(opt.value) ? 'border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md' : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]'
+                      <div className="flex flex-wrap gap-3 mb-6">
+                        {dietaryOptions.map((opt) => (
+                          <motion.button
+                            key={opt.value}
+                            type="button"
+                            onClick={() =>
+                              user?.isSubscribed &&
+                              handleDietaryChange(opt.value)
+                            }
+                            whileHover={{
+                              scale: user?.isSubscribed ? 1.05 : 1,
+                            }}
+                            whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
+                            disabled={!user?.isSubscribed}
+                            className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${
+                              !user?.isSubscribed
+                                ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
+                                : dietaryRestrictions.includes(opt.value)
+                                ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md"
+                                : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]"
                             }`}
-                        >
-                          {opt.label}
-                        </motion.button>
-                      ))}</div>
-                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-3 flex items-center"><span className="mr-2 text-[var(--highlight)] text-2xl">⚠️</span> Ingredientes a evitar:</h3>
+                          >
+                            {opt.label}
+                          </motion.button>
+                        ))}
+                      </div>
+                      <h3 className="text-xl font-bold text-[var(--foreground)] mb-3 flex items-center">
+                        <span className="mr-2 text-[var(--highlight)] text-2xl">
+                          ⚠️
+                        </span>{" "}
+                        Ingredientes a evitar:
+                      </h3>
                       <p className="text-[var(--foreground)] mb-2 text-sm">
                         {user?.isSubscribed
                           ? "Escribe un ingrediente y presiona **Enter** para añadirlo."
@@ -743,18 +1071,42 @@ const CulinariumForm: React.FC = () => {
                       <input
                         type="text"
                         value={currentExcluded}
-                        onChange={(e) => user?.isSubscribed && setCurrentExcluded(e.target.value)}
-                        onKeyDown={user?.isSubscribed ? handleAddExcluded : undefined}
-                        placeholder={user?.isSubscribed ? "Ej: Cacahuetes, cilantro, champiñones..." : "Función Premium - Suscríbete para usar"}
+                        onChange={(e) =>
+                          user?.isSubscribed &&
+                          setCurrentExcluded(e.target.value)
+                        }
+                        onKeyDown={
+                          user?.isSubscribed ? handleAddExcluded : undefined
+                        }
+                        placeholder={
+                          user?.isSubscribed
+                            ? "Ej: Cacahuetes, cilantro, champiñones..."
+                            : "Función Premium - Suscríbete para usar"
+                        }
                         disabled={!user?.isSubscribed}
-                        className={`w-full p-3 border rounded-xl text-lg ${!user?.isSubscribed ? 'opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400' : 'border-[var(--primary)] focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent'
-                          }`}
+                        className={`w-full p-3 border rounded-xl text-lg ${
+                          !user?.isSubscribed
+                            ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
+                            : "border-[var(--primary)] focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent"
+                        }`}
                         aria-label="Añadir ingrediente a evitar"
                       />
                       <div className="mt-4 flex flex-wrap min-h-[60px] max-h-[200px] overflow-y-auto custom-scrollbar">
-                        <AnimatePresence>{excludedIngredients.map(ing => (<Tag key={ing} label={ing} onRemove={handleRemoveExcluded} />))}</AnimatePresence>
+                        <AnimatePresence>
+                          {excludedIngredients.map((ing) => (
+                            <Tag
+                              key={ing}
+                              label={ing}
+                              onRemove={handleRemoveExcluded}
+                            />
+                          ))}
+                        </AnimatePresence>
                       </div>
-                      {excludedIngredients.length === 0 && (<p className="text-[var(--muted)] text-sm mt-2">¡Añade ingredientes que quieras evitar!</p>)}
+                      {excludedIngredients.length === 0 && (
+                        <p className="text-[var(--muted)] text-sm mt-2">
+                          ¡Añade ingredientes que quieras evitar!
+                        </p>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -768,7 +1120,10 @@ const CulinariumForm: React.FC = () => {
                   className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--highlight)] transition-colors"
                 >
                   <span className="flex items-center">
-                    <span className="mr-2 text-[var(--highlight)] text-3xl">🌍</span> ¿Qué estilo te apetece?
+                    <span className="mr-2 text-[var(--highlight)] text-3xl">
+                      🌍
+                    </span>{" "}
+                    ¿Qué estilo te apetece?
                     {!user?.isSubscribed && (
                       <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">
                         PREMIUM
@@ -779,7 +1134,11 @@ const CulinariumForm: React.FC = () => {
                     animate={{ rotate: showCuisineStyle ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {showCuisineStyle ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    {showCuisineStyle ? (
+                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    ) : (
+                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    )}
                   </motion.span>
                 </button>
 
@@ -787,14 +1146,15 @@ const CulinariumForm: React.FC = () => {
                   {showCuisineStyle && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
+                      animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
                       {!user?.isSubscribed && (
                         <p className="text-[var(--foreground)] mb-4 text-sm">
-                          Con Premium puedes elegir entre estos estilos de cocina:
+                          Con Premium puedes elegir entre estos estilos de
+                          cocina:
                         </p>
                       )}
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -802,20 +1162,29 @@ const CulinariumForm: React.FC = () => {
                           <motion.button
                             key={style.value}
                             type="button"
-                            onClick={() => user?.isSubscribed && setCuisineStyle(style.value)}
-                            whileHover={{ scale: user?.isSubscribed ? 1.05 : 1 }}
+                            onClick={() =>
+                              user?.isSubscribed && setCuisineStyle(style.value)
+                            }
+                            whileHover={{
+                              scale: user?.isSubscribed ? 1.05 : 1,
+                            }}
                             whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
                             disabled={!user?.isSubscribed}
                             className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 text-center
-                              ${!user?.isSubscribed
-                                ? 'opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400'
-                                : cuisineStyle === style.value
-                                  ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
-                                  : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
+                              ${
+                                !user?.isSubscribed
+                                  ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
+                                  : cuisineStyle === style.value
+                                  ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
+                                  : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
                               }`}
                           >
-                            <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">{style.icon}</span>
-                            <span className="font-semibold text-xs sm:text-sm leading-tight">{style.label}</span>
+                            <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">
+                              {style.icon}
+                            </span>
+                            <span className="font-semibold text-xs sm:text-sm leading-tight">
+                              {style.label}
+                            </span>
                           </motion.button>
                         ))}
                       </div>
@@ -832,46 +1201,67 @@ const CulinariumForm: React.FC = () => {
                   className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
                   <span className="flex items-center">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">📊</span> Control de Macronutrientes
+                    <span className="mr-2 text-[var(--primary)] text-3xl">
+                      📊
+                    </span>{" "}
+                    Control de Macronutrientes
                     <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full">
                       PRÓXIMAMENTE
                     </span>
                   </span>
-                  <motion.span animate={{ rotate: showMacronutrients ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                    {showMacronutrients ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                  <motion.span
+                    animate={{ rotate: showMacronutrients ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {showMacronutrients ? (
+                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    ) : (
+                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                    )}
                   </motion.span>
                 </button>
                 <AnimatePresence>
                   {showMacronutrients && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
                       <p className="text-[var(--foreground)] mt-2 text-sm">
-                        Próximamente, esta sección te permitirá ajustar la cantidad de proteínas, carbohidratos y grasas de tu receta.
+                        Próximamente, esta sección te permitirá ajustar la
+                        cantidad de proteínas, carbohidratos y grasas de tu
+                        receta.
                       </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </section>
             </div>
-          </div> {/* Fin del grid de 3 columnas */}
-
+          </div>{" "}
+          {/* Fin del grid de 3 columnas */}
           {/* Disable button if user is not loaded or form is submitting */}
           <motion.button
             type="submit"
-            whileHover={{ scale: (loadingUser || status === 'loading') ? 1 : 1.02 }}
-            whileTap={{ scale: (loadingUser || status === 'loading') ? 1 : 0.98 }}
+            whileHover={{
+              scale: loadingUser || status === "loading" ? 1 : 1.02,
+            }}
+            whileTap={{ scale: loadingUser || status === "loading" ? 1 : 0.98 }}
             className={`w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 flex flex-col items-center gap-1
-    ${loadingUser || status === 'loading'
-                ? 'bg-[var(--primary)]/50 cursor-not-allowed'
-                : 'bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]'
-              }`}
-            disabled={loadingUser || status === 'loading'}
+    ${
+      loadingUser || status === "loading"
+        ? "bg-[var(--primary)]/50 cursor-not-allowed"
+        : "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
+    }`}
+            disabled={loadingUser || status === "loading"}
           >
             {loadingUser ? (
               <>
                 <FaUserClock className="text-2xl mb-1" />
                 <span>Cargando usuario...</span>
               </>
-            ) : status === 'loading' ? (
+            ) : status === "loading" ? (
               <>
                 <FaSpinner className="text-2xl animate-spin mb-1" />
                 <span>Generando Receta...</span>
@@ -889,8 +1279,11 @@ const CulinariumForm: React.FC = () => {
               </>
             )}
           </motion.button>
-
-          {status === 'error' && <p className="text-[var(--highlight)] text-center">Error: {error}. Intenta de nuevo.</p>}
+          {status === "error" && (
+            <p className="text-[var(--highlight)] text-center">
+              Error: {error}. Intenta de nuevo.
+            </p>
+          )}
         </form>
 
         {/* Toast notification */}
@@ -924,8 +1317,12 @@ const CulinariumForm: React.FC = () => {
                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
                 className="w-16 h-16 border-4 border-t-4 border-[var(--highlight)] border-t-transparent rounded-full"
               ></motion.div>
-              <p className="text-xl font-semibold text-[var(--foreground)]">Generando tu Receta...</p>
-              <p className="text-sm text-[var(--muted)]">La imagen se generará en segundo plano.</p>
+              <p className="text-xl font-semibold text-[var(--foreground)]">
+                Generando tu Receta...
+              </p>
+              <p className="text-sm text-[var(--muted)]">
+                La imagen se generará en segundo plano.
+              </p>
             </motion.div>
           </motion.div>
         )}
