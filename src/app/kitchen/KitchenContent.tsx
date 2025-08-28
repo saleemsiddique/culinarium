@@ -30,10 +30,11 @@ import {
   User as FirebaseUser,
   signInAnonymously,
 } from "firebase/auth";
-import { useUser } from "@/context/user-context";
+import { CustomUser, useUser } from "@/context/user-context";
 import Onboarding from "@/components/onboarding";
 import { FaUserClock, FaSpinner, FaUtensils, FaCoins } from "react-icons/fa";
 import { useIngredientHistory } from "@/hooks/useIngredientHistory";
+import { TokensModal } from "@/components/SideMenu/TokensModal";
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
 async function loadImageFromDataUrl(
@@ -216,6 +217,9 @@ const CulinariumForm: React.FC = () => {
   const [showCuisineStyle, setShowCuisineStyle] = useState(false);
   const [showMacronutrients, setShowMacronutrients] = useState(false);
   const [autoTriggered, setAutoTriggered] = useState<boolean>(false);
+
+  // Estado para mostrar el modal de tokens
+  const [showTokens, setShowTokens] = useState<boolean>(false);
 
   // Función para calcular el costo de tokens basado en las selecciones del formulario
   const calculateTokenCost = (): number => {
@@ -440,6 +444,7 @@ const CulinariumForm: React.FC = () => {
       setToastMessage(
         `⚡ Necesitas ${TOKENS_PER_RECIPE} tokens para ${recipeType}. Tienes ${currentTokens} tokens disponibles. Compra más tokens desde el menú lateral.`
       );
+      setShowTokens(true);
       return;
     }
 
@@ -1268,7 +1273,7 @@ const CulinariumForm: React.FC = () => {
               </>
             ) : (
               <>
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2" >
                   <FaUtensils className="text-2xl" />
                   ¡Genera mi Receta!
                 </span>
@@ -1327,6 +1332,9 @@ const CulinariumForm: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {showTokens && <TokensModal user={user as CustomUser | null} onClose={() => setShowTokens(false)} />}
+      
     </div>
   );
 };

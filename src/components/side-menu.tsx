@@ -227,7 +227,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                 
                 {/* Indicador de tokens bajos */}
                 {!user?.isSubscribed && remainingTokens <= 5 && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse z-20" />
+                  <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse z-20" />
                 )}
               </motion.button>
               
