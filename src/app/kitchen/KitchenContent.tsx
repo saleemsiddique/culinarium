@@ -734,18 +734,14 @@ const CulinariumForm: React.FC = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-4 md:py-4 max-w-screen-2xl mx-auto"
+        className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-12 md:py-12 max-w-screen-2xl mx-auto"
       >
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-10">
           {/* Contenedor principal del formulario con grid para 3 columnas en pantallas grandes */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}
             <div className="lg:col-span-1 flex flex-col">
-              <section
-                className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex-grow ${
-                  ingredientError ? "border-2 border-[var(--highlight)]" : ""
-                }`}
-              >
+              <section className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex-grow ${ingredientError ? 'border-2 border-[var(--highlight)]' : ''}`}>
                 <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4 flex items-center">
                   <span className="mr-2 text-[var(--highlight)] text-3xl">
                     🍳
@@ -880,10 +876,8 @@ const CulinariumForm: React.FC = () => {
             <div className="lg:col-span-1 flex flex-col space-y-6">
               {/* Sección de Momento del Día */}
               <section
-                className={`bg-[var(--background)] p-4 rounded-2xl shadow-inner flex flex-col justify-between ${
-                  mealTimeError ? "border-2 border-[var(--highlight)]" : ""
-                }`}
-                style={{ minHeight: "250px", maxHeight: "350px" }}
+                className={`bg-[var(--background)] p-4 rounded-2xl form-custom-shadow flex flex-col justify-between ${mealTimeError ? 'border-2 border-[var(--highlight)]' : ''}`}
+                style={{ minHeight: '250px', maxHeight: '350px' }}
               >
                 <h2 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center justify-center">
                   <span className="mr-2 text-[var(--highlight)] text-xl">
@@ -929,11 +923,7 @@ const CulinariumForm: React.FC = () => {
               </section>
 
               {/* Sección de Número de Personas */}
-              <section
-                className={`bg-[var(--background)] p-6 rounded-2xl shadow-inner flex flex-col justify-center h-full relative ${
-                  !user?.isSubscribed ? "opacity-60" : ""
-                }`}
-              >
+              <section className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex flex-col justify-center h-full relative ${!user?.isSubscribed ? 'opacity-60' : ''}`}>
                 <h2 className="text-xl font-bold text-[var(--foreground)] mb-4 text-center flex items-center justify-center">
                   <span className="mr-2 text-[var(--primary)] text-2xl">
                     👨‍👩‍👧‍👦
@@ -990,38 +980,28 @@ const CulinariumForm: React.FC = () => {
               </section>
             </div>
 
-            {/* COLUMNA 3: Secciones Opcionales Colapsables */}
             <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar">
               {/* Sección de Restricciones y Exclusiones (colapsable) */}
-              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
+              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowDietaryRestrictions(!showDietaryRestrictions)
-                  }
-                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
+                  onClick={() => setShowDietaryRestrictions(!showDietaryRestrictions)}
+                  className="w-full flex flex-col items-start text-left font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
-                  <span className="flex items-center">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">
-                      🚫
-                    </span>{" "}
-                    ¿Alguna restricción?
+                  <div className="flex justify-between w-full items-center mb-1">
                     {!user?.isSubscribed && (
-                      <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">
+                      <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-md">
                         PREMIUM
                       </span>
                     )}
-                  </span>
-                  <motion.span
-                    animate={{ rotate: showDietaryRestrictions ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {showDietaryRestrictions ? (
-                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    ) : (
-                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    )}
-                  </motion.span>
+                    <motion.span animate={{ rotate: showDietaryRestrictions ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                      {showDietaryRestrictions ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    </motion.span>
+                  </div>
+                  <div className="flex items-center text-2xl mt-1">
+                    <span className="mr-2 text-[var(--primary)] text-3xl">🚫</span>
+                    <span>¿Alguna restricción?</span>
+                  </div>
                 </button>
                 <AnimatePresence>
                   {showDietaryRestrictions && (
@@ -1119,33 +1099,29 @@ const CulinariumForm: React.FC = () => {
               </section>
 
               {/* Sección de Estilo de Comida (colapsable) */}
-              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
+              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
                 <button
                   type="button"
                   onClick={() => setShowCuisineStyle(!showCuisineStyle)}
-                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--highlight)] transition-colors"
+                  className="w-full flex flex-col items-start text-left font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--highlight)] transition-colors"
                 >
-                  <span className="flex items-center">
-                    <span className="mr-2 text-[var(--highlight)] text-3xl">
-                      🌍
-                    </span>{" "}
-                    ¿Qué estilo te apetece?
+                  <div className="flex justify-between w-full items-center mb-1">
                     {!user?.isSubscribed && (
-                      <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">
+                      <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-md">
                         PREMIUM
                       </span>
                     )}
-                  </span>
-                  <motion.span
-                    animate={{ rotate: showCuisineStyle ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {showCuisineStyle ? (
-                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    ) : (
-                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    )}
-                  </motion.span>
+                    <motion.span
+                      animate={{ rotate: showCuisineStyle ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {showCuisineStyle ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    </motion.span>
+                  </div>
+                  <div className="flex items-center text-2xl mt-1">
+                    <span className="mr-2 text-[var(--highlight)] text-3xl">🌍</span>
+                    <span>¿Qué estilo te apetece?</span>
+                  </div>
                 </button>
 
                 <AnimatePresence>
@@ -1177,12 +1153,11 @@ const CulinariumForm: React.FC = () => {
                             whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
                             disabled={!user?.isSubscribed}
                             className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 text-center
-                              ${
-                                !user?.isSubscribed
-                                  ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
-                                  : cuisineStyle === style.value
-                                  ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
-                                  : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
+                                    ${!user?.isSubscribed
+                                ? 'opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400'
+                                : cuisineStyle === style.value
+                                  ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
+                                  : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
                               }`}
                           >
                             <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">
@@ -1200,31 +1175,24 @@ const CulinariumForm: React.FC = () => {
               </section>
 
               {/* Sección de Macronutrientes (colapsable) */}
-              <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
+              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
                 <button
                   type="button"
                   onClick={() => setShowMacronutrients(!showMacronutrients)}
-                  className="w-full flex justify-between items-center text-left text-2xl font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
+                  className="w-full flex flex-col items-start text-left font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
-                  <span className="flex items-center">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">
-                      📊
-                    </span>{" "}
-                    Control de Macronutrientes
-                    <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full">
+                  <div className="flex justify-between w-full items-center mb-1">
+                    <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-md">
                       PRÓXIMAMENTE
                     </span>
-                  </span>
-                  <motion.span
-                    animate={{ rotate: showMacronutrients ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {showMacronutrients ? (
-                      <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    ) : (
-                      <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
-                    )}
-                  </motion.span>
+                    <motion.span animate={{ rotate: showMacronutrients ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                      {showMacronutrients ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    </motion.span>
+                  </div>
+                  <div className="flex items-center text-2xl mt-1">
+                    <span className="mr-2 text-[var(--primary)] text-3xl">📊</span>
+                    <span>Control de Macronutrientes</span>
+                  </div>
                 </button>
                 <AnimatePresence>
                   {showMacronutrients && (
