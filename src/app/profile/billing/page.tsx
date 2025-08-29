@@ -253,7 +253,6 @@ const BillingContent = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center">
-                            <DollarSign className="w-4 h-4 text-gray-400 mr-1" />
                             {(invoice.amount_due / 100)?.toFixed(2) ?? "0.00"}{" "}
                             {invoice.currency?.toUpperCase()}
                           </div>
