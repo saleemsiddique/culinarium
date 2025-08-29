@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'ingredient_history';
-const MAX_HISTORY = 20;
 
 const COMMON_INGREDIENTS: string[] = [
   'Pollo', 'Carne', 'Pescado', 'Huevos', 'Leche', 'Queso',

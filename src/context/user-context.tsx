@@ -28,7 +28,6 @@ import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
 } from "firebase/auth";
-import router from "next/router";
 
 export interface CustomUser {
   uid: string;

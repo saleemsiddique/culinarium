@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
 import LoaderSkeleton from "@/components/LoaderSkeleton";
 
@@ -12,7 +10,6 @@ interface AuthRedirectProps {
 
 export function AuthRedirect({ 
   children, 
-  redirectTo = "/kitchen" 
 }: AuthRedirectProps) {
   const { user, loading } = useUser();
 

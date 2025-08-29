@@ -318,12 +318,13 @@ export default function ConsentModal() {
     }
   };
 
-  if (loading || !show) return null;
+  // 🐛 FIX: Always call the hook, but pass a condition to it
+  useBodyScrollLock(show && !loading); 
 
-  useBodyScrollLock(true);
+  if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
       <div className="bg-[var(--background)] text-[var(--text)] p-6 rounded-lg max-w-lg w-full shadow-lg">
         <h2 className="text-xl font-bold mb-4">Política y Condiciones</h2>
         <p className="mb-4">

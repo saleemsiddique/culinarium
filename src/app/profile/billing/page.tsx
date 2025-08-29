@@ -9,7 +9,6 @@ import {
   Plus,
   Trash2,
   Calendar,
-  DollarSign,
   FileText,
   CheckCircle,
   XCircle,
