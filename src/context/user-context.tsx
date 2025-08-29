@@ -81,37 +81,37 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const now = Timestamp.now();
     const resetDate = userData.tokens_reset_date;
-    
+
     // 30 días en milisegundos
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
     const timeDiff = now.toMillis() - resetDate.toMillis();
-    
+
     if (timeDiff >= thirtyDaysInMs) {
       try {
         const userDocRef = doc(db, "user", userData.uid);
         const newResetDate = Timestamp.now();
-        
+
         await updateDoc(userDocRef, {
           monthly_tokens: 50,
           tokens_reset_date: newResetDate,
         });
-        
+
         console.log(`Tokens reseteados para usuario: ${userData.email}`);
-        
+
         // Retornar datos actualizados
         return {
           ...userData,
           monthly_tokens: 50,
           tokens_reset_date: newResetDate,
         };
-        
+
       } catch (error) {
         console.error("Error al resetear tokens:", error);
         // Si falla el update, devolver datos originales
         return userData;
       }
     }
-    
+
     return userData;
   };
 
@@ -139,7 +139,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       setLoading(false);
 
-      
+
     });
 
     return () => unsubscribe();
@@ -228,7 +228,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const id = userCredential.user.uid;
       const token = await userCredential.user.getIdToken();
 
-      
+
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
         email,
@@ -323,6 +323,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(userCredential.user);
       setLoading(false);
 
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: email,
+          type: "welcome",
+          data: { firstName },
+        }),
+      });
+
       return id;
     } catch (error) {
       console.error("Error al registrarse:", error);
@@ -331,56 +341,56 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const userInfo = result.user;
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const userInfo = result.user;
 
-  const email = userInfo.email;
-  if (!email) throw new Error("No se pudo obtener el email");
+    const email = userInfo.email;
+    if (!email) throw new Error("No se pudo obtener el email");
 
-  const usersRef = collection(db, "user");
-  const q = query(usersRef, where("email", "==", email));
-  const snapshot = await getDocs(q);
+    const usersRef = collection(db, "user");
+    const q = query(usersRef, where("email", "==", email));
+    const snapshot = await getDocs(q);
 
-  let userData: CustomUser;
-  let isNewUser = false; // ✅ Flag para detectar usuario nuevo
+    let userData: CustomUser;
+    let isNewUser = false; // ✅ Flag para detectar usuario nuevo
 
-  if (snapshot.empty) {
-    // ✅ Nuevo usuario con Google, creamos copia en Firestore
-    isNewUser = true; // Marcamos como usuario nuevo
-    
-    userData = {
-      uid: userInfo.uid,
-      email: email,
-      firstName: userInfo.displayName?.split(" ")[0] || "",
-      lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
-      created_at: Timestamp.now(),
-      extra_tokens: 0,
-      isSubscribed: false,
-      lastRenewal: Timestamp.now(),
-      monthly_tokens: 50,
-      stripeCustomerId: "",
-      subscriptionId: "",
-      subscriptionStatus: "cancelled",
-      subscriptionCanceled: false,
-      tokens_reset_date: Timestamp.now(),
+    if (snapshot.empty) {
+      // ✅ Nuevo usuario con Google, creamos copia en Firestore
+      isNewUser = true; // Marcamos como usuario nuevo
+
+      userData = {
+        uid: userInfo.uid,
+        email: email,
+        firstName: userInfo.displayName?.split(" ")[0] || "",
+        lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
+        created_at: Timestamp.now(),
+        extra_tokens: 0,
+        isSubscribed: false,
+        lastRenewal: Timestamp.now(),
+        monthly_tokens: 50,
+        stripeCustomerId: "",
+        subscriptionId: "",
+        subscriptionStatus: "cancelled",
+        subscriptionCanceled: false,
+        tokens_reset_date: Timestamp.now(),
+      };
+
+      const docRef = doc(db, "user", userInfo.uid);
+      await setDoc(docRef, userData);
+    } else {
+      userData = snapshot.docs[0].data() as CustomUser;
+      userData.uid = snapshot.docs[0].id;
+      userData = await checkAndResetMonthlyTokens(userData);
+    }
+
+    setUser(userData);
+
+    return {
+      user: userData,
+      isNewUser: isNewUser
     };
-
-    const docRef = doc(db, "user", userInfo.uid);
-    await setDoc(docRef, userData);
-  } else {
-    userData = snapshot.docs[0].data() as CustomUser;
-    userData.uid = snapshot.docs[0].id;
-    userData = await checkAndResetMonthlyTokens(userData);
-  }
-
-  setUser(userData);
-
-  return {
-    user: userData,
-    isNewUser: isNewUser
   };
-};
 
   const logout = async () => {
     await signOut(auth);
@@ -452,7 +462,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
 
       const { updatedUser } = await response.json();
-      
+
       // Actualizar el estado local con los nuevos valores de tokens
       setUser((prevUser) => {
         if (!prevUser) return null;
