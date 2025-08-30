@@ -2,36 +2,51 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
+import { useUser } from "@/context/user-context";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { sendPasswordResetEmail } = useUser();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Integrate with Supabase password reset
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      await sendPasswordResetEmail(email);
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error("Error sending password reset email:", err);
+      // El mensaje es genérico por seguridad.
+      setError("No se pudo enviar el enlace de restablecimiento. Por favor, revisa tu dirección de correo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="h-full w-full bg-[var(--background)] flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-900 dark:to-gray-800 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 w-full max-w-md border border-gray-200 dark:border-gray-800">
-        <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-2">
-          Forgotten your password?
+    <div className="h-full w-full bg-[#FDF5E6] flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border border-[#4A2C2A] text-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#2C3E50] mb-2">
+          ¿Olvidaste tu contraseña?
         </h1>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
-          There is nothing to worry about, we’ll send you a message to help you reset your password.
+        <p className="text-[#4A2C2A] mb-8">
+          No te preocupes, te enviaremos un mensaje para ayudarte a restablecerla.
         </p>
         {submitted ? (
-          <div className="text-center text-green-600 dark:text-green-400 font-medium">
-            If an account exists for <span className="font-semibold">{email}</span>, you’ll receive a password reset link shortly.
+          <div className="text-center text-[#E67E22] font-semibold">
+            Si existe una cuenta para <span className="font-bold">{email}</span>, recibirás un enlace para restablecer la contraseña en breve.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-sm font-medium text-[#4A2C2A] mb-2 text-left">
+                Dirección de correo electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -42,25 +57,28 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="Enter personal or work email address"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Introduce tu correo electrónico"
+                  className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent"
                 />
               </div>
             </div>
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <button
               type="submit"
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg transition-colors"
+              className="w-full bg-[#E67E22] hover:bg-[#C2651A] text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={loading}
             >
-              Send Reset Link
+              {loading && <Loader2 size={20} className="animate-spin" />}
+              Enviar Enlace de Restablecimiento
             </button>
           </form>
         )}
-        <div className="mt-8 text-center">
-          <Link href="/auth/login" className="text-orange-600 hover:text-orange-500 font-medium">
-            Back to Login
+        <div className="mt-8">
+          <Link href="/auth/login" className="text-[#E67E22] hover:text-[#C2651A] font-medium transition-colors">
+            Volver a Iniciar Sesión
           </Link>
         </div>
       </div>
     </div>
   );
-} 
+}

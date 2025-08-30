@@ -26,6 +26,8 @@ import {
   signOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
   User as FirebaseUser,
 } from "firebase/auth";
 
@@ -63,6 +65,8 @@ interface UserContextType {
   deductTokens: (amount: number) => Promise<void>;
   hasEnoughTokens: (amount: number) => boolean;
   refreshUser: () => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
+  confirmPasswordReset: (oobCode: string, newPassword: string) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -485,6 +489,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+
+  // 🆕 Nueva función para enviar el correo de restablecimiento
+  const sendPasswordResetEmail = async (email: string) => {
+    try {
+      await firebaseSendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      throw error;
+    }
+  };
+
+  // 🆕 Nueva función para confirmar el restablecimiento de la contraseña
+  const confirmPasswordReset = async (oobCode: string, newPassword: string) => {
+    try {
+      await firebaseConfirmPasswordReset(auth, oobCode, newPassword);
+    } catch (error) {
+      console.error("Error confirming password reset:", error);
+      throw error;
+    }
+  };
+
   const value: UserContextType = {
     user,
     firebaseUser,
@@ -497,6 +522,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     deductTokens,
     hasEnoughTokens,
     refreshUser,
+    sendPasswordResetEmail,
+    confirmPasswordReset,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
