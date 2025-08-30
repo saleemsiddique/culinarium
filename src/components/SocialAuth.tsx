@@ -14,6 +14,12 @@ export function SocialAuth() {
   const { loginWithGoogle } = useUser();
   const router = useRouter();
 
+    // Función auxiliar para extraer el nombre de pila
+  const getFirstName = (displayName: string | null) => {
+    if (!displayName) return "Usuario";
+    return displayName.split(" ")[0];
+  };
+
   const handleGoogleLogin = async () => {
     setLoading("google");
     try {
@@ -22,6 +28,18 @@ export function SocialAuth() {
       
       if (result?.isNewUser) {
         console.log("Navegando a onboarding");
+
+        // ✅ Nueva línea: Enviar el correo de bienvenida a los nuevos usuarios
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: result.user.email,
+            type: "welcome",
+            data: { firstName: getFirstName(result.user.firstName) },
+          }),
+        });
+
         router.push("/kitchen?onboarding=1"); 
       } else {
         console.log("Navegando a cocina");

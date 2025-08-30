@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       case "welcome":
         subject = "Bienvenido a Culinarium";
         // Ahora llamamos a la función que devuelve el HTML en forma de string
-        emailContent = WelcomeEmailHtml({ name: data.name });
+        emailContent = WelcomeEmailHtml({ name: data.firstName });
         break;
       case "reset-password":
         subject = "Restablece tu contraseña";
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const result = await resend.emails.send({
-      from: "Culinarium1 <noreply@onresend.com>", // Campo 'from' corregido
+      from: "Culinarium <noreply@culinarium.io>",
       to,
       subject,
       html: emailContent, // Usamos la propiedad 'html'

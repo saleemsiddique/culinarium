@@ -226,7 +226,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const id = userCredential.user.uid;
-      const token = await userCredential.user.getIdToken();
+      // const token = await userCredential.user.getIdToken();
 
 
       const newUser: Omit<CustomUser, "password"> = {
@@ -249,6 +249,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const docRef = doc(db, "user", id);
       await setDoc(docRef, newUser);
 
+      /*
       const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
       const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
       const clientTimestamp = new Date().toISOString();
@@ -318,6 +319,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("consent_versions", JSON.stringify(saveObj));
         localStorage.setItem("consent_version", POLICY_VERSION); // Por si acaso
       }
+      */
 
       setUser(newUser);
       setFirebaseUser(userCredential.user);

@@ -7,47 +7,128 @@ interface WelcomeEmailProps {
 export function WelcomeEmailHtml({ name }: WelcomeEmailProps) {
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-s/cale=1.0">
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap');
+
           body {
-            font-family: sans-serif;
-            background-color: #f6f6f6;
-            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8F0E3; /* Beige suave */
             color: #333333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
           }
-          .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          .main-wrapper {
+            max-width: 650px;
+            margin: 40px auto;
+            background-color: #FFFFFF;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+          }
+          .header {
+            background-color: #E67E22; /* Naranja vibrante */
+            padding: 40px;
             text-align: center;
           }
-          h1 {
-            color: #213547;
-            font-size: 28px;
-            margin-bottom: 15px;
+          .header h1 {
+            font-family: 'Playfair Display', serif;
+            color: #FFFFFF;
+            font-size: 48px;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
           }
-          p {
-            font-size: 16px;
-            line-height: 1.5;
+          .content {
+            padding: 50px;
+            text-align: center;
+          }
+          .content h2 {
+            font-family: 'Playfair Display', serif;
+            color: #2C3E50; /* Azul oscuro */
+            font-size: 36px;
             margin-bottom: 20px;
           }
-          .logo {
+          .content p {
+            font-size: 18px;
+            color: #4A2C2A; /* Marrón */
+            margin-bottom: 30px;
+          }
+          .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #E67E22 0%, #C2651A 100%);
+            color: #FFFFFF !important;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+          }
+          .button:hover {
+            transform: translateY(-3px);
+          }
+          .footer {
+            background-color: #2C3E50; /* Azul oscuro */
+            padding: 30px 50px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+          }
+          .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+          }
+          .footer-links li a {
+            color: #FDF5E6; /* Beige suave */
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+          }
+          .footer-links li a:hover {
+            color: #E67E22; /* Naranja vibrante */
+          }
+          .footer p {
+            font-size: 14px;
+            color: #FFFFFF;
+            opacity: 0.6;
+            margin: 0;
+          }
+          .footer-logo {
             width: 80px;
-            height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            filter: brightness(0) invert(1); /* Hace que el logo sea blanco para el fondo oscuro */
           }
         </style>
       </head>
       <body>
-        <div class="container">
-          <img src="https://placehold.co/80x80/213547/ffffff?text=C" alt="Culinarium Logo" class="logo">
-          <h1>¡Bienvenido a Culinarium, ${name}!</h1>
-          <p>Gracias por registrarte. Esperamos que disfrutes de nuestras recetas con IA 🍽️</p>
-          <p>Explora un mundo de sabores y creatividad culinaria. ¡Estamos emocionados de tenerte aquí!</p>
+        <div class="main-wrapper">
+          <div class="header">
+            <h1>Culinarium</h1>
+          </div>
+          <div class="content">
+            <h2>¡Bienvenido a la comunidad, ${name}!</h2>
+            <p>Estamos encantados de tenerte a bordo. Prepárate para una aventura culinaria única, donde la inteligencia artificial te ayuda a crear platos espectaculares. ¡Tu cocina está a punto de transformarse!</p>
+            <a href="https://www.culinarium.io/kitchen" class="button">Empieza a cocinar</a>
+          </div>
+          <div class="footer">
+            <ul class="footer-links" style="display:flex; align-items:center; justify-center:center; text-align-center">
+              <li><a href="https://www.culinarium.io/consent/privacy">Política de Privacidad</a></li>
+              <li><a href="https://www.culinarium.io/consent/terms">Términos de Servicio</a></li>
+              <li><a href="https://www.culinarium.io/consent/cookies">Política de Cookies</a></li>
+            </ul>
+            <p>Culinarium &copy; 2025. Todos los derechos reservados.</p>
+          </div>
         </div>
       </body>
     </html>
