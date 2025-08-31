@@ -173,17 +173,19 @@ const BillingContent = () => {
                 <FileText className="w-4 h-4 inline mr-2" />
                 Facturas
               </button>
-              <button
-                onClick={() => setActiveTab("payment-methods")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "payment-methods"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <CreditCard className="w-4 h-4 inline mr-2" />
-                Métodos de pago
-              </button>
+              {user?.stripeCustomerId && (
+                <button
+                  onClick={() => setActiveTab("payment-methods")}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === "payment-methods"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4 inline mr-2" />
+                  Métodos de pago
+                </button>
+              )}
             </nav>
           </div>
         </div>

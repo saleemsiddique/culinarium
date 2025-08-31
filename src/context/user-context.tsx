@@ -202,6 +202,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
   }, [firebaseUser?.email, refreshUser]);
 
+  // Función helper para crear customer en Stripe
+const createStripeCustomer = async (email: string, userId: string) => {
+  try {
+    const response = await fetch("/api/create-stripe-customer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        userId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al crear customer en Stripe");
+    }
+
+    const { customerId } = await response.json();
+    return customerId;
+  } catch (error) {
+    console.error("Error creando Stripe customer:", error);
+    throw error;
+  }
+};
+
   const login = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = result.user;
@@ -232,7 +256,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const id = userCredential.user.uid;
       // const token = await userCredential.user.getIdToken();
 
-
+      console.log("🆕 Creando customer en Stripe para nuevo usuario:", id);
+      const stripeCustomerId = await createStripeCustomer(email, id);
+      console.log("✅ Customer creado:", stripeCustomerId);
+      
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
         email,
@@ -243,7 +270,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
         monthly_tokens: 50,
-        stripeCustomerId: "",
+        stripeCustomerId: stripeCustomerId,
         subscriptionId: "",
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
@@ -365,6 +392,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
 
+      console.log("🆕 Creando customer en Stripe para nuevo usuario Google:", userInfo.uid);
+      const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
+      console.log("✅ Customer creado:", stripeCustomerId);
+
       userData = {
         uid: userInfo.uid,
         email: email,
@@ -375,7 +406,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isSubscribed: false,
         lastRenewal: Timestamp.now(),
         monthly_tokens: 50,
-        stripeCustomerId: "",
+        stripeCustomerId: stripeCustomerId,
         subscriptionId: "",
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
