@@ -5,7 +5,8 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { paymentMethodId, customerId, userEmail, country, postalCode } = await req.json();
+    const { paymentMethodId, customerId, userEmail, country, postalCode } =
+      await req.json();
     if (!paymentMethodId || !customerId) {
       return new Response(
         JSON.stringify({ error: "paymentMethodId y customerId requeridos" }),
@@ -13,18 +14,63 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Recupera el payment method
-    let pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+    let newPaymentMethod = await stripe.paymentMethods.retrieve(
+      paymentMethodId
+    );
 
-    // 2) Si no tiene customer, adjúntalo
-    if (!pm.customer) {
+    if (!newPaymentMethod.customer) {
       try {
-        await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
-        pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+        await stripe.paymentMethods.attach(paymentMethodId, {
+          customer: customerId,
+        });
+        newPaymentMethod = await stripe.paymentMethods.retrieve(
+          paymentMethodId
+        );
       } catch (attachErr: any) {
-        console.warn("attach error (puede ser ignorable):", attachErr?.message || attachErr);
-        pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+        console.warn(
+          "attach error (puede ser ignorable):",
+          attachErr?.message || attachErr
+        );
+        newPaymentMethod = await stripe.paymentMethods.retrieve(
+          paymentMethodId
+        );
       }
+    }
+
+    const existingPaymentMethods = await stripe.paymentMethods.list({
+      customer: customerId,
+      type: "card",
+    });
+
+    const isDuplicate = existingPaymentMethods.data.some((pm: any) => {
+      if (pm.id === paymentMethodId) {
+        return false;
+      }
+
+      return (
+        pm.card?.last4 === newPaymentMethod.card?.last4 &&
+        pm.card?.brand === newPaymentMethod.card?.brand &&
+        pm.card?.exp_month === newPaymentMethod.card?.exp_month &&
+        pm.card?.exp_year === newPaymentMethod.card?.exp_year
+      );
+    });
+
+    if (isDuplicate) {
+      // Opcional: Desasociar el nuevo PaymentMethod para evitar que quede huérfano
+      try {
+        await stripe.paymentMethods.detach(paymentMethodId);
+      } catch (detachErr: any) {
+        console.warn(
+          "Error al desasociar PaymentMethod duplicado:",
+          detachErr.message
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          error: "Esta tarjeta ya está guardada en su cuenta.",
+        }),
+        { status: 409 } // 409 Conflict es un buen código para duplicados
+      );
     }
 
     await stripe.paymentMethods.update(paymentMethodId, {
@@ -33,13 +79,15 @@ export async function POST(req: Request) {
         address: {
           country: country,
           postal_code: postalCode || undefined,
-        }
+        },
       },
-      allow_redisplay: 'always',
+      allow_redisplay: "always",
     });
-    
-    // 3) Comprobar si es la primera tarjeta del cliente
-    const list = await stripe.paymentMethods.list({ customer: customerId, type: "card" });
+
+    const list = await stripe.paymentMethods.list({
+      customer: customerId,
+      type: "card",
+    });
     const isFirstCard = list.data.length === 1;
 
     if (isFirstCard) {
@@ -48,9 +96,12 @@ export async function POST(req: Request) {
       });
     }
 
-    // 4) Devolver info útil al frontend
     return new Response(
-      JSON.stringify({ success: true, isDefault: isFirstCard, paymentMethod: pm }),
+      JSON.stringify({
+        success: true,
+        isDefault: isFirstCard,
+        paymentMethod: newPaymentMethod,
+      }),
       { status: 200 }
     );
   } catch (err: any) {
