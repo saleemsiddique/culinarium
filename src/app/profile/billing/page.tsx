@@ -18,6 +18,83 @@ import {
 import { useUser } from "@/context/user-context";
 import AddCardComponent from "@/components/AddCardComponent";
 
+interface SuccessModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  message: string;
+}
+
+const SuccessModal = ({ isOpen, onClose, message }: SuccessModalProps) => {
+  return (
+    <>
+      {isOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-green-600 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Éxito
+            </h3>
+            <p className="py-4">{message}</p>
+            <div className="modal-action">
+              <button className="btn btn-primary" onClick={onClose}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  loading: boolean;
+}
+
+const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  loading,
+}: ConfirmModalProps) => {
+  return (
+    <>
+      {isOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-red-600 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              Confirmar acción
+            </h3>
+            <p className="py-4">
+              ¿Estás seguro de que quieres eliminar esta tarjeta?
+              <span className="font-semibold">
+                {" "}
+                Esta acción no se puede deshacer.
+              </span>
+            </p>
+            <div className="modal-action">
+              <button className="btn" onClick={onClose} disabled={loading}>
+                Cancelar
+              </button>
+              <button
+                className="btn btn-error"
+                onClick={onConfirm}
+                disabled={loading}
+              >
+                {loading ? "Eliminando..." : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 const BillingContent = () => {
   const [activeTab, setActiveTab] = useState("invoices");
 
@@ -27,6 +104,10 @@ const BillingContent = () => {
   const [loading, setLoading] = useState(true); // Se inicia en true para mostrar el spinner
   const { user } = useUser();
   const [showAddCard, setShowAddCard] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
+
   useEffect(() => {
     // Si no hay un ID de usuario, no hacemos la llamada
     if (!user?.uid) {
@@ -91,31 +172,38 @@ const BillingContent = () => {
     }
   };
 
-  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar esta tarjeta?")) {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/payment-methods/delete?userId=${user?.uid}&paymentMethodId=${paymentMethodId}`,
-          {
-            method: "DELETE",
-          }
-        );
+  const handleDeleteClick = (paymentMethodId: string) => {
+    setPaymentToDelete(paymentMethodId);
+    setConfirmOpen(true);
+  };
 
-        if (!res.ok) {
-          throw new Error("Failed to delete payment method");
-        }
+  const confirmDelete = async () => {
+    if (!paymentToDelete) return;
 
-        setPaymentMethods((prev) =>
-          prev.filter((pm) => pm.id !== paymentMethodId)
-        );
-        alert("Tarjeta eliminada correctamente.");
-      } catch (error) {
-        console.error("Error deleting payment method:", error);
-        alert("Error al eliminar la tarjeta.");
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/payment-methods/delete?userId=${user?.uid}&paymentMethodId=${paymentToDelete}`,
+        { method: "DELETE" }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to delete payment method");
       }
+
+      setPaymentMethods((prev) =>
+        prev.filter((pm) => pm.id !== paymentToDelete)
+      );
+
+      // Mostrar modal de éxito
+      setShowSuccess(true);
+    } catch (error) {
+      console.error("Error deleting payment method:", error);
+      // Aquí podrías poner otro modal de error si quieres
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+      setPaymentToDelete(null);
     }
   };
 
@@ -383,7 +471,7 @@ const BillingContent = () => {
                         )}
 
                         <button
-                          onClick={() => handleDeletePaymentMethod(pm.id)}
+                          onClick={() => handleDeleteClick(pm.id)}
                           disabled={loading || pm.is_default}
                           className={`p-2 rounded-md transition-colors ${
                             pm.is_default
@@ -433,6 +521,19 @@ const BillingContent = () => {
           </div>
         )}
       </div>
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        loading={loading}
+      />
+      {/* Modal de éxito */}
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        message="La tarjeta se eliminó correctamente ✅"
+      />
     </div>
   );
 };
