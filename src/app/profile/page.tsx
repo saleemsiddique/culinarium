@@ -154,44 +154,77 @@ function ProfileContent() {
   };
 
   const handleCancelSubscription = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/subscription/cancel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-        }),
-      });
+  setIsLoading(true);
+  try {
+    // Paso 1: Llamar a la API para cancelar la suscripción
+    const response = await fetch("/api/subscription/cancel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user?.uid,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Error al cancelar la suscripción");
-      }
-
-      setMessageModal({
-        visible: true,
-        title: "Suscripción Cancelada",
-        text: "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual.",
-        isError: false,
-      });
-
-      window.location.reload();
-    } catch (error) {
-      console.error("Error:", error);
-      setMessageModal({
-        visible: true,
-        title: "Error",
-        text: "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
-        isError: true,
-      });
-    } finally {
-      setIsLoading(false);
-      setShowCancelDialog(false);
-      setShowReactivateDialog(false);
+    if (!response.ok) {
+      throw new Error("Error al cancelar la suscripción");
     }
-  };
+
+    // Usamos el `tokens_reset_date` del usuario como la fecha de finalización
+    const subscriptionEndDate = user?.tokens_reset_date;
+
+    // Convertimos la marca de tiempo a una cadena de fecha legible
+    const formattedEndDate = subscriptionEndDate?.toDate().toLocaleDateString("es-ES", {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Paso 2: Llamar a la API para enviar el correo de desuscripción
+    const emailResponse = await fetch("/api/send-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "unsubscribe",
+        to: user?.email, // o la dirección de correo del usuario
+        data: {
+          name: user?.firstName || user?.email,
+          endDate: formattedEndDate,
+        },
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      console.error("Error al enviar el correo de confirmación");
+      // No lanzamos un error aquí para que el modal de éxito se muestre de todas formas
+    }
+
+    setMessageModal({
+      visible: true,
+      title: "Suscripción Cancelada",
+      text: "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual. Hemos enviado un correo de confirmación a tu dirección.",
+      isError: false,
+    });
+
+    window.location.reload();
+  } catch (error) {
+    console.error("Error:", error);
+    setMessageModal({
+      visible: true,
+      title: "Error",
+      text: "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
+      isError: true,
+    });
+  } finally {
+    setIsLoading(false);
+    setShowCancelDialog(false);
+    setShowReactivateDialog(false);
+  }
+};
+
 
   const handleCancelImmediateSubscription = async () => {
     setIsLoading(true);
@@ -490,7 +523,7 @@ function ProfileContent() {
                       <Button
                         onClick={() => setShowCancelDialog(true)}
                         variant="outline"
-                        className="border-red-400/50 text-red-300 hover:bg-red-500/20 hover:border-red-400 rounded-xl backdrop-blur-sm"
+                        className="border-red-900 text-red-900 hover:bg-red-100 hover:border-red-400 rounded-xl backdrop-blur-sm"
                       >
                         <AlertTriangle className="h-4 w-4 mr-2" />
                         Cancelar Suscripción

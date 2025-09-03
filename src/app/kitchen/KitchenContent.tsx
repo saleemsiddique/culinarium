@@ -493,7 +493,7 @@ const CulinariumForm: React.FC = () => {
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("lastFormData", JSON.stringify(formData));
-        } catch {}
+        } catch { }
       }
       // Get authentication token
       const idToken = await firebaseUser.getIdToken();
@@ -521,7 +521,7 @@ const CulinariumForm: React.FC = () => {
         // If the AI explicitly returned an error recipe, throw an error to stop the process
         throw new Error(
           recipeDataFromAI.receta.descripcion ||
-            "La IA no pudo generar una receta válida con los ingredientes proporcionados."
+          "La IA no pudo generar una receta válida con los ingredientes proporcionados."
         );
       }
 
@@ -551,7 +551,7 @@ const CulinariumForm: React.FC = () => {
         const errorData = await saveRecipeRes.json();
         throw new Error(
           errorData.error ||
-            `Error al guardar receta: Status ${saveRecipeRes.status}`
+          `Error al guardar receta: Status ${saveRecipeRes.status}`
         );
       }
 
@@ -765,18 +765,17 @@ const CulinariumForm: React.FC = () => {
                       setTimeout(() => setShowSuggestions(false), 200)
                     }
                     placeholder="Ej: Pollo, arroz, tomate..."
-                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${
-                      ingredientError
+                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${ingredientError
                         ? "border-[var(--highlight)]"
                         : "border-[var(--primary)]"
-                    }`}
+                      }`}
                     aria-label="Añadir ingrediente"
                     autoComplete="off"
                   />
 
                   {showSuggestions &&
                     getSuggestions(currentIngredient, ingredients).length >
-                      0 && (
+                    0 && (
                       <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-[var(--primary)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
                         {getSuggestions(currentIngredient, ingredients).map(
                           (suggestion, index) => (
@@ -799,31 +798,28 @@ const CulinariumForm: React.FC = () => {
                 </div>
 
                 {/* Sugerencias rápidas cuando no hay input */}
-                {currentIngredient === "" &&
-                  ingredientHistory
-                    .filter((ing) => !ingredients.includes(ing))
-                    .slice(0, 6).length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-xs text-[var(--muted)] mb-2">
-                        Ingredientes sugeridos:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {ingredientHistory
-                          .filter((ing) => !ingredients.includes(ing))
-                          .slice(0, 6)
-                          .map((ingredient) => (
-                            <button
-                              key={ingredient}
-                              onClick={() => handleSelectSuggestion(ingredient)}
-                              type="button"
-                              className="px-3 py-1 bg-[var(--highlight)]/10 text-[var(--highlight)] text-sm rounded-full hover:bg-[var(--highlight)]/20 transition-colors border border-[var(--highlight)]/30"
-                            >
-                              + {ingredient}
-                            </button>
-                          ))}
-                      </div>
+                {currentIngredient === "" && (
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-500 mb-2">
+                      Ingredientes sugeridos:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ingredientHistory
+                        .filter((ing) => !ingredients.map(i => i.toLowerCase()).includes(ing.toLowerCase()))
+                        .slice(0, 6)
+                        .map((ingredient) => (
+                          <button
+                            key={ingredient}
+                            onClick={() => handleSelectSuggestion(ingredient)}
+                            type="button"
+                            className="px-3 py-1 bg-orange-100 text-orange-600 text-sm rounded-full hover:bg-orange-200 transition-colors border border-orange-300"
+                          >
+                            + {ingredient}
+                          </button>
+                        ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {ingredientError && (
                   <p className="text-[var(--highlight)] text-sm mt-2">
@@ -897,10 +893,9 @@ const CulinariumForm: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className={`flex flex-col items-center justify-center  p-2 rounded-xl border-2 transition-all duration-200
-                        ${
-                          mealTime === time.value
-                            ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
-                            : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
+                        ${mealTime === time.value
+                          ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
+                          : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
                         }`}
                     >
                       <span className="text-2xl mb-0.5">
@@ -945,10 +940,9 @@ const CulinariumForm: React.FC = () => {
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners <= 1}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${
-                        !user?.isSubscribed || diners <= 1
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-[var(--primary)]/30"
+                      ${!user?.isSubscribed || diners <= 1
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-[var(--primary)]/30"
                       }`}
                     aria-label="Disminuir número de comensales"
                   >
@@ -967,10 +961,9 @@ const CulinariumForm: React.FC = () => {
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners >= MAX_DINERS}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${
-                        !user?.isSubscribed || diners >= MAX_DINERS
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-[var(--primary)]/30"
+                      ${!user?.isSubscribed || diners >= MAX_DINERS
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-[var(--primary)]/30"
                       }`}
                     aria-label="Aumentar número de comensales"
                   >
@@ -1017,7 +1010,7 @@ const CulinariumForm: React.FC = () => {
                           ? "Selecciona si hay alguna preferencia dietética."
                           : "Con Premium puedes configurar estas restricciones dietéticas:"}
                       </p>
-                      <div className="flex flex-wrap gap-3 mb-6">
+                      <div className="flex flex-wrap gap-3 mb-6 m-2">
                         {dietaryOptions.map((opt) => (
                           <motion.button
                             key={opt.value}
@@ -1031,13 +1024,12 @@ const CulinariumForm: React.FC = () => {
                             }}
                             whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
                             disabled={!user?.isSubscribed}
-                            className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${
-                              !user?.isSubscribed
+                            className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${!user?.isSubscribed
                                 ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                                 : dietaryRestrictions.includes(opt.value)
-                                ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md"
-                                : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]"
-                            }`}
+                                  ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md"
+                                  : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]"
+                              }`}
                           >
                             {opt.label}
                           </motion.button>
@@ -1070,11 +1062,10 @@ const CulinariumForm: React.FC = () => {
                             : "Función Premium - Suscríbete para usar"
                         }
                         disabled={!user?.isSubscribed}
-                        className={`w-full p-3 border rounded-xl text-lg ${
-                          !user?.isSubscribed
+                        className={`w-full p-3 border rounded-xl text-lg ${!user?.isSubscribed
                             ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                             : "border-[var(--primary)] focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent"
-                        }`}
+                          }`}
                         aria-label="Añadir ingrediente a evitar"
                       />
                       <div className="mt-4 flex flex-wrap min-h-[60px] max-h-[200px] overflow-y-auto custom-scrollbar">
@@ -1139,7 +1130,7 @@ const CulinariumForm: React.FC = () => {
                           cocina:
                         </p>
                       )}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 m-1">
                         {cuisineStyles.map((style) => (
                           <motion.button
                             key={style.value}
@@ -1223,11 +1214,10 @@ const CulinariumForm: React.FC = () => {
             }}
             whileTap={{ scale: loadingUser || status === "loading" ? 1 : 0.98 }}
             className={`w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 flex flex-col items-center gap-1
-    ${
-      loadingUser || status === "loading"
-        ? "bg-[var(--primary)]/50 cursor-not-allowed"
-        : "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
-    }`}
+    ${loadingUser || status === "loading"
+                ? "bg-[var(--primary)]/50 cursor-not-allowed"
+                : "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
+              }`}
             disabled={loadingUser || status === "loading"}
           >
             {loadingUser ? (
@@ -1303,7 +1293,7 @@ const CulinariumForm: React.FC = () => {
       </AnimatePresence>
 
       {showTokens && <TokensModal user={user as CustomUser | null} onClose={() => setShowTokens(false)} />}
-      
+
     </div>
   );
 };
