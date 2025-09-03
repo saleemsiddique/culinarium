@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
           // RESETEAR tokens mensuales (no acumular) - funciona para primer pago y renovaciones
           await userDoc.ref.update({
             monthly_tokens: 300, // RESETEAR a 300, no incrementar
-            tokens_reset_date: new Date(),
+            tokens_reset_date: oneMonthLater,
             lastRenewal: new Date(),
           });
 
