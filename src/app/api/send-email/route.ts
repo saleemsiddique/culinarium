@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { WelcomeEmailHtml } from "@/app/emails/Welcome";
+import { UnsubscribeEmailHtml } from "@/app/emails/UnsuscribedEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -17,10 +18,12 @@ export async function POST(req: Request) {
         // Ahora llamamos a la función que devuelve el HTML en forma de string
         emailContent = WelcomeEmailHtml({ name: data.firstName });
         break;
-      case "reset-password":
-        subject = "Restablece tu contraseña";
-        // Si tienes la lógica de restablecer, la pondrías aquí de manera similar.
-        emailContent = ``;
+      case "unsubscribe":
+        if (!data || !data.name || !data.endDate) {
+          return NextResponse.json({ error: "Faltan datos para el correo de desuscripción" }, { status: 400 });
+        }
+        subject = "Confirmación de Cancelación de Suscripción";
+        emailContent = UnsubscribeEmailHtml({ name: data.name, endDate: data.endDate });
         break;
       default:
         return NextResponse.json({ error: "Tipo de email no válido" }, { status: 400 });

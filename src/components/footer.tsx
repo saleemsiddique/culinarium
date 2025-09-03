@@ -44,7 +44,7 @@ export default function Footer() {
               {/* Social Icons */}
               <div className="flex items-center gap-4 mt-6">
                 <a
-                  href="https://tiktok.com"
+                  href="https://tiktok.com/@culinariumofficial"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="TikTok Culinarium"

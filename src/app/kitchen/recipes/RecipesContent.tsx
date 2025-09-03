@@ -360,7 +360,7 @@ const RecipePage: React.FC = () => {
                       className="flex items-start text-lg text-[var(--foreground)] border-b border-[var(--foreground)]/20 pb-2 last:border-b-0"
                     >
                       <span className="text-[var(--primary)] mr-3 mt-1">●</span>
-                      {`${ingredient.cantidad} ${ingredient.unidad} de ${ingredient.nombre}`}
+                      {`${ingredient.cantidad ?? ''}${ingredient.cantidad && ingredient.unidad ? ` ${ingredient.unidad}` : ''} de ${ingredient.nombre}`}
                     </motion.li>
                   ))}
                 </ul>

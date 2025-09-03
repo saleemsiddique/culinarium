@@ -31,28 +31,18 @@ const faqData = [
       "Sí, ofrecemos un plan gratuito que incluye 30 tokens mensuales para que puedas probar nuestro servicio.",
   },
   {
-    question: "¿Puedo cambiar de plan o paquete de tokens después de contratar?",
-    answer:
-      "Sí, puedes comprar paquetes adicionales o cambiar tu suscripción cuando lo necesites.",
+  question: "¿Los tokens de la suscripción son permanentes?",
+  answer:
+    "No, los tokens que recibes con tu suscripción no son acumulables de un periodo a otro. Al finalizar el periodo de la suscripción, el saldo de tokens se restablece y recibes la cantidad correspondiente al nuevo periodo. Ten en cuenta que los tokens no utilizados no se reembolsan.",
   },
   { 
     question: "¿Cómo puedo cancelar mi suscripción?", 
     answer: "Puedes cancelar tu suscripción en cualquier momento desde la pagina de perfil. La cancelación será efectiva al final del período de facturación actual.",
   },
   {
-    question: "¿Cómo se realiza el pago de la suscripción?",
-    answer:
-      "El pago se gestiona de forma segura a través de Stripe, aceptando tarjetas de crédito y débito.",
-  },
-  {
     question: "¿Ofrecen reembolsos?",
     answer:
       "No ofrecemos reembolsos. Una vez compras tokens, se quedan en la pagina para consumo.",
-  },
-  {
-    question: "¿Qué pasa si mi pago falla?",
-    answer:
-      "Si el pago falla, recibirás un aviso por email y tendrás varios intentos para solucionarlo antes de que tu suscripción se pause.",
   },
   {
     question: "¿Ofrecen soporte técnico?",
@@ -63,11 +53,6 @@ const faqData = [
     question: "¿Puedo sugerir nuevas funcionalidades o mejoras?",
     answer:
       "Sí, nos encanta recibir sugerencias. Puedes enviarlas a través de nuestro correo culinariumofficial@gmail.com.",
-  },
-  {
-    question: "¿Guardan los datos de mi tarjeta de crédito?",
-    answer:
-      "No, el procesamiento de pagos lo gestiona Stripe, que es una plataforma segura y certificada PCI DSS.",
   },
 ];
 

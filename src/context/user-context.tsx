@@ -255,6 +255,9 @@ const createStripeCustomer = async (email: string, userId: string) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const id = userCredential.user.uid;
       // const token = await userCredential.user.getIdToken();
+      const now = new Date();
+      now.setMonth(now.getMonth() + 1);
+      const tokens_reset_date = Timestamp.fromDate(now);
 
       console.log("🆕 Creando customer en Stripe para nuevo usuario:", id);
       const stripeCustomerId = await createStripeCustomer(email, id);
@@ -274,7 +277,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
         subscriptionId: "",
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
-        tokens_reset_date: Timestamp.now(),
+        tokens_reset_date: tokens_reset_date,
       };
 
       const docRef = doc(db, "user", id);
@@ -384,6 +387,9 @@ const createStripeCustomer = async (email: string, userId: string) => {
     const usersRef = collection(db, "user");
     const q = query(usersRef, where("email", "==", email));
     const snapshot = await getDocs(q);
+    const now = new Date();
+    now.setMonth(now.getMonth() + 1);
+    const tokens_reset_date = Timestamp.fromDate(now);
 
     let userData: CustomUser;
     let isNewUser = false; // ✅ Flag para detectar usuario nuevo
@@ -410,7 +416,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
         subscriptionId: "",
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
-        tokens_reset_date: Timestamp.now(),
+        tokens_reset_date: tokens_reset_date,
       };
 
       const docRef = doc(db, "user", userInfo.uid);
