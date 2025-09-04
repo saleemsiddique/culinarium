@@ -71,9 +71,10 @@ export default function Header() {
 
   // Lógica para determinar si estamos en una página de perfil en móvil
   const isMobileProfilePage = isMobile && pathname.startsWith('/profile');
+  const isAuthPage = isMobile && pathname.startsWith('/auth');
 
   // Lógica para determinar si mostrar la cabecera en general
-  const shouldHideHeader = isMobile && !isMobileProfilePage && pathname !== '/';
+  const shouldHideHeader = isMobile && !isMobileProfilePage && !isAuthPage && pathname !== '/';
 
   // Calcular el total de tokens
   const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
