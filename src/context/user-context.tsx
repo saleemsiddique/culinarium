@@ -17,6 +17,7 @@ import {
   setDoc,
   updateDoc,
   Timestamp,
+  getDoc,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -122,13 +123,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
       setFirebaseUser(userAuth);
       if (userAuth?.email) {
-        const usersRef = collection(db, "user");
-        const q = query(usersRef, where("email", "==", userAuth.email));
-        const snapshot = await getDocs(q);
+        const userDocRef = doc(db, "user", userAuth.uid);
+        const userSnapshot = await getDoc(userDocRef);
 
-        if (!snapshot.empty) {
-          let docData = snapshot.docs[0].data() as CustomUser;
-          docData.uid = snapshot.docs[0].id;
+        if (userSnapshot.exists()) {
+          let docData = userSnapshot.data() as CustomUser;
+          docData.uid = userSnapshot.id;
 
           // ✅ Verificar y resetear tokens si es necesario
           docData = await checkAndResetMonthlyTokens(docData);
@@ -156,18 +156,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const usersRef = collection(db, "user");
-      const q = query(usersRef, where("email", "==", firebaseUser.email));
-      const snapshot = await getDocs(q);
+      const userDocRef = doc(db, "user", firebaseUser.uid);
+      const userSnapshot = await getDoc(userDocRef);
 
-      if (!snapshot.empty) {
-        const docData = snapshot.docs[0].data() as CustomUser;
-        docData.uid = snapshot.docs[0].id;
-
+      if (userSnapshot.exists()) {
+        const docData = userSnapshot.data() as CustomUser;
+        docData.uid = userSnapshot.id;
         setUser(docData);
       } else {
         console.warn("No se encontró el usuario en la base de datos");
       }
+
     } catch (error) {
       console.error("Error al refrescar datos del usuario:", error);
     }
@@ -199,47 +198,49 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [firebaseUser?.email, refreshUser]);
 
   // Función helper para crear customer en Stripe
-const createStripeCustomer = async (email: string, userId: string) => {
-  try {
-    const response = await fetch("/api/create-stripe-customer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        userId,
-      }),
-    });
+  const createStripeCustomer = async (email: string, userId: string) => {
+    try {
+      const response = await fetch("/api/create-stripe-customer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          userId,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Error al crear customer en Stripe");
+      if (!response.ok) {
+        throw new Error("Error al crear customer en Stripe");
+      }
+
+      const { customerId } = await response.json();
+      return customerId;
+    } catch (error) {
+      console.error("Error creando Stripe customer:", error);
+      throw error;
     }
-
-    const { customerId } = await response.json();
-    return customerId;
-  } catch (error) {
-    console.error("Error creando Stripe customer:", error);
-    throw error;
-  }
-};
+  };
 
   const login = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = result.user;
 
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", firebaseUser.email));
-    const snapshot = await getDocs(q);
+    const userDocRef = doc(db, "user", firebaseUser.uid);
+    const snapshot = await getDoc(userDocRef);
 
-    if (snapshot.empty) throw new Error("Usuario no encontrado");
+    if (!snapshot.exists()) {
+      throw new Error("Usuario no encontrado");
+    }
 
-    let docData = snapshot.docs[0].data() as CustomUser;
-    docData.uid = snapshot.docs[0].id;
+    let docData = snapshot.data() as CustomUser;
+    docData.uid = snapshot.id;
 
     // ✅ Verificar y resetear tokens si es necesario
     docData = await checkAndResetMonthlyTokens(docData);
 
     setUser(docData);
   };
+
 
   const register = async (
     email: string,
@@ -256,7 +257,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
       const tokens_reset_date = Timestamp.fromDate(now);
 
       const stripeCustomerId = await createStripeCustomer(email, id);
-      
+
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
         email,
@@ -376,9 +377,9 @@ const createStripeCustomer = async (email: string, userId: string) => {
     const email = userInfo.email;
     if (!email) throw new Error("No se pudo obtener el email");
 
-    const usersRef = collection(db, "user");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
+    const userDocRef = doc(db, "user", userInfo.uid);
+    const userSnapshot = await getDoc(userDocRef);
+
     const now = new Date();
     now.setMonth(now.getMonth() + 1);
     const tokens_reset_date = Timestamp.fromDate(now);
@@ -386,7 +387,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
     let userData: CustomUser;
     let isNewUser = false; // ✅ Flag para detectar usuario nuevo
 
-    if (snapshot.empty) {
+    if (userSnapshot.exists()) {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
 
@@ -412,8 +413,8 @@ const createStripeCustomer = async (email: string, userId: string) => {
       const docRef = doc(db, "user", userInfo.uid);
       await setDoc(docRef, userData);
     } else {
-      userData = snapshot.docs[0].data() as CustomUser;
-      userData.uid = snapshot.docs[0].id;
+      userData = userSnapshot.data() as CustomUser;
+      userData.uid = userSnapshot.id;
       userData = await checkAndResetMonthlyTokens(userData);
     }
 
