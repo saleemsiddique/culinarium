@@ -100,7 +100,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           tokens_reset_date: newResetDate,
         });
 
-        console.log(`Tokens reseteados para usuario: ${userData.email}`);
 
         // Retornar datos actualizados
         return {
@@ -166,7 +165,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         docData.uid = snapshot.docs[0].id;
 
         setUser(docData);
-        console.log("✅ Datos de usuario refrescados desde la base de datos");
       } else {
         console.warn("No se encontró el usuario en la base de datos");
       }
@@ -178,14 +176,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Listener para eventos de actualización de tokens (ej: después de compras)
   useEffect(() => {
     const handleTokenUpdate = () => {
-      console.log("🔄 Evento de actualización de tokens detectado, refrescando usuario...");
       refreshUser().catch(console.error);
     };
 
     const handleVisibilityChange = () => {
       // Refrescar cuando el usuario regrese a la pestaña (útil después de completar compras en Stripe)
       if (!document.hidden && firebaseUser?.email) {
-        console.log("🔄 Usuario regresó a la pestaña, refrescando datos...");
         setTimeout(() => {
           refreshUser().catch(console.error);
         }, 1000); // Delay para asegurar que los webhooks se hayan procesado
@@ -259,9 +255,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
       now.setMonth(now.getMonth() + 1);
       const tokens_reset_date = Timestamp.fromDate(now);
 
-      console.log("🆕 Creando customer en Stripe para nuevo usuario:", id);
       const stripeCustomerId = await createStripeCustomer(email, id);
-      console.log("✅ Customer creado:", stripeCustomerId);
       
       const newUser: Omit<CustomUser, "password"> = {
         uid: id,
@@ -317,7 +311,6 @@ const createStripeCustomer = async (email: string, userId: string) => {
       if (!consentResponse.ok) {
         console.error("Error al registrar el consentimiento:", await consentResponse.json());
       } else {
-        console.log("Consentimiento registrado correctamente.");
 
         // Guardar en localStorage (solo en cliente)
         if (typeof window !== "undefined") {
@@ -346,7 +339,6 @@ const createStripeCustomer = async (email: string, userId: string) => {
       if (!consentResponse.ok) {
         console.error("Error al registrar el consentimiento:", await consentResponse.json());
       } else {
-        console.log("Consentimiento registrado correctamente.");
         // ✅ Nueva línea: Guardar en localStorage para evitar que el modal aparezca inmediatamente
         const saveObj: Record<string, string> = {};
         CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
@@ -398,9 +390,7 @@ const createStripeCustomer = async (email: string, userId: string) => {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
 
-      console.log("🆕 Creando customer en Stripe para nuevo usuario Google:", userInfo.uid);
       const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
-      console.log("✅ Customer creado:", stripeCustomerId);
 
       userData = {
         uid: userInfo.uid,

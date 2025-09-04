@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       extra_tokens: newExtraTokens,
     });
 
-    console.log(`✅ Tokens deducidos para usuario ${uid}: ${amount} tokens. Nuevos valores: monthly=${newMonthlyTokens}, extra=${newExtraTokens}`);
+    // console.log(`✅ Tokens deducidos para usuario ${uid}: ${amount} tokens. Nuevos valores: monthly=${newMonthlyTokens}, extra=${newExtraTokens}`);
 
     return NextResponse.json({
       message: 'Tokens deducidos correctamente',

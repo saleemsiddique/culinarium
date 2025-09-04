@@ -143,7 +143,6 @@ const RecipePage: React.FC = () => {
           if (storedRecipe) {
             const parsedRecipe: Recipe = JSON.parse(storedRecipe);
             if (parsedRecipe.img_url && parsedRecipe.img_url !== recipe.img_url) {
-              console.log('🖼️ Nueva imagen detectada en sessionStorage');
               setImageSrc(parsedRecipe.img_url);
               setRecipe(parsedRecipe);
               setIsGeneratingImage(false);
@@ -158,7 +157,6 @@ const RecipePage: React.FC = () => {
 
       // Clean up after 30 seconds (image generation timeout)
       const timeout = setTimeout(() => {
-        console.log('⏰ Timeout: stopping image generation check');
         setIsGeneratingImage(false);
         clearInterval(interval);
       }, 30000);

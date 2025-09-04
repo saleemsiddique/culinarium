@@ -40,7 +40,6 @@ if (getApps().length === 0) {
     if (!storageBucket) {
       console.warn('WARN: FIREBASE_STORAGE_BUCKET no está configurado. Storage usará el bucket por defecto si existe.');
     }
-    console.log('Firebase Admin SDK initialized successfully.');
   } catch (initError: unknown) { // Cambiado 'any' a 'unknown' para mayor seguridad de tipos
     let errorMessage = 'An unknown error occurred during Firebase Admin SDK initialization.';
     if (initError instanceof Error) {
@@ -53,7 +52,6 @@ if (getApps().length === 0) {
   }
 } else {
   firebaseAdminApp = getApps()[0];
-  console.log('Firebase Admin SDK already initialized (retrieved existing app).');
 }
 
 // ✅ Usar const porque no se reasignan

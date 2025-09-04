@@ -7,7 +7,6 @@ import { db } from "@/lib/firebase-admin";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log("Recibido:", body);
 
     // =============================================
     // OBTENER O CREAR CUSTOMER EN STRIPE
@@ -23,10 +22,6 @@ export async function POST(request: Request) {
 
       // 2. Si no existe customerId, crear customer en Stripe
       if (!customerId) {
-        console.log(
-          "🆕 Creando nuevo customer en Stripe para userId:",
-          body.userId
-        );
 
         const customer = await stripe.customers.create({
           email: userData?.email, //ESTO SE AGREGA ANTES DEL MERGE
@@ -34,7 +29,6 @@ export async function POST(request: Request) {
             userId: body.userId,
           },
         });
-        console.log(customer.email);
         customerId = customer.id;
 
         // 3. Guardar el customerId en Firebase
@@ -42,9 +36,7 @@ export async function POST(request: Request) {
           stripeCustomerId: customerId,
         });
 
-        console.log("✅ Customer creado y guardado:", customerId);
       } else {
-        console.log("✅ Customer existente encontrado:", customerId);
       }
     } else {
       return NextResponse.json(

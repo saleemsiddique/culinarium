@@ -583,7 +583,7 @@ function ProfileContent() {
                 </p>
                 <div className="max-w-md mx-auto">
                   <EmbeddedCheckoutButton
-                    priceId={"price_1RrJVF2LSjDC5txTR6lOQslg"}
+                    priceId={"price_1RwHJCRpBiBhmezm4D1fPQt5"}
                     user={user}
                   />
                 </div>

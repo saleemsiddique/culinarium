@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("✅ Stripe customer creado:", customer.id);
-
     return NextResponse.json({
       customerId: customer.id,
       message: "Customer creado exitosamente",

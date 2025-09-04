@@ -168,7 +168,6 @@ export async function POST(request: NextRequest) {
     }
 
     // La deducción de tokens se manejará en el frontend para mantener el estado sincronizado
-    console.log(`✅ Receta generada exitosamente para usuario ${uid}. Los tokens se deducirán desde el frontend.`);
 
     return NextResponse.json(data);
   } catch (err: any) {

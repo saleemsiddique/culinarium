@@ -24,10 +24,8 @@ export function SocialAuth() {
     setLoading("google");
     try {
       const result = await loginWithGoogle(); 
-      console.log("Resultado de loginWithGoogle:", result);
       
       if (result?.isNewUser) {
-        console.log("Navegando a onboarding");
 
         // ✅ Nueva línea: Enviar el correo de bienvenida a los nuevos usuarios
         await fetch("/api/send-email", {
@@ -42,7 +40,6 @@ export function SocialAuth() {
 
         router.push("/kitchen?onboarding=1"); 
       } else {
-        console.log("Navegando a cocina");
         router.push("/kitchen");
       }
     } catch (error) {
@@ -55,7 +52,6 @@ export function SocialAuth() {
 
   const handleAppleLogin = () => {
     // Apple Sign-In no está implementado aún
-    console.log("Apple Sign-In no está disponible todavía");
   };
 
   return (

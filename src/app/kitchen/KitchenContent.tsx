@@ -299,7 +299,6 @@ const CulinariumForm: React.FC = () => {
   useEffect(() => {
     const onboardingParam = searchParams.get("onboarding");
     if (onboardingParam === "1") {
-      console.log("Iniciando onboarding " + onboardingParam);
       setShowOnboarding(true);
     }
   }, [searchParams]);
@@ -514,7 +513,6 @@ const CulinariumForm: React.FC = () => {
         );
       }
       recipeDataFromAI = await openaiRes.json();
-      console.log("✅ Respuesta IA:", recipeDataFromAI);
 
       // NEW: Check if AI actually generated an error recipe based on title prefix
       if (recipeDataFromAI?.receta?.titulo?.startsWith("ERROR:")) {
@@ -528,7 +526,6 @@ const CulinariumForm: React.FC = () => {
       // STEP 1.5: Deduct tokens after successful recipe generation
       try {
         await deductTokens(TOKENS_PER_RECIPE);
-        console.log(`✅ ${TOKENS_PER_RECIPE} tokens deducidos exitosamente`);
       } catch (tokenError) {
         console.error("Error al deducir tokens:", tokenError);
         throw new Error(
@@ -556,10 +553,6 @@ const CulinariumForm: React.FC = () => {
       }
 
       const savedRecipeData = await saveRecipeRes.json();
-      console.log(
-        "✅ Receta guardada en Firestore (sin imagen):",
-        savedRecipeData
-      );
 
       setStatus("success");
       const actionMessage = isRegeneration ? "regenerada" : "generada";
@@ -602,10 +595,6 @@ const CulinariumForm: React.FC = () => {
     recipeId: string
   ) => {
     try {
-      console.log(
-        "🖼️ Iniciando generación de imagen en segundo plano para receta ID:",
-        recipeId
-      );
 
       const imageRes = await fetch("/api/recipe-image", {
         method: "POST",
@@ -613,9 +602,7 @@ const CulinariumForm: React.FC = () => {
         body: JSON.stringify({ recipe }),
       });
 
-      console.log("📸 Solicitud /api/recipe-image status:", imageRes.status);
       const imageData = await imageRes.json().catch(() => ({}));
-      console.log("📸 Respuesta /api/recipe-image:", imageData);
 
       if (imageRes.ok && imageData?.img_url) {
         // Compress image
@@ -638,9 +625,6 @@ const CulinariumForm: React.FC = () => {
         });
 
         if (updateRecipeRes.ok) {
-          console.log(
-            "✅ Imagen generada y receta actualizada en segundo plano"
-          );
 
           // Update sessionStorage so the image appears when user refreshes
           if (typeof window !== "undefined") {

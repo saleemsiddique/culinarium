@@ -7,9 +7,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[API /api/recipe-image] POST: inicio');
     const body = await request.json();
-    console.log('[API /api/recipe-image] body recibido keys:', Object.keys(body || {}));
     const recipe = body?.recipe;
 
     if (!recipe) {
@@ -49,7 +47,6 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
     
     let b64: string | undefined;
     try {
-      console.log('[API /api/recipe-image] intentando con dall-e-3 (512x512)');
       const result = await openai.images.generate({
         model: 'dall-e-3',
         prompt,
@@ -59,7 +56,6 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
         response_format: 'b64_json',
       } as any);
       b64 = (result as any)?.data?.[0]?.b64_json;
-      console.log('[API /api/recipe-image] dall-e-3 OK?', Boolean(b64));
     } catch (err) {
       console.error('[API /api/recipe-image] dall-e-3 falló, probando gpt-image-1', err);
       try {
@@ -72,7 +68,6 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
           response_format: 'b64_json',
         } as any);
         b64 = (fallback as any)?.data?.[0]?.b64_json;
-        console.log('[API /api/recipe-image] gpt-image-1 OK?', Boolean(b64));
       } catch (err2) {
         console.error('[API /api/recipe-image] gpt-image-1 también falló', err2);
       }
@@ -84,11 +79,10 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
 
     const dataUrl = `data:image/png;base64,${b64}`;
 
-    console.log('[API /api/recipe-image] imagen generada (base64 length):', b64?.length || 0);
     // Devolvemos SIEMPRE base64 (sin usar Storage)
     return NextResponse.json({ img_url: dataUrl });
   } catch (error: any) {
-    console.error('Error en /api/recipe-image:', error);
+    // console.error('Error en /api/recipe-image:', error);
     return NextResponse.json({ error: 'Error interno al generar la imagen.', details: error?.message }, { status: 500 });
   }
 }

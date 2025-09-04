@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
         process.env.STRIPE_WEBHOOK_SECRET!
       );
     } catch (err: any) {
-      console.log("Webhook Error:", err.message);
       return NextResponse.json(
         { error: `Webhook Error: ${err.message}` },
         { status: 400 }
@@ -39,8 +38,6 @@ export async function POST(request: NextRequest) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const userId = session.metadata?.userId;
-
-      console.log("🔥 Checkout completado:", session.id);
 
       if (!userId) {
         console.error("Missing userId in session metadata");
@@ -120,9 +117,7 @@ export async function POST(request: NextRequest) {
                 await stripe.customers.update(customerId, {
                   invoice_settings: { default_payment_method: pmId },
                 });
-                console.log(
-                  `✅ Customer ${customerId} default_payment_method set -> ${pmId}`
-                );
+
               } catch (custUpdErr: any) {
                 console.error(
                   "Error setting customer default payment method:",
@@ -135,9 +130,7 @@ export async function POST(request: NextRequest) {
               );
             }
           } else {
-            console.log(
-              "Customer already has a default payment method -> skipping default set."
-            );
+
           }
         } else {
           console.warn(
@@ -214,7 +207,6 @@ export async function POST(request: NextRequest) {
       //Actualizar Tokens
       if (lineItems.data.length > 0) {
         const priceId = lineItems.data[0].price?.id;
-        console.log("Precio Id: " + priceId);
         const productConfig =
           PRICE_TO_TOKENS[priceId as keyof typeof PRICE_TO_TOKENS];
 
@@ -244,13 +236,11 @@ export async function POST(request: NextRequest) {
 
             if (!existingSub.empty) {
               await existingSub.docs[0].ref.update(subscriptionData);
-              console.log("✅ Suscripción actualizada");
             } else {
               await subsRef.add({
                 ...subscriptionData,
                 createdAt: new Date(),
               });
-              console.log("✅ Nueva suscripción creada");
             }
 
             const userRef = db.collection("user").doc(userId);
@@ -260,18 +250,12 @@ export async function POST(request: NextRequest) {
               subscriptionId: session.subscription,
               stripeCustomerId: session.customer,
             });
-            console.log(
-              "✅ Usuario configurado para suscripción - esperando invoice"
-            );
           } else {
             if (productConfig.tokens > 0) {
               const userRef = db.collection("user").doc(userId);
               await userRef.update({
                 extra_tokens: FieldValue.increment(productConfig.tokens),
               });
-              console.log(
-                `✅ ${productConfig.tokens} tokens extra añadidos (acumulativos)`
-              );
             }
 
             // Registrar la transacción de tokens extra
@@ -288,7 +272,6 @@ export async function POST(request: NextRequest) {
                 status: "Completed",
                 createdAt: new Date(),
               });
-            console.log("✅ Compra de tokens extra registrada");
           }
         }
       }
@@ -320,10 +303,6 @@ export async function POST(request: NextRequest) {
         const existingSub = await subsRef.limit(1).get();
 
         if (subscription.cancel_at_period_end === true) {
-          console.log(
-            "⏰ Suscripción marcada para cancelar al final del período:",
-            customerId
-          );
 
           await userDoc.ref.update({
             subscriptionCanceled: true,
@@ -337,9 +316,6 @@ export async function POST(request: NextRequest) {
             });
           }
 
-          console.log(
-            "✅ Usuario marcado para cancelación al final del período"
-          );
         } else {
           // Esto incluye tanto la reactivación como cambios que mantienen la suscripción activa
           const wasCanceled =
@@ -347,10 +323,6 @@ export async function POST(request: NextRequest) {
             userData.subscriptionStatus === "cancel_at_period_end";
 
           if (wasCanceled || userData.subscriptionStatus !== "active") {
-            console.log(
-              "🔄 Suscripción reactivada o actualizada a activa:",
-              customerId
-            );
 
             await userDoc.ref.update({
               subscriptionCanceled: false,
@@ -364,11 +336,9 @@ export async function POST(request: NextRequest) {
               });
             }
 
-            console.log("✅ Usuario actualizado a suscripción activa");
           }
         }
       } else {
-        console.log("❌ Usuario no encontrado para customerId:", customerId);
       }
     }
 
@@ -383,7 +353,6 @@ export async function POST(request: NextRequest) {
       const oneMonthLater = new Date(now);
       oneMonthLater.setMonth(now.getMonth() + 1);
 
-      console.log("🔄 Pago exitoso para customer:", customerId);
 
       // Buscar usuario por customerId (Stripe customer ID)
       const usersQuery = await db
@@ -396,9 +365,6 @@ export async function POST(request: NextRequest) {
         const userDoc = usersQuery.docs[0];
         const userId = userDoc.id;
         const userData = userDoc.data();
-        console.log("-------------------------");
-        console.log("Usuario encontrado:", userId);
-        console.log("Estado de suscripción:", userData.subscriptionStatus);
 
         // Solo procesar si tiene suscripción activa
         if (invoice.parent?.subscription_details?.subscription) {
@@ -430,13 +396,10 @@ export async function POST(request: NextRequest) {
           }
 
           if (isFirstPayment) {
-            console.log("✅ Primer pago: 300 tokens mensuales asignados");
           } else {
-            console.log("✅ Renovación: tokens mensuales reseteados a 300");
           }
         }
       } else {
-        console.log("⚠️ Usuario no encontrado con customerId:", customerId);
       }
     }
 
@@ -448,8 +411,6 @@ export async function POST(request: NextRequest) {
       const subscriptionId = subscription.id;
       const customerId = subscription.customer;
 
-
-      console.log("❌ Suscripción cancelada:", subscriptionId);
 
       // Anular invoices pendientes
       if (customerId) {
@@ -503,9 +464,6 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        console.log(
-          "✅ Usuario marcado como no suscrito, tokens mensuales eliminados"
-        );
       }
     }
 
@@ -515,8 +473,6 @@ export async function POST(request: NextRequest) {
     if (event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
       const customerId = invoice.customer;
-
-      console.log("⚠️ Pago fallido para customer:", customerId);
 
       // Buscar usuario por customerId
       const usersQuery = await db
@@ -533,7 +489,6 @@ export async function POST(request: NextRequest) {
           lastPaymentFailed: new Date(),
         });
 
-        console.log("⚠️ Usuario marcado con pago fallido");
       }
     }
 

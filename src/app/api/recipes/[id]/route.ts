@@ -104,8 +104,6 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
     await docRef.update(updatedRecipe);
 
-    console.log(`✅ Receta ${id} actualizada exitosamente para usuario ${uid}`);
-
     return NextResponse.json({
       message: 'Receta actualizada exitosamente',
       id: id,
