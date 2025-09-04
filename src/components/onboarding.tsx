@@ -12,13 +12,13 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
       image: "/onboarding/step1.jpg",
     },
     {
-      title: "🥘 Monedas y Recetas",
-      text: "¡Las monedas son tu recurso más valioso! Cada vez que crees una receta gastarás monedas, y siempre podrás ver el precio indicado antes de crearla.",
+      title: "🥘 Tokens y Recetas",
+      text: "¡Los tokens son tu recurso más valioso! Cada vez que crees una receta gastarás tokens, y siempre podrás ver el coste de tokens indicado antes de crearla.",
       image: "/onboarding/step2.jpg",
     },
     {
       title: "🔄 Renovación",
-      text: "Tus monedas se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
+      text: "Tus tokens se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
       image: "/onboarding/step3.jpg",
     },
     {
