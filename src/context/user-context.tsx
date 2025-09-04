@@ -383,7 +383,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     let userData: CustomUser;
     let isNewUser = false; // ✅ Flag para detectar usuario nuevo
 
-    if (userSnapshot.exists()) {
+    if (!userSnapshot.exists()) {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
 
