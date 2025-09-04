@@ -28,7 +28,7 @@ const faqData = [
   {
     question: "¿Tienen una versión gratuita?",
     answer:
-      "Sí, ofrecemos un plan gratuito que incluye 30 tokens mensuales para que puedas probar nuestro servicio.",
+      "Sí, ofrecemos un plan gratuito que incluye 50 tokens mensuales para que puedas probar nuestro servicio.",
   },
   {
   question: "¿Los tokens de la suscripción son permanentes?",
