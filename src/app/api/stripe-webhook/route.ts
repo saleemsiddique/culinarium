@@ -402,8 +402,6 @@ export async function POST(request: NextRequest) {
 
         // Solo procesar si tiene suscripción activa
         if (invoice.parent?.subscription_details?.subscription) {
-          console.log("✅ Factura asociada a una suscripción. Procediendo a asignar tokens.");
-          console.log("-------------------------");
           // Verificar si es el primer pago o renovación
           const isFirstPayment =
             !userData.monthly_tokens || userData.monthly_tokens === 0;
@@ -448,8 +446,29 @@ export async function POST(request: NextRequest) {
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
       const subscriptionId = subscription.id;
+      const customerId = subscription.customer;
+
 
       console.log("❌ Suscripción cancelada:", subscriptionId);
+
+      // Anular invoices pendientes
+      if (customerId) {
+        try {
+          const openInvoices = await stripe.invoices.list({
+            customer: typeof customerId === "string" ? customerId : (customerId?.id ?? undefined),
+            status: "open",
+          });
+
+          for (const invoice of openInvoices.data) {
+            if (invoice.id) {
+              // Verificar que invoice.id existe
+              await stripe.invoices.voidInvoice(invoice.id);
+            }
+          }
+        } catch (error) {
+          console.error("Error anulando invoices:", error);
+        }
+      }
 
       // Buscar usuario por subscriptionId
       const usersQuery = await db
