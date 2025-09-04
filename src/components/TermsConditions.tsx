@@ -123,9 +123,7 @@ const TermsContent = () => {
               de recetas y consumición de tokens en el momento), el usuario
               deberá aceptar expresamente, en el momento del pago, que el
               servicio comience inmediatamente y renuncia al derecho de
-              desistimiento cuando la ley lo permita. Esto se hará mediante una
-              casilla (checkbox) visible en el proceso de compra que el usuario
-              debe marcar.
+              desistimiento cuando la ley lo permita.
             </p>
           </section>
 
@@ -173,9 +171,7 @@ const TermsContent = () => {
             <p className="mt-2">
               Las recetas son sugerencias; no garantizamos resultados concretos.
               Equipo Culinarium no será responsable por daños derivados de
-              seguir una receta (intoxicaciones, alergias, etc.). Nuestra
-              responsabilidad, en la medida permitida por la ley, queda limitada
-              a lo pagado por el usuario en los 12 meses previos.
+              seguir una receta (intoxicaciones, alergias, etc.).
             </p>
           </section>
 
