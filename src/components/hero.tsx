@@ -89,7 +89,7 @@ export default function HeroSection() {
           transition={{ delay: 0.9, duration: 0.6, ease: "easeOut" }}
           className="mt-8 space-y-4 md:space-y-0 md:space-x-6 flex flex-col md:flex-row justify-center"
         >
-          <ButtonPrimary route={"/auth/login"} description={"Empieza Ahora"} />
+          <ButtonPrimary route={"/auth/login"} description={"Empezar"} />
           <ButtonSecondary route={"#pricing"} description={"Ver Precios"} />
         </motion.div>
       </motion.div>
