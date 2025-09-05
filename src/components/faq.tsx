@@ -155,7 +155,7 @@ export default function FAQ() {
         </motion.div>
 
         <div className=" mt-12 justify-center w-full text-center">
-          <ButtonPrimary route={"/auth/login"} description={"Get Started"} />
+          <ButtonPrimary route={"/auth/login"} description={"Empieza Ahora"} />
         </div>
 
         <div className="mt-16 text-center">

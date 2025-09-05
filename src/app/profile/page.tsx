@@ -2,7 +2,7 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useUser } from "@/context/user-context";
+import { CustomUser, useUser } from "@/context/user-context";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,8 +26,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";
-import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutForm";
 import Onboarding from "@/components/onboarding";
+import { PremiumModal } from "@/components/SideMenu/PremiumModal";
 
 export default function ProfilePage() {
   return (
@@ -46,6 +46,7 @@ function ProfileContent() {
   const [showCancelNowDialog, setShowCancelNowDialog] = useState(false);
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
 
   // Estados para editar nombre
   const [isEditingName, setIsEditingName] = useState(false);
@@ -154,77 +155,78 @@ function ProfileContent() {
   };
 
   const handleCancelSubscription = async () => {
-  setIsLoading(true);
-  try {
-    // Paso 1: Llamar a la API para cancelar la suscripción
-    const response = await fetch("/api/subscription/cancel", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user?.uid,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Error al cancelar la suscripción");
-    }
-
-    // Usamos el `tokens_reset_date` del usuario como la fecha de finalización
-    const subscriptionEndDate = user?.tokens_reset_date;
-
-    // Convertimos la marca de tiempo a una cadena de fecha legible
-    const formattedEndDate = subscriptionEndDate?.toDate().toLocaleDateString("es-ES", {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-
-    // Paso 2: Llamar a la API para enviar el correo de desuscripción
-    const emailResponse = await fetch("/api/send-email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "unsubscribe",
-        to: user?.email, // o la dirección de correo del usuario
-        data: {
-          name: user?.firstName || user?.email,
-          endDate: formattedEndDate,
+    setIsLoading(true);
+    try {
+      // Paso 1: Llamar a la API para cancelar la suscripción
+      const response = await fetch("/api/subscription/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          userId: user?.uid,
+        }),
+      });
 
-    if (!emailResponse.ok) {
-      console.error("Error al enviar el correo de confirmación");
-      // No lanzamos un error aquí para que el modal de éxito se muestre de todas formas
+      if (!response.ok) {
+        throw new Error("Error al cancelar la suscripción");
+      }
+
+      // Usamos el `tokens_reset_date` del usuario como la fecha de finalización
+      const subscriptionEndDate = user?.tokens_reset_date;
+
+      // Convertimos la marca de tiempo a una cadena de fecha legible
+      const formattedEndDate = subscriptionEndDate
+        ?.toDate()
+        .toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+      // Paso 2: Llamar a la API para enviar el correo de desuscripción
+      const emailResponse = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "unsubscribe",
+          to: user?.email, // o la dirección de correo del usuario
+          data: {
+            name: user?.firstName || user?.email,
+            endDate: formattedEndDate,
+          },
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error("Error al enviar el correo de confirmación");
+        // No lanzamos un error aquí para que el modal de éxito se muestre de todas formas
+      }
+
+      setMessageModal({
+        visible: true,
+        title: "Suscripción Cancelada",
+        text: "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual. Hemos enviado un correo de confirmación a tu dirección.",
+        isError: false,
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error:", error);
+      setMessageModal({
+        visible: true,
+        title: "Error",
+        text: "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
+        isError: true,
+      });
+    } finally {
+      setIsLoading(false);
+      setShowCancelDialog(false);
+      setShowReactivateDialog(false);
     }
-
-    setMessageModal({
-      visible: true,
-      title: "Suscripción Cancelada",
-      text: "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual. Hemos enviado un correo de confirmación a tu dirección.",
-      isError: false,
-    });
-
-    window.location.reload();
-  } catch (error) {
-    console.error("Error:", error);
-    setMessageModal({
-      visible: true,
-      title: "Error",
-      text: "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
-      isError: true,
-    });
-  } finally {
-    setIsLoading(false);
-    setShowCancelDialog(false);
-    setShowReactivateDialog(false);
-  }
-};
-
+  };
 
   const handleCancelImmediateSubscription = async () => {
     setIsLoading(true);
@@ -337,8 +339,10 @@ function ProfileContent() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-orange-50 py-18 px-4">
       {/* Showing OnBoarding al hacer cliq al boton */}
-      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} /> }
-      
+      {showOnboarding && (
+        <Onboarding onClose={() => setShowOnboarding(false)} />
+      )}
+
       <div className="max-w-6xl mx-auto">
         {/* Header with Profile Picture Placeholder */}
         <div className="text-center mb-12">
@@ -357,10 +361,8 @@ function ProfileContent() {
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-          
           {/* Left Column - Personal Info */}
           <div className="lg:col-span-1 space-y-6">
-            
             {/* Personal Information Card */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-orange-100 shadow-xl p-6">
               <div className="flex items-center mb-6">
@@ -379,7 +381,9 @@ function ProfileContent() {
                 </label>
                 {!isEditingName ? (
                   <div className="flex items-center justify-between bg-gray-50/80 rounded-xl p-3 border border-gray-100">
-                    <span className="text-[var(--foreground)] font-medium">{user?.firstName}</span>
+                    <span className="text-[var(--foreground)] font-medium">
+                      {user?.firstName}
+                    </span>
                     <Button
                       onClick={() => setIsEditingName(true)}
                       variant="ghost"
@@ -406,7 +410,13 @@ function ProfileContent() {
                         className="flex-1 bg-[var(--highlight)] text-white hover:bg-[var(--highlight-dark)] rounded-xl"
                         disabled={isSavingName}
                       >
-                        {isSavingName ? "Guardando..." : <><Save className="h-4 w-4 mr-1" /> Guardar</>}
+                        {isSavingName ? (
+                          "Guardando..."
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4 mr-1" /> Guardar
+                          </>
+                        )}
                       </Button>
                       <Button
                         onClick={handleCancelEdit}
@@ -429,7 +439,9 @@ function ProfileContent() {
                 </label>
                 <div className="flex items-center bg-gray-50/80 rounded-xl p-3 border border-gray-100">
                   <Mail className="h-4 w-4 text-[var(--highlight)] mr-2" />
-                  <span className="text-[var(--foreground)]">{user?.email}</span>
+                  <span className="text-[var(--foreground)]">
+                    {user?.email}
+                  </span>
                 </div>
               </div>
             </div>
@@ -468,7 +480,6 @@ function ProfileContent() {
 
           {/* Right Column - Subscription Info */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Premium Subscription Card */}
             {user?.isSubscribed && (
               <div className="bg-gradient-to-br from-[var(--primary)] via-[var(--primary)] to-slate-800 text-white rounded-2xl shadow-2xl overflow-hidden">
@@ -479,17 +490,29 @@ function ProfileContent() {
                         <Crown className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold">Suscripción Premium</h2>
-                        <p className="text-white/80">Disfruta de todos los beneficios</p>
+                        <h2 className="text-2xl font-bold">
+                          Suscripción Premium
+                        </h2>
+                        <p className="text-white/80">
+                          Disfruta de todos los beneficios
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                        subscriptionStatus.text === 'Activa' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-[var(--highlight)]/20 text-orange-300'
-                      }`}>
-                        <div className={`w-2 h-2 rounded-full mr-2 ${
-                          subscriptionStatus.text === 'Activa' ? 'bg-emerald-300' : 'bg-orange-300'
-                        }`}></div>
+                      <div
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          subscriptionStatus.text === "Activa"
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : "bg-[var(--highlight)]/20 text-orange-300"
+                        }`}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full mr-2 ${
+                            subscriptionStatus.text === "Activa"
+                              ? "bg-emerald-300"
+                              : "bg-orange-300"
+                          }`}
+                        ></div>
                         {subscriptionStatus.text}
                       </div>
                     </div>
@@ -499,17 +522,23 @@ function ProfileContent() {
                     <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
                       <div className="flex items-center mb-2">
                         <Calendar className="h-5 w-5 text-[var(--highlight)] mr-2" />
-                        <span className="text-sm text-white/80">Próxima facturación</span>
+                        <span className="text-sm text-white/80">
+                          Próxima facturación
+                        </span>
                       </div>
                       <p className="text-xl font-semibold">
-                        {subscription?.endsAt ? formatDate(subscription.endsAt.toDate()) : "N/A"}
+                        {subscription?.endsAt
+                          ? formatDate(subscription.endsAt.toDate())
+                          : "N/A"}
                       </p>
                     </div>
-                    
+
                     <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
                       <div className="flex items-center mb-2">
                         <Coins className="h-5 w-5 text-[var(--highlight)] mr-2" />
-                        <span className="text-sm text-white/80">Tokens disponibles</span>
+                        <span className="text-sm text-white/80">
+                          Tokens disponibles
+                        </span>
                       </div>
                       <p className="text-xl font-semibold text-[var(--highlight)]">
                         {totalOfTokens.toLocaleString()}
@@ -518,18 +547,20 @@ function ProfileContent() {
                   </div>
 
                   {/* Subscription Actions */}
-                  {user?.isSubscribed && !user?.subscriptionCanceled && user?.subscriptionStatus !== "payment_failed" && (
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={() => setShowCancelDialog(true)}
-                        variant="outline"
-                        className="border-red-900 text-red-900 hover:bg-red-100 hover:border-red-400 rounded-xl backdrop-blur-sm"
-                      >
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Cancelar Suscripción
-                      </Button>
-                    </div>
-                  )}
+                  {user?.isSubscribed &&
+                    !user?.subscriptionCanceled &&
+                    user?.subscriptionStatus !== "payment_failed" && (
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={() => setShowCancelDialog(true)}
+                          variant="outline"
+                          className="border-red-900 text-red-900 hover:bg-red-100 hover:border-red-400 rounded-xl backdrop-blur-sm"
+                        >
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Cancelar Suscripción
+                        </Button>
+                      </div>
+                    )}
 
                   {/* Payment Failed Action */}
                   {user?.subscriptionStatus === "payment_failed" && (
@@ -550,8 +581,11 @@ function ProfileContent() {
                       <div className="flex items-center justify-center mb-4">
                         <AlertTriangle className="h-6 w-6 text-red-300 mr-3" />
                         <p className="text-red-200 font-medium text-center">
-                          Tu suscripción ha sido cancelada pero seguirás teniendo acceso hasta el{" "}
-                          {subscription?.endsAt ? formatDate(subscription.endsAt.toDate()) : "final del período"}
+                          Tu suscripción ha sido cancelada pero seguirás
+                          teniendo acceso hasta el{" "}
+                          {subscription?.endsAt
+                            ? formatDate(subscription.endsAt.toDate())
+                            : "final del período"}
                         </p>
                       </div>
                       <div className="text-center">
@@ -581,11 +615,14 @@ function ProfileContent() {
                 <p className="text-[var(--foreground)]/70 mb-6 text-lg">
                   Desbloquea todo el potencial con Premium
                 </p>
-                <div className="max-w-md mx-auto">
-                  <EmbeddedCheckoutButton
-                    priceId={"price_1RwHJCRpBiBhmezm4D1fPQt5"}
-                    user={user}
-                  />
+                <div className="max-w-md mx-auto" onClick={() => {setShowPremium(true);}}>
+                  <div className="w-full flex flex-col items-center gap-4">
+                    <button
+                      className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out"
+                    >
+                      Suscribirse
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -625,7 +662,9 @@ function ProfileContent() {
               </div>
               <h3 className="text-xl font-bold mb-3">¿Cancelar Suscripción?</h3>
               <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">
-                Tu suscripción se cancelará, pero mantendrás acceso a todas las funciones Premium hasta el final de tu período actual de facturación.
+                Tu suscripción se cancelará, pero mantendrás acceso a todas las
+                funciones Premium hasta el final de tu período actual de
+                facturación.
               </p>
               <div className="flex space-x-3">
                 <Button
@@ -659,7 +698,8 @@ function ProfileContent() {
               </div>
               <h3 className="text-xl font-bold mb-3">¿Cancelar Suscripción?</h3>
               <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">
-                Tu suscripción se cancelará de inmediato y perderás acceso a todas las funciones Premium.
+                Tu suscripción se cancelará de inmediato y perderás acceso a
+                todas las funciones Premium.
               </p>
               <div className="flex space-x-3">
                 <Button
@@ -726,9 +766,12 @@ function ProfileContent() {
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
                 <Zap className="h-8 w-8 text-green-500" />
               </div>
-              <h3 className="text-xl font-bold mb-3">¿Reactivar Suscripción?</h3>
+              <h3 className="text-xl font-bold mb-3">
+                ¿Reactivar Suscripción?
+              </h3>
               <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">
-                Tu suscripción se reactivará y tendrás acceso a todas las funciones Premium nuevamente.
+                Tu suscripción se reactivará y tendrás acceso a todas las
+                funciones Premium nuevamente.
               </p>
               <div className="flex space-x-3">
                 <Button
@@ -757,9 +800,11 @@ function ProfileContent() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
             <div className="text-center text-[var(--foreground)]">
-              <div className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 ${
-                messageModal.isError ? 'bg-red-100' : 'bg-green-100'
-              }`}>
+              <div
+                className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 ${
+                  messageModal.isError ? "bg-red-100" : "bg-green-100"
+                }`}
+              >
                 {messageModal.isError ? (
                   <AlertCircle className="h-8 w-8 text-red-500" />
                 ) : (
@@ -771,7 +816,9 @@ function ProfileContent() {
                 {messageModal.text}
               </p>
               <Button
-                onClick={() => setMessageModal({ ...messageModal, visible: false })}
+                onClick={() =>
+                  setMessageModal({ ...messageModal, visible: false })
+                }
                 className="bg-[var(--highlight)] hover:bg-[var(--highlight-dark)] text-white rounded-xl px-8 py-3"
               >
                 Cerrar
@@ -779,6 +826,14 @@ function ProfileContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {showPremium && (
+        <PremiumModal
+          user={user as CustomUser | null}
+          onClose={() => setShowPremium(false)}
+          onSubscribe={() => setShowPremium(false)}
+        />
       )}
     </div>
   );

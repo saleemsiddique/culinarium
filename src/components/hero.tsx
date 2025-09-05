@@ -68,7 +68,7 @@ export default function HeroSection() {
           className="font-extrabold text-4xl md:text-7xl leading-tight mb-4"
           style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }} // Added text shadow for readability
         >
-          WELCOME TO CULINARIUM
+          BIENVENIDO A CULINARIUM
         </motion.div>
 
         {/* Tagline */}
@@ -89,8 +89,8 @@ export default function HeroSection() {
           transition={{ delay: 0.9, duration: 0.6, ease: "easeOut" }}
           className="mt-8 space-y-4 md:space-y-0 md:space-x-6 flex flex-col md:flex-row justify-center"
         >
-          <ButtonPrimary route={"/auth/login"} description={"Get Started"} />
-          <ButtonSecondary route={"#pricing"} description={"See Pricing"} />
+          <ButtonPrimary route={"/auth/login"} description={"Empieza Ahora"} />
+          <ButtonSecondary route={"#pricing"} description={"Ver Precios"} />
         </motion.div>
       </motion.div>
     </div>
