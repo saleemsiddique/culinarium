@@ -31,10 +31,6 @@ export default function PricingCard({
         </span>
       </div>
 
-      <div className=" mt-10 justify-center w-full text-center">
-        {/* <EmbeddedCheckoutButton priceId={priceId} /> */}
-      </div>
-
       <ul role="list" className="space-y-3 my-7">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center min-h-[40px]">
