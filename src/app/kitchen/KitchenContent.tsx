@@ -333,31 +333,37 @@ const CulinariumForm: React.FC = () => {
   }, [toastMessage]);
 
   // Handlers ingredientes disponibles
-  const handleAddIngredient = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      const value = currentIngredient.trim();
-      e.preventDefault();
-      if (!value) {
-        setCurrentIngredient("");
-        return;
-      }
-      // Comparar ambos valores en minúsculas
-      const normalizedValue = value.toLowerCase();
-      const isDuplicate = ingredients.some(
-        (ing) => ing.toLowerCase() === normalizedValue
-      );
+      const handleAddIngredient = (
+  e?: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
+) => {
+  // Si es un evento de teclado y no es Enter → no hacer nada
+  if (e && "key" in e && e.key !== "Enter") return;
 
-      if (isDuplicate) {
-        setToastMessage("Ingrediente ya añadido");
-      } else {
-        setIngredients((prev) => [...prev, value]);
-        //addToHistory(value);
-        setIngredientError(false); // Clear error when an ingredient is added
-      }
-      setCurrentIngredient("");
-      setShowSuggestions(false);
-    }
-  };
+  const value = currentIngredient.trim();
+  e?.preventDefault();
+
+  if (!value) {
+    setCurrentIngredient("");
+    return;
+  }
+
+  const normalizedValue = value.toLowerCase();
+  const isDuplicate = ingredients.some(
+    (ing) => ing.toLowerCase() === normalizedValue
+  );
+
+  if (isDuplicate) {
+    setToastMessage("Ingrediente ya añadido");
+  } else {
+    setIngredients((prev) => [...prev, value]);
+    // addToHistory(value);
+    setIngredientError(false);
+  }
+
+  setCurrentIngredient("");
+  setShowSuggestions(false);
+};
+
 
   const handleRemoveIngredient = (label: string) => {
     setIngredients((prev) => prev.filter((ing) => ing !== label));
@@ -756,6 +762,14 @@ const CulinariumForm: React.FC = () => {
                     aria-label="Añadir ingrediente"
                     autoComplete="off"
                   />
+
+                  <button
+                    type="button"
+                    onClick={handleAddIngredient}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-[var(--highlight)] text-white rounded-lg hover:opacity-90 text-sm"
+                  >
+                    Añadir
+                  </button>
 
                   {showSuggestions &&
                     getSuggestions(currentIngredient, ingredients).length >
