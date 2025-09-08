@@ -365,7 +365,7 @@ const CulinariumForm: React.FC = () => {
     setCurrentIngredient("");
     setShowSuggestions(false);
   };
-
+ 
   const handleRemoveIngredient = (label: string) => {
     setIngredients((prev) => prev.filter((ing) => ing !== label));
   };
