@@ -333,37 +333,38 @@ const CulinariumForm: React.FC = () => {
   }, [toastMessage]);
 
   // Handlers ingredientes disponibles
-      const handleAddIngredient = (
-  e?: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-) => {
-  // Si es un evento de teclado y no es Enter → no hacer nada
-  if (e && "key" in e && e.key !== "Enter") return;
+  const handleAddIngredient = (
+    e?:
+      | React.KeyboardEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLButtonElement>
+  ) => {
+    // Si es un evento de teclado y no es Enter → no hacer nada
+    if (e && "key" in e && e.key !== "Enter") return;
 
-  const value = currentIngredient.trim();
-  e?.preventDefault();
+    const value = currentIngredient.trim();
+    e?.preventDefault();
 
-  if (!value) {
+    if (!value) {
+      setCurrentIngredient("");
+      return;
+    }
+
+    const normalizedValue = value.toLowerCase();
+    const isDuplicate = ingredients.some(
+      (ing) => ing.toLowerCase() === normalizedValue
+    );
+
+    if (isDuplicate) {
+      setToastMessage("Ingrediente ya añadido");
+    } else {
+      setIngredients((prev) => [...prev, value]);
+      // addToHistory(value);
+      setIngredientError(false);
+    }
+
     setCurrentIngredient("");
-    return;
-  }
-
-  const normalizedValue = value.toLowerCase();
-  const isDuplicate = ingredients.some(
-    (ing) => ing.toLowerCase() === normalizedValue
-  );
-
-  if (isDuplicate) {
-    setToastMessage("Ingrediente ya añadido");
-  } else {
-    setIngredients((prev) => [...prev, value]);
-    // addToHistory(value);
-    setIngredientError(false);
-  }
-
-  setCurrentIngredient("");
-  setShowSuggestions(false);
-};
-
+    setShowSuggestions(false);
+  };
 
   const handleRemoveIngredient = (label: string) => {
     setIngredients((prev) => prev.filter((ing) => ing !== label));
@@ -498,7 +499,7 @@ const CulinariumForm: React.FC = () => {
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("lastFormData", JSON.stringify(formData));
-        } catch { }
+        } catch {}
       }
       // Get authentication token
       const idToken = await firebaseUser.getIdToken();
@@ -525,7 +526,7 @@ const CulinariumForm: React.FC = () => {
         // If the AI explicitly returned an error recipe, throw an error to stop the process
         throw new Error(
           recipeDataFromAI.receta.descripcion ||
-          "La IA no pudo generar una receta válida con los ingredientes proporcionados."
+            "La IA no pudo generar una receta válida con los ingredientes proporcionados."
         );
       }
 
@@ -554,7 +555,7 @@ const CulinariumForm: React.FC = () => {
         const errorData = await saveRecipeRes.json();
         throw new Error(
           errorData.error ||
-          `Error al guardar receta: Status ${saveRecipeRes.status}`
+            `Error al guardar receta: Status ${saveRecipeRes.status}`
         );
       }
 
@@ -601,7 +602,6 @@ const CulinariumForm: React.FC = () => {
     recipeId: string
   ) => {
     try {
-
       const imageRes = await fetch("/api/recipe-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -631,7 +631,6 @@ const CulinariumForm: React.FC = () => {
         });
 
         if (updateRecipeRes.ok) {
-
           // Update sessionStorage so the image appears when user refreshes
           if (typeof window !== "undefined") {
             sessionStorage.setItem(
@@ -659,14 +658,19 @@ const CulinariumForm: React.FC = () => {
   useEffect(() => {
     if (loadingUser) return;
     const auto = searchParams.get("auto");
-    if (auto === "1" && !autoTriggered) {
-      const stored =
+    const regen = searchParams.get("regenerate");
+    if ((auto === "1" || regen === "1") && !autoTriggered) {
+      // Intentamos primero lastFormData (más fiable)
+      const storedLastForm =
         typeof window !== "undefined"
           ? sessionStorage.getItem("lastFormData")
           : null;
-      if (stored) {
+
+      let didPopulate = false;
+
+      if (storedLastForm) {
         try {
-          const data = JSON.parse(stored);
+          const data = JSON.parse(storedLastForm);
           setIngredients(
             Array.isArray(data.ingredients) ? data.ingredients : []
           );
@@ -694,16 +698,76 @@ const CulinariumForm: React.FC = () => {
           setAvailableTime(
             typeof data.availableTime === "string" ? data.availableTime : "30"
           );
-        } catch {
-          // Si falla el parseo, evitamos bucles
+          didPopulate = true;
+        } catch (err) {
+          // fallamos silenciosamente y probamos siguiente fuente
+          console.warn("Error parseando lastFormData:", err);
         }
-        setAutoTriggered(true);
-        // Permite que React aplique los estados antes de enviar
+      }
+
+      // Si no había lastFormData intentamos con generatedRecipe (p.ej. al regenerar desde la vista de receta)
+      if (!didPopulate) {
+        const storedGenerated =
+          typeof window !== "undefined"
+            ? sessionStorage.getItem("generatedRecipe")
+            : null;
+        if (storedGenerated) {
+          try {
+            const recipe = JSON.parse(storedGenerated);
+            // Intentar leer ingredientes desde varias propiedades posibles
+            const maybeIngredients =
+              recipe.ingredients ||
+              recipe.ingredientes ||
+              recipe.ingredientes_list ||
+              recipe.ingredients_list ||
+              recipe.ingredientesList ||
+              null;
+
+            if (
+              Array.isArray(maybeIngredients) &&
+              maybeIngredients.length > 0
+            ) {
+              // Asegurarnos que sean strings
+              const normalized = maybeIngredients.map((it: any) =>
+                typeof it === "string" ? it : String(it)
+              );
+              setIngredients(normalized);
+              didPopulate = true;
+            }
+
+            // Si la receta guarda otros campos comunes
+            if (
+              !mealTime &&
+              (recipe.mealTime || recipe.momento || recipe.tipo)
+            ) {
+              setMealTime(recipe.mealTime || recipe.momento || recipe.tipo);
+            }
+
+            // otros mappings si existen
+            if (recipe.diners || recipe.comensales) {
+              setDiners(
+                typeof recipe.diners === "number"
+                  ? recipe.diners
+                  : recipe.comensales || 1
+              );
+            }
+
+            if (recipe.cuisineStyle || recipe.estilo) {
+              setCuisineStyle(recipe.cuisineStyle || recipe.estilo);
+            }
+          } catch (err) {
+            console.warn("Error parseando generatedRecipe:", err);
+          }
+        }
+      }
+
+      setAutoTriggered(true);
+      // Permite que React aplique los estados antes de enviar (si queremos auto-submit)
+      // Solo requestSubmit si hemos poblado algo
+      if (didPopulate) {
         setTimeout(() => {
           formRef.current?.requestSubmit();
         }, 0);
-      } else {
-        setAutoTriggered(true);
       }
     }
   }, [loadingUser, searchParams, autoTriggered]);
@@ -731,7 +795,11 @@ const CulinariumForm: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
             {/* COLUMNA 1: Ingredientes (principal) */}
             <div className="lg:col-span-1 flex flex-col">
-              <section className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex-grow ${ingredientError ? 'border-2 border-[var(--highlight)]' : ''}`}>
+              <section
+                className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex-grow ${
+                  ingredientError ? "border-2 border-[var(--highlight)]" : ""
+                }`}
+              >
                 <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4 flex items-center">
                   <span className="mr-2 text-[var(--highlight)] text-3xl">
                     🍳
@@ -755,10 +823,11 @@ const CulinariumForm: React.FC = () => {
                       setTimeout(() => setShowSuggestions(false), 200)
                     }
                     placeholder="Ej: Pollo, arroz, tomate..."
-                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${ingredientError
+                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${
+                      ingredientError
                         ? "border-[var(--highlight)]"
                         : "border-[var(--primary)]"
-                      }`}
+                    }`}
                     aria-label="Añadir ingrediente"
                     autoComplete="off"
                   />
@@ -773,7 +842,7 @@ const CulinariumForm: React.FC = () => {
 
                   {showSuggestions &&
                     getSuggestions(currentIngredient, ingredients).length >
-                    0 && (
+                      0 && (
                       <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-[var(--primary)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
                         {getSuggestions(currentIngredient, ingredients).map(
                           (suggestion, index) => (
@@ -803,7 +872,12 @@ const CulinariumForm: React.FC = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {ingredientHistory
-                        .filter((ing) => !ingredients.map(i => i.toLowerCase()).includes(ing.toLowerCase()))
+                        .filter(
+                          (ing) =>
+                            !ingredients
+                              .map((i) => i.toLowerCase())
+                              .includes(ing.toLowerCase())
+                        )
                         .slice(0, 6)
                         .map((ingredient) => (
                           <button
@@ -870,8 +944,10 @@ const CulinariumForm: React.FC = () => {
             <div className="lg:col-span-1 flex flex-col space-y-6">
               {/* Sección de Momento del Día */}
               <section
-                className={`bg-[var(--background)] p-4 rounded-2xl form-custom-shadow flex flex-col justify-between ${mealTimeError ? 'border-2 border-[var(--highlight)]' : ''}`}
-                style={{ minHeight: '250px', maxHeight: '350px' }}
+                className={`bg-[var(--background)] p-4 rounded-2xl form-custom-shadow flex flex-col justify-between ${
+                  mealTimeError ? "border-2 border-[var(--highlight)]" : ""
+                }`}
+                style={{ minHeight: "250px", maxHeight: "350px" }}
               >
                 <h2 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center justify-center">
                   <span className="mr-2 text-[var(--highlight)] text-xl">
@@ -891,9 +967,10 @@ const CulinariumForm: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className={`flex flex-col items-center justify-center  p-2 rounded-xl border-2 transition-all duration-200
-                        ${mealTime === time.value
-                          ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
-                          : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
+                        ${
+                          mealTime === time.value
+                            ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
+                            : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
                         }`}
                     >
                       <span className="text-2xl mb-0.5">
@@ -916,7 +993,11 @@ const CulinariumForm: React.FC = () => {
               </section>
 
               {/* Sección de Número de Personas */}
-              <section className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex flex-col justify-center h-full relative ${!user?.isSubscribed ? 'opacity-60' : ''}`}>
+              <section
+                className={`bg-[var(--background)] p-6 rounded-2xl form-custom-shadow flex flex-col justify-center h-full relative ${
+                  !user?.isSubscribed ? "opacity-60" : ""
+                }`}
+              >
                 <h2 className="text-xl font-bold text-[var(--foreground)] mb-4 text-center flex items-center justify-center">
                   <span className="mr-2 text-[var(--primary)] text-2xl">
                     👨‍👩‍👧‍👦
@@ -938,9 +1019,10 @@ const CulinariumForm: React.FC = () => {
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners <= 1}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${!user?.isSubscribed || diners <= 1
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-[var(--primary)]/30"
+                      ${
+                        !user?.isSubscribed || diners <= 1
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-[var(--primary)]/30"
                       }`}
                     aria-label="Disminuir número de comensales"
                   >
@@ -959,9 +1041,10 @@ const CulinariumForm: React.FC = () => {
                     whileTap={{ scale: user?.isSubscribed ? 0.9 : 1 }}
                     disabled={!user?.isSubscribed || diners >= MAX_DINERS}
                     className={`p-3 bg-[var(--primary)]/20 rounded-full text-[var(--primary)] transition-colors
-                      ${!user?.isSubscribed || diners >= MAX_DINERS
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-[var(--primary)]/30"
+                      ${
+                        !user?.isSubscribed || diners >= MAX_DINERS
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-[var(--primary)]/30"
                       }`}
                     aria-label="Aumentar número de comensales"
                   >
@@ -976,7 +1059,9 @@ const CulinariumForm: React.FC = () => {
               <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
                 <button
                   type="button"
-                  onClick={() => setShowDietaryRestrictions(!showDietaryRestrictions)}
+                  onClick={() =>
+                    setShowDietaryRestrictions(!showDietaryRestrictions)
+                  }
                   className="w-full flex flex-col items-start text-left font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--muted)]/50 hover:text-[var(--primary)] transition-colors"
                 >
                   <div className="flex justify-between w-full items-center mb-1">
@@ -985,12 +1070,21 @@ const CulinariumForm: React.FC = () => {
                         PREMIUM
                       </span>
                     )}
-                    <motion.span animate={{ rotate: showDietaryRestrictions ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                      {showDietaryRestrictions ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    <motion.span
+                      animate={{ rotate: showDietaryRestrictions ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {showDietaryRestrictions ? (
+                        <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      ) : (
+                        <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      )}
                     </motion.span>
                   </div>
                   <div className="flex items-center text-2xl mt-1">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">🚫</span>
+                    <span className="mr-2 text-[var(--primary)] text-3xl">
+                      🚫
+                    </span>
                     <span>¿Alguna restricción?</span>
                   </div>
                 </button>
@@ -1022,12 +1116,13 @@ const CulinariumForm: React.FC = () => {
                             }}
                             whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
                             disabled={!user?.isSubscribed}
-                            className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${!user?.isSubscribed
+                            className={`px-5 py-2 rounded-full border-2 transition-all duration-200 ${
+                              !user?.isSubscribed
                                 ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                                 : dietaryRestrictions.includes(opt.value)
-                                  ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md"
-                                  : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]"
-                              }`}
+                                ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] shadow-md"
+                                : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)]"
+                            }`}
                           >
                             {opt.label}
                           </motion.button>
@@ -1060,10 +1155,11 @@ const CulinariumForm: React.FC = () => {
                             : "Función Premium - Suscríbete para usar"
                         }
                         disabled={!user?.isSubscribed}
-                        className={`w-full p-3 border rounded-xl text-lg ${!user?.isSubscribed
+                        className={`w-full p-3 border rounded-xl text-lg ${
+                          !user?.isSubscribed
                             ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                             : "border-[var(--primary)] focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent"
-                          }`}
+                        }`}
                         aria-label="Añadir ingrediente a evitar"
                       />
                       <div className="mt-4 flex flex-wrap min-h-[60px] max-h-[200px] overflow-y-auto custom-scrollbar">
@@ -1104,11 +1200,17 @@ const CulinariumForm: React.FC = () => {
                       animate={{ rotate: showCuisineStyle ? 180 : 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      {showCuisineStyle ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                      {showCuisineStyle ? (
+                        <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      ) : (
+                        <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      )}
                     </motion.span>
                   </div>
                   <div className="flex items-center text-2xl mt-1">
-                    <span className="mr-2 text-[var(--highlight)] text-3xl">🌍</span>
+                    <span className="mr-2 text-[var(--highlight)] text-3xl">
+                      🌍
+                    </span>
                     <span>¿Qué estilo te apetece?</span>
                   </div>
                 </button>
@@ -1142,12 +1244,13 @@ const CulinariumForm: React.FC = () => {
                             whileTap={{ scale: user?.isSubscribed ? 0.95 : 1 }}
                             disabled={!user?.isSubscribed}
                             className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 text-center
-                                    ${!user?.isSubscribed
-                                ? 'opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400'
-                                : cuisineStyle === style.value
-                                  ? 'border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md'
-                                  : 'border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]'
-                              }`}
+                                    ${
+                                      !user?.isSubscribed
+                                        ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
+                                        : cuisineStyle === style.value
+                                        ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)] shadow-md"
+                                        : "border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--highlight)]"
+                                    }`}
                           >
                             <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">
                               {style.icon}
@@ -1174,12 +1277,21 @@ const CulinariumForm: React.FC = () => {
                     <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-md">
                       PRÓXIMAMENTE
                     </span>
-                    <motion.span animate={{ rotate: showMacronutrients ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                      {showMacronutrients ? <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" /> : <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />}
+                    <motion.span
+                      animate={{ rotate: showMacronutrients ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {showMacronutrients ? (
+                        <IoChevronUpCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      ) : (
+                        <IoChevronDownCircleOutline className="w-8 h-8 text-[var(--muted)]" />
+                      )}
                     </motion.span>
                   </div>
                   <div className="flex items-center text-2xl mt-1">
-                    <span className="mr-2 text-[var(--primary)] text-3xl">📊</span>
+                    <span className="mr-2 text-[var(--primary)] text-3xl">
+                      📊
+                    </span>
                     <span>Control de Macronutrientes</span>
                   </div>
                 </button>
@@ -1212,10 +1324,11 @@ const CulinariumForm: React.FC = () => {
             }}
             whileTap={{ scale: loadingUser || status === "loading" ? 1 : 0.98 }}
             className={`w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 flex flex-col items-center gap-1
-    ${loadingUser || status === "loading"
-                ? "bg-[var(--primary)]/50 cursor-not-allowed"
-                : "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
-              }`}
+    ${
+      loadingUser || status === "loading"
+        ? "bg-[var(--primary)]/50 cursor-not-allowed"
+        : "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
+    }`}
             disabled={loadingUser || status === "loading"}
           >
             {loadingUser ? (
@@ -1230,7 +1343,7 @@ const CulinariumForm: React.FC = () => {
               </>
             ) : (
               <>
-                <span className="flex items-center gap-2" >
+                <span className="flex items-center gap-2">
                   <FaUtensils className="text-2xl" />
                   ¡Genera mi Receta!
                 </span>
@@ -1290,8 +1403,12 @@ const CulinariumForm: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {showTokens && <TokensModal user={user as CustomUser | null} onClose={() => setShowTokens(false)} />}
-
+      {showTokens && (
+        <TokensModal
+          user={user as CustomUser | null}
+          onClose={() => setShowTokens(false)}
+        />
+      )}
     </div>
   );
 };
