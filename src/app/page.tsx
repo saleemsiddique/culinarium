@@ -4,11 +4,11 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Importa useRouter
 import { useUser } from '@/context/user-context'; // Importa useUser
 
-import HeroSection from "@/components/hero";
 import InfoBox from "@/components/infoBox";
 import FAQ from "@/components/faq";
 import Pricing from "@/components/pricing";
 import { Loader2 } from 'lucide-react';
+import KitchenContent from "./kitchen/KitchenContent";
 
 export default function Home() {
   const { user, loading } = useUser(); // Obtén el usuario y el estado de carga del contexto
@@ -35,7 +35,7 @@ export default function Home() {
       
       {/*Video Introduction*/}
       <section className="relative flex justify-center items-center min-h-[600px] md:min-h-[820px]">
-        <HeroSection/>
+        <KitchenContent />
       </section>
 
       {/* Key Features */}

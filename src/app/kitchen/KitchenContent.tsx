@@ -424,9 +424,19 @@ const CulinariumForm: React.FC = () => {
       return;
     }
     if (!user || !firebaseUser) {
-      setToastMessage(
-        "Por favor, regístrate o inicia sesión para generar recetas."
-      );
+      // Guarda el estado del formulario para recuperarlo tras el registro
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pendingRecipeForm", JSON.stringify({
+          ingredients,
+          mealTime,
+          diners,
+          dietaryRestrictions,
+          excludedIngredients,
+          cuisineStyle,
+          availableTime,
+        }));
+      }
+      router.push("/auth/register");
       return;
     }
 
