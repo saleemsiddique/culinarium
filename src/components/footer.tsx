@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useUser } from "@/context/user-context";
+import { useTranslation } from "react-i18next";
 
 const footerVariants = {
   initial: { opacity: 0, y: 20 },
@@ -21,6 +22,7 @@ const footerVariants = {
 export default function Footer() {
   const year = new Date().getFullYear();
   const { firebaseUser } = useUser();
+  const { t, i18n } = useTranslation();
 
   return (
     <>
@@ -39,7 +41,9 @@ export default function Footer() {
               <div className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text">
                 Culinarium
               </div>
-              <p className="mt-2 text-sm text-gray-400 italic">Descubre un mundo de sabores.</p>
+              <p className="mt-2 text-sm text-gray-400 italic">
+                Descubre un mundo de sabores.
+              </p>
 
               {/* Social Icons */}
               <div className="flex items-center gap-4 mt-6">
@@ -103,19 +107,36 @@ export default function Footer() {
                   <span>Cookies</span>
                 </Link>
               </div>
-              <p className="mt-8 text-sm text-gray-500">© Culinarium {year}. Todos los derechos reservados.</p>
+              <p className="mt-8 text-sm text-gray-500">
+                © Culinarium {year}. Todos los derechos reservados.
+              </p>
             </div>
 
             {/* Contact and Micro Info */}
             <div className="flex flex-col items-center lg:items-end text-center lg:text-right mt-6 lg:mt-0">
               <p className="text-sm font-semibold text-gray-400">Contáctanos</p>
-              <p className="mt-2 text-sm text-gray-500">culinariumofficial@gmail.com</p>
-              <p className="mt-1 text-sm text-gray-500">Dirección: 03502, España</p>
+              <p className="mt-2 text-sm text-gray-500">
+                culinariumofficial@gmail.com
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                Dirección: 03502, España
+              </p>
 
               <div className="mt-8">
                 {/* Mostrar enlace a ajustes solo si el usuario está logueado */}
                 {firebaseUser ? <CookieSettingsLink /> : null}
               </div>
+
+              <div>
+                <button onClick={() => i18n.changeLanguage("en")}>
+                  English
+                </button>
+                <button onClick={() => i18n.changeLanguage("es")}>
+                  Español
+                </button>
+              </div>
+
+              <p>Current language: {i18n.language}</p>
             </div>
           </div>
         </div>

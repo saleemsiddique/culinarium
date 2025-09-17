@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Please sign in to continue",
+      "socialDivider": "Or sign in with:",
+      "noAccount": "Don't have an account? Sign up"
+    }
+  }
+}

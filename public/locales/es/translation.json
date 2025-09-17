@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Por favor, inicia sesión para continuar",
+      "socialDivider": "O inicia sesión con:",
+      "noAccount": "¿No tienes una cuenta? Regístrate"
+    }
+  }
+}
