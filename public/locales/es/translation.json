@@ -286,5 +286,39 @@
     "footer": {
       "content": "Dirección: 03502, España — Equipo Culinarium"
     }
+  },
+  "consentManagement": {
+    "title": "Gestión de consentimientos",
+    "subtitle": "Aquí puedes ver y modificar las preferencias guardadas en tu cuenta.",
+    "loading": "Cargando estado...",
+    "saveButton": "Guardar cambios",
+    "saving": "Guardando...",
+    "revokeAllButton": "Revocar todo",
+    "processing": "Procesando...",
+    "accepted": "Aceptado",
+    "rejected": "Rechazado",
+    "saveSuccess": "Preferencias guardadas correctamente",
+    "saveError": "Error al guardar las preferencias",
+    "revokeSuccess": "Todos los consentimientos han sido revocados",
+    "revokeError": "Error al revocar los consentimientos",
+    "version": "Versión",
+    "rightsNotice": "Derechos: puedes revocar el consentimiento en cualquier momento. La revocación no afecta al tratamiento previo realizado de forma legítima.",
+    "types": {
+      "terms_of_service": {
+        "title": "Términos y Condiciones"
+      },
+      "privacy_policy": {
+        "title": "Política de Privacidad"
+      },
+      "cookies_policy": {
+        "title": "Política de Cookies"
+      }
+    },
+    "unauthenticated": {
+      "title": "Gestionar consentimientos",
+      "description": "Esta página solo está disponible para usuarios autenticados. Si quieres gestionar tus preferencias o conservarlas entre dispositivos, por favor inicia sesión.",
+      "loginButton": "Iniciar sesión",
+      "backButton": "Volver"
+    }
   }
 }

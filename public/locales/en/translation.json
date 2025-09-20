@@ -286,5 +286,39 @@
     "footer": {
       "content": "Address: 03502, Spain — Culinarium Team"
     }
+  },
+  "consentManagement": {
+    "title": "Consent management",
+    "subtitle": "Here you can view and modify the preferences saved in your account.",
+    "loading": "Loading status...",
+    "saveButton": "Save changes",
+    "saving": "Saving...",
+    "revokeAllButton": "Revoke all",
+    "processing": "Processing...",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "saveSuccess": "Preferences saved successfully",
+    "saveError": "Error saving preferences",
+    "revokeSuccess": "All consents have been revoked",
+    "revokeError": "Error revoking consents",
+    "version": "Version",
+    "rightsNotice": "Rights: you can revoke consent at any time. Revocation does not affect previous legitimate processing.",
+    "types": {
+      "terms_of_service": {
+        "title": "Terms and Conditions"
+      },
+      "privacy_policy": {
+        "title": "Privacy Policy"
+      },
+      "cookies_policy": {
+        "title": "Cookies Policy"
+      }
+    },
+    "unauthenticated": {
+      "title": "Manage consents",
+      "description": "This page is only available for authenticated users. If you want to manage your preferences or keep them across devices, please log in.",
+      "loginButton": "Log in",
+      "backButton": "Back"
+    }
   }
 }

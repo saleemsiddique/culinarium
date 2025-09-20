@@ -15,7 +15,8 @@ const itemVariants = {
 };
 
 export default function CookiesContent() {
-        const { t } = useTranslation();
+  const { t  } = useTranslation();
+
   
   return (
     <motion.main
@@ -81,7 +82,7 @@ export default function CookiesContent() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-16 text-sm text-gray-500 border-t border-gray-800 pt-8">
-          <p>{t("cookies.footer.content")}</p>
+          <p>{t("terms.footer.content")}</p>
         </motion.div>
       </div>
     </motion.main>

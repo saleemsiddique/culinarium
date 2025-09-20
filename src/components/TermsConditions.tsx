@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState }from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -15,8 +15,8 @@ const itemVariants = {
 };
 
 const TermsContent = () => {
-      const { t } = useTranslation();
-  
+    const { t } = useTranslation();
+
   return (
     <motion.main
       className="bg-gray-950 text-gray-300 min-h-screen w-screen px-6 py-12 lg:py-24"

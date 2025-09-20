@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +15,7 @@ const itemVariants = {
 };
 
 const PrivacyContent = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation();        
 
   return (
     <motion.main
