@@ -1,10 +1,50 @@
 {
   "auth": {
     "login": {
+      "socialDivider": "Or sign in with:",
       "title": "Welcome back",
       "subtitle": "Please sign in to continue",
-      "socialDivider": "Or sign in with:",
-      "noAccount": "Don't have an account? Sign up"
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "forgotPassword": "Forgot your password?",
+      "button": "Sign In",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account? Register"
+    },
+    "register": {
+      "title": "Create your account",
+      "firstNamePlaceholder": "First Name",
+      "lastNamePlaceholder": "Last Name",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "terms": "I accept the ",
+      "termsLink": "Terms and Conditions",
+      "privacyLink": "Privacy Policy",
+      "cookiesLink": "Cookies Policy",
+      "button": "Register",
+      "loading": "Registering...",
+      "and": " and ",
+      "socialDivider": "Or sign up with:",
+      "alreadyAccount": "Already have an account?"
+    },
+    "errors": {
+      "acceptTerms": "You must accept the terms and conditions, privacy policy, and cookies policy.",
+      "default": "An error has occurred"
+    }
+  },
+  "footer": {
+    "brand": {
+      "slogan": "Discover a world of flavors."
+    },
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    },
+    "copyright": "All rights reserved.",
+    "contact": {
+      "title": "Contact us",
+      "email": "culinariumofficial@gmail.com"
     }
   }
 }

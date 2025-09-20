@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUser } from "@/context/user-context";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export function AuthForm({
   type = "login",
@@ -26,6 +27,9 @@ export function AuthForm({
     rememberMe: false,
     acceptTerms: false,
   });
+  
+  const { t, i18n } = useTranslation();
+
 
   const { login, register } = useUser();
   const router = useRouter();
@@ -94,14 +98,14 @@ export function AuthForm({
       {type === "register" && (
         <div className="flex gap-2">
           <Input
-            placeholder="Nombre"
+            placeholder={t("auth.register.firstNamePlaceholder")}
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
             required
           />
           <Input
-            placeholder="Apellido"
+            placeholder={t("auth.register.lastNamePlaceholder")}
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
@@ -119,7 +123,7 @@ export function AuthForm({
       />
       <div className="relative">
         <Input
-          placeholder="Contraseña"
+          placeholder={t("auth.register.passwordPlaceholder")}
           type={showPassword ? "text" : "password"}
           name="password"
           value={formData.password}
@@ -156,7 +160,7 @@ export function AuthForm({
             href="/auth/forgot-password"
             className="text-blue-500 hover:underline"
           >
-            ¿Olvidaste tu contraseña?
+            {t("auth.login.forgotPassword")}
           </Link>
         </div>
       ) : (
@@ -172,7 +176,8 @@ export function AuthForm({
             className="border border-1 text-gray-300"
           />
           <label htmlFor="terms">
-            Acepto los <Link href="/consent/terms" className="text-blue-500 hover:underline">Términos y Condiciones</Link>, <Link href="/consent/privacy" className="text-blue-500 hover:underline">Política de Privacidad</Link> y <Link href="/consent/cookies" className="text-blue-500 hover:underline">Política de Cookies</Link>.
+            {t("auth.register.terms")} 
+            <Link href="/consent/terms" className="text-blue-500 hover:underline">{t("auth.register.termsLink")}</Link>, <Link href="/consent/privacy" className="text-blue-500 hover:underline">{t("auth.register.privacyLink")}</Link> {t("auth.register.and")} <Link href="/consent/cookies" className="text-blue-500 hover:underline">{t("auth.register.cookiesLink")}</Link>.
           </label>
         </div>
       )}
@@ -184,11 +189,11 @@ export function AuthForm({
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {type === "login" ? "Iniciando sesión..." : "Registrando..."}
-          </>
-        ) : (
-          type === "login" ? "Iniciar Sesión" : "Registrarse"
-        )}
+      {type === "login" ? t("auth.login.loading") : t("auth.register.loading")}
+      </>
+      ) : (
+        type === "login" ? t("auth.login.button") : t("auth.register.button")
+      )}
       </Button>
     </form>
   );
