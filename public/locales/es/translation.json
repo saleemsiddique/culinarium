@@ -30,6 +30,34 @@
     "errors": {
       "acceptTerms": "Debes aceptar los términos y condiciones, política de privacidad y de cookies.",
       "default": "Ha ocurrido un error"
+    },
+    "forgotPassword": {
+      "title": "¿Olvidaste tu contraseña?",
+      "subtitle": "No te preocupes, te enviaremos un mensaje para ayudarte a restablecerla.",
+      "submitted": "Si existe una cuenta para {{email}}, recibirás un enlace para restablecer la contraseña en breve.",
+      "emailLabel": "Dirección de correo electrónico",
+      "emailPlaceholder": "Introduce tu correo electrónico",
+      "submitButton": "Enviar Enlace de Restablecimiento",
+      "error": "No se pudo enviar el enlace de restablecimiento. Por favor, revisa tu dirección de correo.",
+      "backToLogin": "Volver a Iniciar Sesión"
+    },
+    "resetPassword": {
+      "title": "Establece una nueva contraseña",
+      "subtitle": "Introduce y confirma tu nueva contraseña.",
+      "newPasswordLabel": "Nueva contraseña",
+      "confirmPasswordLabel": "Confirmar contraseña",
+      "newPasswordPlaceholder": "Introduce tu nueva contraseña",
+      "confirmPasswordPlaceholder": "Confirma tu nueva contraseña",
+      "submitButton": "Cambiar Contraseña",
+      "successTitle": "¡Contraseña Restablecida!",
+      "successSubtitle": "Tu contraseña ha sido cambiada con éxito.",
+      "backToLogin": "Volver a Iniciar Sesión",
+      "errors": {
+        "mismatch": "Las contraseñas no coinciden.",
+        "minLength": "La contraseña debe tener al menos 6 caracteres.",
+        "invalidCode": "Código de restablecimiento no válido. Por favor, intenta de nuevo.",
+        "default": "No se pudo cambiar la contraseña. El enlace puede haber expirado o ya fue usado."
+      }
     }
   },
   "footer": {
