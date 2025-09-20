@@ -74,5 +74,217 @@
       "title": "Contact us",
       "email": "culinariumofficial@gmail.com"
     }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "responsible": {
+        "title": "1. Responsible party and contact details",
+        "content": "Responsible: <strong>Culinarium Team</strong> — developers: Saleem Siddique, Hakeem Siddique and Wassim Atiki.<br />Contact address: <strong>03502, Spain</strong>.<br />Contact email (privacy): <strong>culinariumofficial@gmail.com</strong>.<br />We do not have a Data Protection Officer (DPO)."
+      },
+      "introduction": {
+        "title": "2. Introduction",
+        "content": "Culinarium is a SaaS application that generates recipes from the ingredients and preferences that users enter. This policy explains what data we collect, for what purpose, who processes it, where it is stored and how you can exercise your rights."
+      },
+      "dataCollected": {
+        "title": "3. Data we collect",
+        "items": [
+          "<strong>Account and profile data:</strong> email, firstName, lastName, uid, created_at, subscription fields and tokens (monthly_tokens, extra_tokens, subscriptionId, stripeCustomerId, subscriptionStatus, subscriptionCanceled, lastRenewal, tokens_reset_date).",
+          "<strong>History and usage:</strong> generated recipes (created_recipes), ingredients, instructions, timestamps, momento_del_dia, portions, restrictions, img_url.",
+          "<strong>Technical data:</strong> IP (logs), user_agent, device data and usage metrics (only if you give consent).",
+          "<strong>Payment data:</strong> we do not store card numbers; Stripe handles payment data. We store Stripe identifiers (stripeCustomerId) and metadata necessary for billing.",
+          "<strong>Cookies and consent:</strong> record of cookie consent and preferences (collection `consents`)."
+        ]
+      },
+      "purposes": {
+        "title": "4. Purposes and legal bases",
+        "items": [
+          "<strong>Service provision (contract execution):</strong> account creation and management, recipe generation, token usage and subscriptions.",
+          "<strong>Payments and billing (contract execution / legal obligation):</strong> management through Stripe.",
+          "<strong>Analytics and service improvement (consent):</strong> collection of metrics if the user expressly authorizes it.",
+          "<strong>Security and support (legitimate interest):</strong> fraud detection and customer service."
+        ]
+      },
+      "processors": {
+        "title": "5. Data processors / third parties",
+        "content": "The following third parties process data on behalf of Culinarium:",
+        "items": [
+          "<strong>OpenAI</strong> — recipe generation via API.",
+          "<strong>Stripe</strong> — payments and subscriptions.",
+          "<strong>Firebase (Firestore and Auth)</strong> — database and authentication (location: <em>europe-southwest1</em>).",
+          "<strong>Vercel</strong> — hosting and Vercel Analytics (only if you give consent).",
+          "<strong>GitHub</strong> — repository and CI/CD (deployment metadata)."
+        ],
+        "additional": "We maintain contractual agreements (DPA) with these providers when appropriate. Some may process data outside the EEA; we apply safeguards (SCCs or other measures) when necessary."
+      },
+      "transfers": {
+        "title": "6. International transfers",
+        "content": "Some providers may process data outside the EEA. In such cases we will apply appropriate safeguards (e.g. standard contractual clauses / SCCs) to protect your data."
+      },
+      "retention": {
+        "title": "7. Retention periods",
+        "items": [
+          "<strong>User / account data:</strong> until account cancellation.",
+          "<strong>Recipe history:</strong> preserved while the account exists; maximum 5 years if applicable.",
+          "<strong>Payment / accounting records:</strong> 5 years.",
+          "<strong>Consent records:</strong> 2 years."
+        ]
+      },
+      "rights": {
+        "title": "8. Data subject rights",
+        "content": "You have the right to access, rectify, delete, restrict processing, object and request portability. To exercise them contact <strong>culinariumofficial@gmail.com</strong> indicating your name, email and UID (if applicable). We will respond within the legal period (normally 1 month; may be extended in complex cases)."
+      },
+      "minors": {
+        "title": "9. Minors",
+        "content": "The service is intended for people over <strong>18 years of age</strong>. We do not allow registration of minors under 18 years of age. If we detect a minor's account we will suspend it and proceed according to applicable regulations."
+      },
+      "security": {
+        "title": "10. Security",
+        "content": "We implement reasonable technical and organizational measures: TLS, Firestore access controls, backups and good development practices. For payment data we use Stripe exclusively."
+      },
+      "complaints": {
+        "title": "11. Filing complaints",
+        "content": "If you are not satisfied with our response you can file a complaint with the competent supervisory authority (in Spain: <strong>AEPD</strong>)."
+      },
+      "changes": {
+        "title": "12. Policy changes",
+        "content": "We will publish the date of the last update in the header of this policy. If there are significant changes we will notify you and request additional consents if applicable."
+      }
+    },
+    "footer": {
+      "content": "Contact: culinariumofficial@gmail.com — Address: 03502, Spain."
+    }
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "parties": {
+        "title": "1. Parties",
+        "content": "Agreement between the user (you) and the <strong>Culinarium Team</strong> (Saleem Siddique, Hakeem Siddique and Wassim Atiki. By creating an account and using the service you accept these terms."
+      },
+      "serviceDescription": {
+        "title": "2. Service description",
+        "content": "Culinarium allows generating recipes from a form where you specify ingredients, available time, time of day, dietary restrictions and culinary style. Each recipe costs <strong>10 tokens</strong>."
+      },
+      "models": {
+        "title": "3. Models and generated content",
+        "content": "Recipes are generated using the OpenAI API or other models we may use. Model selection may change over time. Recipes are culinary suggestions and the user is responsible for verifying allergens, food safety and ingredient suitability."
+      },
+      "tokens": {
+        "title": "4. Tokens and plans",
+        "items": [
+          "<strong>Free plan:</strong> 50 tokens per month (equivalent to 5 recipes/month).",
+          "<strong>Subscription:</strong> monthly subscription grants 300 tokens + extra features. Subscription tokens <em>expire</em> at the end of each subscription period (they are not permanent).",
+          "<strong>Token packs (1–6):</strong> token packages purchased separately; these extra tokens remain available as long as the service exists.",
+          "<strong>Spending order:</strong> subscription tokens are consumed before tokens purchased in packs.",
+          "<strong>Generation costs:</strong> generating a new recipe costs 10 tokens, regenerating an existing recipe costs 5 tokens."
+        ]
+      },
+      "payments": {
+        "title": "5. Payments and billing",
+        "content": "All payments are managed through <strong>Stripe</strong>. By paying you accept Stripe's terms. Subscriptions renew automatically unless cancelled in advance."
+      },
+      "withdrawal": {
+        "title": "6. Right of withdrawal and immediate service commencement",
+        "content": "Because the service is provided immediately (recipe generation and token consumption at the moment), the user must expressly accept, at the time of payment, that the service begins immediately and waives the right of withdrawal when permitted by law."
+      },
+      "refunds": {
+        "title": "7. Refunds",
+        "content": "<strong>We do not offer refunds under any circumstances.</strong> This policy applies to token purchases and subscriptions, unless the law requires otherwise in a specific case."
+      },
+      "cancellation": {
+        "title": "8. Cancellation and token management",
+        "items": [
+          "If you cancel your subscription, the extra features remain until the end of the already paid period; subscription tokens are not cumulative or permanent.",
+          "Tokens purchased in packs will remain as long as the service is active (until possible service closure)."
+        ]
+      },
+      "suspension": {
+        "title": "9. Suspension and termination",
+        "content": "Culinarium reserves the right to suspend or terminate accounts for fraud, illegal activity or violation of these terms. In case of reasonable termination we will try to notify the user."
+      },
+      "liability": {
+        "title": "10. Limitation of liability",
+        "content": "Recipes are suggestions; we do not guarantee specific results. Culinarium Team will not be responsible for damages resulting from following a recipe (poisoning, allergies, etc.)."
+      },
+      "healthNotice": {
+        "title": "11. Health and nutrition notice",
+        "content": "We are not doctors, dietitians or licensed nutritionists. The content and recipes generated by Culinarium are solely culinary suggestions for informational and recreational purposes. They do not constitute medical, nutritional or professional advice. The user is responsible for checking the suitability of ingredients based on their allergies, intolerances, medical restrictions or personal needs. If you have any questions related to your health or diet, always consult with a qualified healthcare professional."
+      },
+      "acceptableUse": {
+        "title": "12. Acceptable use",
+        "content": "The user agrees not to use the service for illegal, fraudulent purposes or that harm third parties, nor to attempt to damage, overload or interfere with the platform's operation."
+      },
+      "warranty": {
+        "title": "13. Technical warranty disclaimer",
+        "content": "We do not guarantee that the service will work without interruptions, error-free or permanently available. There may be interruptions due to maintenance, updates or causes beyond our control."
+      },
+      "modification": {
+        "title": "14. Service modification",
+        "content": "We reserve the right to modify, suspend or interrupt part or all of the service functionalities at any time, giving reasonable advance notice when possible."
+      },
+      "minimumAge": {
+        "title": "15. Minimum age of use",
+        "content": "To use Culinarium you must be at least <strong>18 years old</strong>. By registering you declare that you meet this requirement."
+      },
+      "intellectualProperty": {
+        "title": "16. Intellectual property",
+        "content": "Users retain rights over the content they upload. By submitting ingredients and preferences you grant Culinarium a non-exclusive license to process, store and generate recipes. The use of generated recipes for commercial purposes or other uses should be consulted if there are restrictions."
+      },
+      "dataProtection": {
+        "title": "17. Data protection",
+        "content": {
+          "part1": "We process your data in accordance with our",
+          "linkText": "Privacy Policy",
+          "part2": ". Main processors: OpenAI, Stripe, Firebase, Vercel, GitHub."
+        }
+      },
+      "jurisdiction": {
+        "title": "18. Applicable law and jurisdiction",
+        "content": "These terms are governed by Spanish law. Any dispute will be submitted to the competent courts established by applicable law."
+      },
+      "changes": {
+        "title": "19. Changes to Terms",
+        "content": "We may modify these terms; we will publish the new version with date and will notify substantial changes with reasonable advance notice."
+      }
+    },
+    "footer": {
+      "content": "Contact: culinariumofficial@gmail.com — Address: 03502, Spain."
+    }
+  },
+  "cookies": {
+    "title": "Cookies Policy",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "whatAreCookies": {
+        "title": "What are cookies?",
+        "content": "Cookies are small files that are stored in your browser to maintain the session, remember your preferences or collect analytical usage data."
+      },
+      "cookiesWeUse": {
+        "title": "Cookies we use",
+        "items": [
+          "<strong>Essential / functional:</strong> Cookies necessary for the service to function such as authentication with Firebase Auth. They do not require your consent.",
+          "<strong>Analytics:</strong> Vercel Analytics cookies to measure platform performance and usage. They are only activated if you give your explicit consent.",
+          "<strong>Payments:</strong> Stripe may use its own cookies to process payments securely (classified as functional during checkout)."
+        ]
+      },
+      "consentManagement": {
+        "title": "Consent management",
+        "content": "You can change your preferences at any time from the consent management page.",
+        "buttonText": "Go to consent management"
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "For any questions about cookies or privacy, contact us at: <strong>culinariumofficial@gmail.com</strong>"
+      }
+    },
+    "footer": {
+      "content": "Address: 03502, Spain — Culinarium Team"
+    }
   }
 }
