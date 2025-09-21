@@ -282,16 +282,16 @@ export default function GestionConsentimientosPage() {
           </p>
           <div className="flex justify-center gap-3">
             <a
-              href="/login"
+              href="/auth/login"
               className="px-6 py-3 rounded-full bg-orange-600 text-white hover:bg-orange-700"
             >
-              Iniciar sesión
+              {t("consentManagement.unauthenticated.loginButton")}
             </a>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800"
             >
-              Volver
+              {t("consentManagement.unauthenticated.backButton")}
             </button>
           </div>
         </div>

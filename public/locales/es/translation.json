@@ -320,5 +320,55 @@
       "loginButton": "Iniciar sesión",
       "backButton": "Volver"
     }
+  },
+  "header": {
+    "brandName": "Culinarium",
+    "menu": {
+      "open": "Abrir menú",
+      "close": "Cerrar menú",
+      "home": "Inicio",
+      "newRecipe": "Nueva Receta",
+      "myRecipes": "Mis Recetas",
+      "myProfile": "Mi Perfil"
+    },
+    "tokens": {
+      "title": "Tus Tokens",
+      "monthly": "Mensuales:",
+      "extra": "Extras:",
+      "total": "Total:",
+      "buy": "¡Comprar Más Tokens!",
+      "buyMore": "Comprar más tokens",
+      "premium": {
+        "subscribe": "¡Hacerme Premium!",
+        "current": "Tu Plan Premium",
+        "subscribeButton": "Suscribirse a Premium"
+      },
+      "popup": {
+        "title": "Tus Tokens",
+        "monthly": "Mensuales:",
+        "extra": "Extras:",
+        "total": "Total:"
+      }
+    },
+    "auth": {
+      "getStarted": "Empezar"
+    }
+  },
+  "sideMenu": {
+    "new": "Nueva",
+    "recipes": "Recetas",
+    "tokens": {
+      "button": "Ver Tokens",
+      "buy": "Comprar",
+      "lowIndicator": "Tokens bajos"
+    },
+    "premium": {
+      "button": "Premium",
+      "active": "Activo",
+      "inactive": "Premium"
+    },
+    "auth": {
+      "login": "Entrar"
+    }
   }
 }

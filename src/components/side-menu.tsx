@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, CustomUser } from '@/context/user-context';
 import { TokensModal } from "./SideMenu/TokensModal";
 import { PremiumModal } from "./SideMenu/PremiumModal";
+import { useTranslation } from "react-i18next";
 
 interface SideMenuProps {
   className?: string;
@@ -75,6 +76,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
   const [showTokens, setShowTokens] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
   const { user } = useUser(); // CustomUser | null
+  const { t } = useTranslation();
 
   const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
   const remainingTokens = totalTokens;
@@ -118,9 +120,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
 
         {/* Contenido centrado */}
         <div className="flex flex-col items-center justify-center gap-3 p-4 flex-grow">
-          <MobileMenuItem href="/kitchen" icon={<Plus />} label="Nueva Receta" onClick={() => setDrawerOpen(false)} />
-          <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Mis Recetas" onClick={() => setDrawerOpen(false)} />
-          <MobileMenuItem href="/profile" icon={<User />} label="Mi Perfil" onClick={() => setDrawerOpen(false)} />
+          <MobileMenuItem href="/kitchen" icon={<Plus />} label={t("header.menu.newRecipe")} onClick={() => setDrawerOpen(false)} />
+          <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label={t("header.menu.myRecipes")} onClick={() => setDrawerOpen(false)} />
+          <MobileMenuItem href="/profile" icon={<User />} label={t("header.menu.myProfile")} onClick={() => setDrawerOpen(false)} />
 
           {/* Sección de Tokens en Móvil */}
           {user && (
@@ -130,17 +132,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
               transition={{ delay: 0.2, duration: 0.4 }}
               className="mt-8 p-6 bg-[var(--primary)] rounded-xl shadow-xl text-[var(--text2)] text-center w-full max-w-sm border-2 border-[var(--highlight)]"
             >
-              <h3 className="text-xl font-bold mb-3">Tus Tokens</h3>
+              <h3 className="text-xl font-bold mb-3">{t("header.tokens.title")}</h3>
               <div className="space-y-2 mb-4">
                 <p className="flex justify-between items-center text-lg">
-                  <span>Mensuales:</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                  <span>{t("header.tokens.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
                 </p>
                 <p className="flex justify-between items-center text-lg">
-                  <span>Extras:</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                  <span>{t("header.tokens.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
                 </p>
               </div>
               <p className="text-sm italic mb-4">
-                Total: <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
+                {t("header.tokens.total")} <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
               </p>
 
               {/* Botón para abrir el modal de tokens */}
@@ -156,7 +158,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                 whileTap={{ scale: 0.95 }}
                 role="button"
               >
-                ¡Comprar Más Tokens!
+                {t("header.tokens.buy")}
               </motion.button>
 
               {/* Nuevo: Botón para el modal de Premium */}
@@ -172,7 +174,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                 whileTap={{ scale: 0.95 }}
                 role="button"
               >
-                {user?.isSubscribed ? 'Tu Plan Premium' : '¡Hacerme Premium!'}
+                {user?.isSubscribed ? t("header.tokens.premium.current") : t("header.tokens.premium.subscribeButton")}
               </motion.button>
             </motion.div>
           )}
@@ -190,8 +192,8 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
         `}
       >
         <div className="flex flex-col gap-6 w-full px-2 mt-4">
-          <SideMenuItem href="/kitchen" icon={<Plus />} label="Nueva" />
-          <SideMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Recetas" />
+          <SideMenuItem href="/kitchen" icon={<Plus />} label={t("sideMenu.new")}  />
+          <SideMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label={t("sideMenu.recipes")} />
         </div>
 
         {/* Espacio flexible para empujar controles abajo */}
@@ -206,8 +208,8 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
               <motion.button
                 onClick={onOpenTokens}
                 className="relative w-16 h-16 rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-105 group"
-                title="Ver Tokens"
-                aria-label="Ver Tokens"
+                title={t("sideMenu.tokens.button")}
+                aria-label={t("sideMenu.tokens.button")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -222,7 +224,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                 
                 {/* Tooltip en hover */}
                 <span className="absolute inset-0 flex items-center justify-center text-[var(--text2)] text-xs font-semibold opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
-                  Comprar
+                  {t("sideMenu.tokens.buy")}
                 </span>
                 
                 {/* Indicador de tokens bajos */}
@@ -239,15 +241,15 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
                     ? "border-[var(--highlight-dark)] bg-gradient-to-br from-[var(--highlight)]/30 to-[var(--highlight-dark)]/30" 
                     : "border-dashed border-[var(--highlight)]"
                 }`}
-                title="Premium"
-                aria-label="Abrir Premium"
+                title={t("sideMenu.premium.button")}
+                aria-label={t("sideMenu.premium.button")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="relative flex flex-col items-center justify-center text-[var(--highlight)]">
                   <Crown className="w-6 h-6" />
                   <span className="mt-1 text-xs font-semibold">
-                    {user?.isSubscribed ? "Activo" : "Premium"}
+                    {user?.isSubscribed ? t("sideMenu.premium.active") : t("sideMenu.premium.inactive")}
                   </span>
                 </div>
               </motion.button>
@@ -258,7 +260,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
               href="/login"
               className="block w-full text-center py-2 rounded-lg text-sm font-medium bg-[var(--highlight)] text-[var(--text2)] hover:opacity-95 transition"
             >
-              Entrar
+              {t("sideMenu.auth.login")}
             </Link>
           )}
         </div>
