@@ -38,7 +38,7 @@ type Recipe = {
     carbohidratos_g: number | null;
     grasas_g: number | null;
   };
-  dificultad: String;
+  dificultad: string;
 };
 
 const RecipePage: React.FC = () => {

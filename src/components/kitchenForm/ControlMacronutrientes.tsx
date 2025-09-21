@@ -117,7 +117,7 @@ export default function ControlMacronutrientes({
             first = clamp(first, LIMITS[others[0]].min, LIMITS[others[0]].max);
             second = clamp(second, LIMITS[others[1]].min, LIMITS[others[1]].max);
 
-            let sum = v + first + second;
+            const sum = v + first + second;
 
             // If sum != 100, try to correct by changing 'first' and 'second' within their bounds
             if (sum !== 100) {
