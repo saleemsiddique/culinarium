@@ -26,18 +26,18 @@ const features = [
     gradient: 'linear-gradient(135deg, #E67E22 20%, #2C3E50 80%)',
   },
   {
-    name: 'Cálculo de macros y calorías (Próximamente)',
+    name: 'Cálculo de macros y calorías',
     description:
-      'Muy pronto podrás ver el desglose nutricional de cada receta y ajustar porciones para recalcular automáticamente.',
+      'Consulta el desglose nutricional de cada receta y ajusta las porciones para recalcular automáticamente calorías y macros.',
     icon: GiWeightScale,
     gradient: 'linear-gradient(135deg, #1ABC9C 0%, #16A085 100%)',
-  },
+  }
 ];
 
 
 export default function InfoBox() {
   return (
-    <div style={{ 
+    <div style={{
       backgroundColor: '#FDF5E6',
       color: '#4A2C2A',
       minHeight: '100vh',
@@ -48,7 +48,7 @@ export default function InfoBox() {
       paddingBottom: '50px'
     }}>
       <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
-        
+
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -77,7 +77,7 @@ export default function InfoBox() {
           >
             Cocina Inteligente
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -92,7 +92,7 @@ export default function InfoBox() {
             }}
           >
             Revoluciona tu forma de{' '}
-            <span style={{ 
+            <span style={{
               background: 'linear-gradient(135deg, #E67E22, #C2651A)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -101,7 +101,7 @@ export default function InfoBox() {
               cocinar
             </span>
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -115,13 +115,13 @@ export default function InfoBox() {
               lineHeight: '1.6'
             }}
           >
-            Culinarium utiliza inteligencia artificial para transformar ingredientes simples 
+            Culinarium utiliza inteligencia artificial para transformar ingredientes simples
             en recetas extraordinarias, adaptadas perfectamente a tus gustos y necesidades.
           </motion.p>
         </motion.div>
 
         {/* Features Grid */}
-        <div style={{ 
+        <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
           gap: '2rem',
@@ -134,7 +134,7 @@ export default function InfoBox() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, delay: index * 0.15 }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.02,
                 transition: { duration: 0.3 }
               }}
@@ -160,7 +160,7 @@ export default function InfoBox() {
                 opacity: '0.05',
                 transform: 'rotate(-45deg)'
               }} />
-              
+
               {/* Icon */}
               <motion.div
                 whileHover={{ rotate: 5, scale: 1.1 }}
@@ -179,7 +179,7 @@ export default function InfoBox() {
               >
                 <feature.icon size={40} color="white" />
               </motion.div>
-              
+
               {/* Content */}
               <h3 style={{
                 fontSize: '1.5rem',
@@ -190,7 +190,7 @@ export default function InfoBox() {
               }}>
                 {feature.name}
               </h3>
-              
+
               <p style={{
                 fontSize: '1rem',
                 color: '#4A2C2A',
@@ -199,7 +199,7 @@ export default function InfoBox() {
               }}>
                 {feature.description}
               </p>
-              
+
               {/* Decorative element */}
               <motion.div
                 initial={{ width: 0 }}
