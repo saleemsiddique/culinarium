@@ -1,9 +1,12 @@
 "use client";
 import { useCallback } from "react";
 import { CustomUser } from "@/context/user-context";
+import { useTranslation } from "react-i18next";
 
 export default function RedirectCheckoutButton({ priceId, user }: { priceId: string, user: CustomUser | null }) {
   const userId = user?.uid;
+
+  const { t } = useTranslation();
 
   const handleCheckoutClick = useCallback(async () => {
     try {
@@ -37,7 +40,7 @@ export default function RedirectCheckoutButton({ priceId, user }: { priceId: str
         className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out" 
         onClick={handleCheckoutClick}
       >
-        Suscribirse
+        {t("checkout.subscribe")}
       </button>
     </div>
   );

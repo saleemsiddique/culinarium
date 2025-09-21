@@ -5,6 +5,7 @@ import { Zap, X } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
 import TokenPurchaseCards from "@/components/TokenPurchaseCards";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { useTranslation } from "react-i18next";
 
 interface TokensModalProps {
   onClose: () => void;
@@ -16,6 +17,7 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
 
   const extra = user?.extra_tokens || 0;
   const monthly = user?.monthly_tokens || 0;
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -48,21 +50,21 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
                 className="text-2xl font-bold mb-1"
                 style={{ color: 'var(--foreground)' }}
               >
-                Comprar Tokens Extra
+                {t("tokens.modal.title")}
               </h2>
               <p
                 className="text-sm opacity-80"
                 style={{ color: 'var(--foreground)' }}
               >
-                Tokens actuales:{" "}
-                <span className="font-semibold">{extra} extra</span> +{" "}
-                <span className="font-semibold">{monthly} mensuales</span>
+                {t("tokens.modal.currentTokens")}{" "}
+                <span className="font-semibold">{extra} {t("tokens.modal.extra")}</span> +{" "}
+                <span className="font-semibold">{monthly} {t("tokens.modal.monthly")}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t("tokens.modal.close")}
             className="p-2 rounded-full hover:bg-black/10 transition absolute top-6 right-6"
             style={{ color: 'var(--foreground)' }}
           >
@@ -77,48 +79,48 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
               user={user}
               count={30}
               price={0.99}
-              label="Uso puntual (3 recetas)"
+              label={t("tokens.modal.packages.30.label")}
               priceId="price_1RwHKLRpBiBhmezmK1AybT5C"
-              labelPromo="Oferta"
+              labelPromo={t("tokens.modal.packages.30.promo")}
               promoType="limited"
             />
             <TokenPurchaseCards
               user={user}
               count={60}
               price={1.99}
-              label="Uso ocasional (6 recetas)"
+              label={t("tokens.modal.packages.60.label")}
               priceId="price_1RwHL6RpBiBhmezmsEhJyMC1"
             />
             <TokenPurchaseCards
               user={user}
               count={120}
               price={3.49}
-              label="Uso semanal (12 recetas)"
+              label={t("tokens.modal.packages.120.label")}
               priceId="price_1RwHLWRpBiBhmezmY3vPGDxT"
             />
             <TokenPurchaseCards
               user={user}
               count={250}
               price={6.49}
-              label="Uso frecuente (25 recetas)"
+              label={t("tokens.modal.packages.250.label")}
               priceId="price_1RwHLrRpBiBhmezmFamEW9Ct"
             />
             <TokenPurchaseCards
               user={user}
               count={600}
               price={13.99}
-              label="Uso intensivo (60 recetas)"
+              label={t("tokens.modal.packages.600.label")}
               priceId="price_1RwHMCRpBiBhmezmRzyb4DAm"
-              labelPromo="Más Popular"
+              labelPromo={t("tokens.modal.packages.600.promo")}
               promoType="popular"
             />
             <TokenPurchaseCards
               user={user}
               count={1200}
               price={24.99}
-              label="Uso profesional (120 recetas)"
+              label={t("tokens.modal.packages.1200.label")}
               priceId="price_1RwHMbRpBiBhmezmgyMbGrJq"
-              labelPromo="Mejor Valor"
+              labelPromo={t("tokens.modal.packages.1200.promo")}
               promoType="value"
             />
           </div>

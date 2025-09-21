@@ -497,5 +497,74 @@
     "error": {
       "title": "¡Ups! Algo salió mal"
     }
+  },
+  "tokens": {
+    "modal": {
+      "title": "Comprar Tokens Extra",
+      "currentTokens": "Tokens actuales:",
+      "extra": "extra",
+      "monthly": "mensuales",
+      "close": "Cerrar",
+      "packages": {
+        "30": {
+          "label": "Uso puntual (3 recetas)",
+          "promo": "Oferta"
+        },
+        "60": {
+          "label": "Uso ocasional (6 recetas)"
+        },
+        "120": {
+          "label": "Uso semanal (12 recetas)"
+        },
+        "250": {
+          "label": "Uso frecuente (25 recetas)"
+        },
+        "600": {
+          "label": "Uso intensivo (60 recetas)",
+          "promo": "Más Popular"
+        },
+        "1200": {
+          "label": "Uso profesional (120 recetas)",
+          "promo": "Mejor Valor"
+        }
+      },
+      "promoTypes": {
+        "save": "¡Ahorras",
+        "limited": "Oferta",
+        "popular": "Más Popular",
+        "value": "Mejor Valor",
+        "perToken": "por token"
+      }
+    }
+  },
+  "premium": {
+    "modal": {
+      "title": "Culinarium Premium",
+      "close": "Cerrar modal",
+      "subscribed": {
+        "title": "¡Ya eres un suscriptor Premium!",
+        "thankYou": "¡Gracias por ser un suscriptor Premium!",
+        "message": "Mantienes tus tokens y acceso a todas las funcionalidades premium.",
+        "renewal": "Tu suscripción se renovará automáticamente el {{date}}.",
+        "close": "Cerrar",
+        "manage": "Gestionar Suscripción"
+      },
+      "notSubscribed": {
+        "greeting": "Hola {{name}}, desbloquea todas las funciones avanzadas.",
+        "greetingFallback": "Hola, desbloquea todas las funciones avanzadas.",
+        "price": "€7.99/mes",
+        "cancel": "Cancelar",
+        "features": [
+          "300 tokens mensuales (30 recetas)",
+          "Acceso a formularios premium exclusivos",
+          "Prioridad en generación de recetas",
+          "Soporte prioritario 24/7",
+          "Acceso anticipado a nuevas funciones"
+        ]
+      }
+    }
+  },
+  "checkout":{
+    "subscribe":"Suscribirse"
   }
 }

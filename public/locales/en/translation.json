@@ -497,5 +497,74 @@
     "error": {
       "title": "Oops! Something went wrong"
     }
+  },
+  "tokens": {
+    "modal": {
+      "title": "Buy Extra Tokens",
+      "currentTokens": "Current tokens:",
+      "extra": "extra",
+      "monthly": "monthly",
+      "close": "Close",
+      "packages": {
+        "30": {
+          "label": "Occasional use (3 recipes)",
+          "promo": "Offer"
+        },
+        "60": {
+          "label": "Casual use (6 recipes)"
+        },
+        "120": {
+          "label": "Weekly use (12 recipes)"
+        },
+        "250": {
+          "label": "Frequent use (25 recipes)"
+        },
+        "600": {
+          "label": "Intensive use (60 recipes)",
+          "promo": "Most Popular"
+        },
+        "1200": {
+          "label": "Professional use (120 recipes)",
+          "promo": "Best Value"
+        }
+      },
+      "promoTypes": {
+        "save": "Save",
+        "limited": "Offer",
+        "popular": "Most Popular",
+        "value": "Best Value",
+        "perToken": "per token"
+      }
+    }
+  },
+  "premium": {
+    "modal": {
+      "title": "Culinarium Premium",
+      "close": "Close modal",
+      "subscribed": {
+        "title": "You're already a Premium subscriber!",
+        "thankYou": "Thank you for being a Premium subscriber!",
+        "message": "You keep your tokens and access to all premium features.",
+        "renewal": "Your subscription will automatically renew on {{date}}.",
+        "close": "Close",
+        "manage": "Manage Subscription"
+      },
+      "notSubscribed": {
+        "greeting": "Hello {{name}}, unlock all advanced features.",
+        "greetingFallback": "Hello there, unlock all advanced features.",
+        "price": "€7.99/month",
+        "cancel": "Cancel",
+        "features": [
+          "300 monthly tokens (30 recipes)",
+          "Access to exclusive premium forms",
+          "Priority in recipe generation",
+          "24/7 priority support",
+          "Early access to new features"
+        ]
+      }
+    }
+  },
+  "checkout":{
+    "subscribe":"Subscribe"
   }
 }
