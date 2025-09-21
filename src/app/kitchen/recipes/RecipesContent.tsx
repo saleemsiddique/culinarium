@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
-import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl } from 'react-icons/gi';
+import { GiChopsticks, GiSushis, GiTacos, GiHamburger, GiPizzaSlice, GiBowlOfRice, GiFruitBowl, GiChefToque } from 'react-icons/gi';
 import { MdOutlineFastfood, MdOutlineNoFood } from 'react-icons/md';
 import { FaCoins } from 'react-icons/fa';
 import { useRouter, useSearchParams } from 'next/navigation'; // Importamos useSearchParams
@@ -33,6 +33,13 @@ type Recipe = {
   restricciones: string[];
   excluidos: string[];
   img_url: string;
+  macronutrientes?: {
+    calorias: number | null;
+    proteinas_g: number | null;
+    carbohidratos_g: number | null;
+    grasas_g: number | null;
+  };
+  dificultad: string;
 };
 
 const RecipePage: React.FC = () => {
@@ -308,6 +315,7 @@ const RecipePage: React.FC = () => {
                   <p className="text-lg font-bold text-[var(--primary)]">{recipe.tiempo_total_min} min</p>
                 </div>
               </div>
+
               <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                 <IoPeopleOutline className="w-8 h-8 text-[var(--highlight)]" />
                 <div>
@@ -315,6 +323,7 @@ const RecipePage: React.FC = () => {
                   <p className="text-lg font-bold text-[var(--highlight)]">{recipe.porciones}</p>
                 </div>
               </div>
+
               {recipe.estilo && (
                 <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                   {getCuisineIcon(recipe.estilo)}
@@ -324,6 +333,7 @@ const RecipePage: React.FC = () => {
                   </div>
                 </div>
               )}
+
               {recipe.restricciones && recipe.restricciones.length > 0 && (
                 <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                   <GiFruitBowl className="w-8 h-8 text-[var(--highlight)]" />
@@ -336,6 +346,76 @@ const RecipePage: React.FC = () => {
                         </span>
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Dificultad */}
+              {recipe.dificultad && (
+                <div className="p-4 rounded-xl shadow-sm flex items-center space-x-3"
+                  // background color depending on difficulty
+                  style={{
+                    background:
+                      recipe.dificultad === "Principiante"
+                        ? "rgba(16,185,129,0.08)" // green-ish
+                        : recipe.dificultad === "Intermedio"
+                          ? "rgba(250,204,21,0.08)" // yellow-ish
+                          : "rgba(139,92,246,0.06)" // purple-ish
+                  }}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center
+            ${recipe.dificultad === "Principiante" ? "bg-green-100 text-green-600" :
+                      recipe.dificultad === "Intermedio" ? "bg-yellow-100 text-yellow-600" :
+                        "bg-purple-100 text-purple-600"}`}>
+                    <GiChefToque className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">Nivel</h3>
+                    <p className="text-lg font-bold" style={{
+                      color:
+                        recipe.dificultad === "Principiante"
+                          ? "var(--success)" // if you have CSS vars, otherwise fallback below
+                          : recipe.dificultad === "Intermedio"
+                            ? "var(--highlight)"
+                            : "var(--primary)"
+                    }}>
+                      {recipe.dificultad}
+                    </p>
+                    <p className="text-xs text-[var(--muted)] mt-1">
+                      {recipe.dificultad === "Principiante" ? "Técnicas simples · Tiempos cortos" :
+                        recipe.dificultad === "Intermedio" ? "Pasos moderados · Algo de técnica" :
+                          "Técnicas avanzadas · Precisión y tiempo"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Macronutrientes */}
+              {recipe.macronutrientes && (
+                <div className="bg-[var(--primary)]/10 p-4 rounded-xl shadow-sm flex flex-col space-y-2">
+                  <h3 className="text-md font-semibold text-[var(--foreground)] flex items-center">
+                    <MdOutlineFastfood className="w-6 h-6 mr-2 text-[var(--primary)]" />
+                    Macronutrientes
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="text-[var(--foreground)]">Calorías:</span>
+                    <span className="font-bold text-[var(--primary)]">
+                      {recipe.macronutrientes.calorias ?? '-'} kcal
+                    </span>
+
+                    <span className="text-[var(--foreground)]">Proteínas:</span>
+                    <span className="font-bold text-[var(--primary)]">
+                      {recipe.macronutrientes.proteinas_g ?? '-'} g
+                    </span>
+
+                    <span className="text-[var(--foreground)]">Carbohidratos:</span>
+                    <span className="font-bold text-[var(--primary)]">
+                      {recipe.macronutrientes.carbohidratos_g ?? '-'} g
+                    </span>
+
+                    <span className="text-[var(--foreground)]">Grasas:</span>
+                    <span className="font-bold text-[var(--primary)]">
+                      {recipe.macronutrientes.grasas_g ?? '-'} g
+                    </span>
                   </div>
                 </div>
               )}
