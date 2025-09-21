@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { useUser } from "@/context/user-context";
 import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 const footerVariants = {
   initial: { opacity: 0, y: 20 },
@@ -160,7 +161,7 @@ function CookieSettingsLink() {
       aria-label="Gestionar consentimientos"
     >
       <FaCookieBite />
-      <span>Ajustes de cookies y privacidad</span>
+      <span>{t("footer.manageConsent")}</span>
     </Link>
   );
 }

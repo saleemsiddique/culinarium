@@ -73,7 +73,8 @@
     "contact": {
       "title": "Contáctanos",
       "email": "culinariumofficial@gmail.com"
-    }
+    },
+    "manageConsent": "Ajustes de cookies y privacidad"
   },
   "privacy": {
     "title": "Política de Privacidad",
@@ -369,6 +370,132 @@
     },
     "auth": {
       "login": "Entrar"
+    }
+  },
+  "recipes": {
+    "title": "Mis Recetas",
+    "description": "Tus recetas generadas y guardadas en Culinarium.",
+    "searchPlaceholder": "Buscar recetas, ingredientes...",
+    "filters": {
+      "button": "Filtros",
+      "title": "Filtrar Recetas",
+      "clear": "Limpiar filtros",
+      "mealTime": {
+        "label": "Momento del día",
+        "all": "Todos"
+      },
+      "timeRange": {
+        "label": "Tiempo de preparación",
+        "any": "Cualquier tiempo"
+      },
+      "portions": {
+        "label": "Número de porciones",
+        "any": "Cualquier cantidad"
+      },
+      "style": {
+        "label": "Estilo de cocina",
+        "all": "Todos los estilos"
+      },
+      "restrictions": {
+        "label": "Restricciones dietéticas"
+      },
+      "mealTimeOptions": {
+        "breakfast": "Desayuno",
+        "lunch": "Comida",
+        "dinner": "Cena",
+        "snack": "Snack"
+      },
+      "timeRangeOptions": {
+        "0-15": "Menos de 15 min",
+        "15-30": "15-30 min",
+        "30-60": "30-60 min",
+        "60+": "Más de 1 hora"
+      },
+      "portionOptions": {
+        "1-2": "1-2 personas",
+        "3-4": "3-4 personas",
+        "5+": "5+ personas"
+      },
+      "cuisineStyleOptions": {
+        "italian": "Italiana",
+        "mexican": "Mexicana",
+        "japanese": "Japonesa",
+        "american": "Americana",
+        "spanish": "Española",
+        "indian": "India",
+        "jamaican": "Jamaicana"
+      },
+      "dietaryRestrictionOptions": {
+        "vegetarian": "Vegetariano",
+        "vegan": "Vegano",
+        "gluten-free": "Sin Gluten",
+        "lactose-free": "Sin Lactosa",
+        "keto": "Keto"
+      }
+    },
+    "loading": "Cargando tus deliciosas recetas...",
+    "noResults": {
+      "title": "No se encontraron recetas con los filtros seleccionados.",
+      "clear": "Limpiar filtros"
+    },
+    "empty": {
+      "title": "¡Ups! Parece que aún no has generado ninguna receta.",
+      "description": "¡Es el momento perfecto para crear tu primera obra maestra culinaria!",
+      "button": "¡Empezar a Cocinar Ahora! 🍳"
+    },
+    "recipeCard": {
+      "time": "min",
+      "portions": "porciones",
+      "viewRecipe": "Ver Receta"
+    },
+    "results": "Mostrando {{current}} de {{total}} recetas",
+    "mealTimes": {
+      "breakfast": "🍳 Desayuno",
+      "lunch": "🍲 Comida",
+      "dinner": "🌙 Cena",
+      "snack": "🍎 Snack",
+      "default": "🍽️ Tu Receta"
+    },
+    "activeFilters": {
+      "search": "Búsqueda: {{term}}"
+    }
+  },
+  "recipeDetail": {
+    "loadingRecipe": "Cargando receta...",
+    "description": "Receta para {{title}} generada por Culinarium.",
+    "backButton": {
+      "toRecipes": "Volver a Mis Recetas",
+      "toForm": "Volver al Formulario"
+    },
+    "metadata": {
+      "totalTime": "Tiempo Total",
+      "portions": "Porciones",
+      "style": "Estilo",
+      "restrictions": "Restricciones",
+      "minutes": "min"
+    },
+    "sections": {
+      "ingredients": {
+        "title": " Ingredientes"
+      },
+      "instructions": {
+        "title": " Instrucciones",
+        "step": "Paso {{number}}"
+      },
+      "excluded": {
+        "title": "Ingredientes Evitados"
+      }
+    },
+    "actions": {
+      "goToKitchen": "Ir a la Cocina",
+      "generateAnother": "¡Quiero otra Receta!",
+      "cost": "Costo: {{tokens}} tokens"
+    },
+    "loading": {
+      "generatingImage": "Generando imagen..."
+    },
+    "error": {
+      "title": "¡Ups! Algo salió mal"
     }
   }
 }
