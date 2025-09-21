@@ -36,6 +36,17 @@ import { FaUserClock, FaSpinner, FaUtensils, FaCoins } from "react-icons/fa";
 import { useIngredientHistory } from "@/hooks/useIngredientHistory";
 import { TokensModal } from "@/components/SideMenu/TokensModal";
 import ControlMacronutrientes from "@/components/kitchenForm/ControlMacronutrientes";
+import Icon from "@mdi/react";
+import {
+  mdiStove,
+  mdiMicrowave,
+  mdiPan,
+  mdiPot,
+  mdiBlender,
+  mdiGrill,
+  mdiSilverwareForkKnife,
+  mdiKnife
+} from "@mdi/js";
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
 async function loadImageFromDataUrl(
@@ -224,16 +235,36 @@ const CulinariumForm: React.FC = () => {
   // dificultad de la receta
   const [difficulty, setDifficulty] = useState<'Principiante' | 'Intermedio' | 'Chef'>('Principiante');
 
+  // Nuevo: modal/slide para utensilios
+  const [showUtensilsModal, setShowUtensilsModal] = useState<boolean>(false);
+
+  // lista de utensilios importantes (puedes editar/añadir)
+  const utensilsList = [
+    { key: "horno", label: "Horno", icon: mdiStove },
+    { key: "microondas", label: "Microondas", icon: mdiMicrowave },
+    { key: "airfryer", label: "Airfryer", icon: mdiPan },        // fallback visual (no icon MDI específico)
+    { key: "sarten", label: "Sartén", icon: mdiPan },
+    { key: "olla", label: "Olla", icon: mdiPot },
+    { key: "batidora", label: "Batidora", icon: mdiBlender },
+    { key: "licuadora", label: "Licuadora", icon: mdiBlender },
+    { key: "grill", label: "Plancha", icon: mdiGrill },
+    { key: "tabla", label: "Tabla de cortar", icon: mdiSilverwareForkKnife }, // uso utensilios genérico
+    { key: "pelador", label: "Pelador", icon: mdiKnife }
+  ];
+
+
+  // estado: todos activos por defecto
+  const [utensils, setUtensils] = useState<Record<string, boolean>>(
+    () => utensilsList.reduce((acc, u) => ({ ...acc, [u.key]: true }), {})
+  );
+
+  const toggleUtensil = (key: string) => {
+    setUtensils(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // Función para calcular el costo de tokens basado en las selecciones del formulario
   const calculateTokenCost = (): number => {
     const baseCost = 10; // Costo base fijo por ahora
-
-    // En el futuro se pueden añadir modificadores aquí:
-    // if (user?.isSubscribed) baseCost -= 2; // Descuento para suscriptores
-    // if (cuisineStyle) baseCost += 1; // Costo extra por estilo específico
-    // if (dietaryRestrictions.length > 0) baseCost += 1; // Costo extra por restricciones
-
     return baseCost;
   };
 
@@ -312,29 +343,6 @@ const CulinariumForm: React.FC = () => {
     },
     [] // no depende de nada: la referencia será estable
   )
-
-  // lista de utensilios importantes (puedes editar/añadir)
-  const utensilsList = [
-    { key: "horno", label: "Horno", emoji: "🔥" },
-    { key: "microondas", label: "Microondas", emoji: "📡" },
-    { key: "airfryer", label: "Airfryer", emoji: "🍟" },
-    { key: "sarten", label: "Sartén", emoji: "🍳" },
-    { key: "olla", label: "Olla/Cazuela", emoji: "🥘" },
-    { key: "batidora", label: "Batidora", emoji: "🥣" },
-    { key: "licuadora", label: "Licuadora", emoji: "🍹" },
-    { key: "grill", label: "Plancha/Grill", emoji: "🥩" },
-    { key: "tabla", label: "Tabla de cortar", emoji: "🪵" },
-    { key: "pelador", label: "Pelador", emoji: "🥕" },
-  ];
-
-  // estado: todos activos por defecto
-  const [utensils, setUtensils] = useState<Record<string, boolean>>(
-    () => utensilsList.reduce((acc, u) => ({ ...acc, [u.key]: true }), {})
-  );
-
-  const toggleUtensil = (key: string) => {
-    setUtensils(prev => ({ ...prev, [key]: !prev[key] }));
-  };
 
   // Onboarding effect
   useEffect(() => {
@@ -713,12 +721,49 @@ const CulinariumForm: React.FC = () => {
 
       let didPopulate = false;
 
+      type MacrosState = {
+        mode: "basic" | "pro";
+        basicGoal: string | null;
+        calories: number;
+        percents: { protein: number; carbs: number; fats: number };
+      };
+
+      const normalizeMacros = (raw: any): MacrosState | null => {
+        if (!raw) return null;
+        const m = raw.macronutrients ?? raw.macros ?? raw;
+
+        // Normalizar mode estrictamente a "pro" | "basic"
+        const mode: "basic" | "pro" = m?.mode === "pro" ? "pro" : "basic";
+
+        const basicGoal: string | null =
+          m?.basicGoal ?? m?.basic_goal ?? null;
+
+        const calories = Number(m?.calories ?? 500);
+
+        // Percents pueden venir como objeto o como propiedades separadas
+        const percentsSource =
+          m?.percents ??
+          (m?.protein != null && m?.carbs != null && m?.fats != null
+            ? { protein: m.protein, carbs: m.carbs, fats: m.fats }
+            : null);
+
+        const percents = percentsSource
+          ? {
+            protein: Number(percentsSource.protein ?? 30),
+            carbs: Number(percentsSource.carbs ?? 50),
+            fats: Number(percentsSource.fats ?? 20),
+          }
+          : { protein: 30, carbs: 50, fats: 20 };
+
+        return { mode, basicGoal, calories, percents };
+      };
+
       if (storedLastForm) {
         try {
           const data = JSON.parse(storedLastForm);
-          setIngredients(
-            Array.isArray(data.ingredients) ? data.ingredients : []
-          );
+
+          // ... (las asignaciones ya existentes)
+          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : []);
           setMealTime(
             typeof data.mealTime === "string" || data.mealTime === null
               ? data.mealTime
@@ -743,14 +788,47 @@ const CulinariumForm: React.FC = () => {
           setAvailableTime(
             typeof data.availableTime === "string" ? data.availableTime : "30"
           );
+
+          // Dificultad
+          if (data.difficulty && (data.difficulty === 'Principiante' || data.difficulty === 'Intermedio' || data.difficulty === 'Chef')) {
+            setDifficulty(data.difficulty);
+          } else if (typeof data.difficulty === 'string') {
+            const dif = data.difficulty.toLowerCase();
+            if (dif.includes('principi')) setDifficulty('Principiante');
+            else if (dif.includes('inter')) setDifficulty('Intermedio');
+            else if (dif.includes('chef') || dif.includes('avanz')) setDifficulty('Chef');
+          }
+
+          // Utensilios
+          if (data.utensils) {
+            if (Array.isArray(data.utensils)) {
+              const selectedArray: string[] = data.utensils;
+              const newUtensils = utensilsList.reduce<Record<string, boolean>>(
+                (acc, u) => ({ ...acc, [u.key]: selectedArray.includes(u.key) }),
+                {}
+              );
+              setUtensils(newUtensils);
+            } else if (typeof data.utensils === "object") {
+              const newUtensils = utensilsList.reduce<Record<string, boolean>>(
+                (acc, u) => ({ ...acc, [u.key]: data.utensils[u.key] ?? true }),
+                {}
+              );
+              setUtensils(newUtensils);
+            }
+          }
+
+          // Macros
+          const normalized = normalizeMacros(data.macronutrients ?? data.macros ?? data);
+          if (normalized) {
+            setMacros(normalized);
+          }
+
           didPopulate = true;
         } catch (err) {
-          // fallamos silenciosamente y probamos siguiente fuente
           console.warn("Error parseando lastFormData:", err);
         }
       }
 
-      // Si no había lastFormData intentamos con generatedRecipe (p.ej. al regenerar desde la vista de receta)
       if (!didPopulate) {
         const storedGenerated =
           typeof window !== "undefined"
@@ -759,7 +837,8 @@ const CulinariumForm: React.FC = () => {
         if (storedGenerated) {
           try {
             const recipe = JSON.parse(storedGenerated);
-            // Intentar leer ingredientes desde varias propiedades posibles
+
+            // ... (asignaciones desde generatedRecipe)
             const maybeIngredients =
               recipe.ingredients ||
               recipe.ingredientes ||
@@ -768,11 +847,7 @@ const CulinariumForm: React.FC = () => {
               recipe.ingredientesList ||
               null;
 
-            if (
-              Array.isArray(maybeIngredients) &&
-              maybeIngredients.length > 0
-            ) {
-              // Asegurarnos que sean strings
+            if (Array.isArray(maybeIngredients) && maybeIngredients.length > 0) {
               const normalized = maybeIngredients.map((it: any) =>
                 typeof it === "string" ? it : String(it)
               );
@@ -780,25 +855,56 @@ const CulinariumForm: React.FC = () => {
               didPopulate = true;
             }
 
-            // Si la receta guarda otros campos comunes
-            if (
-              !mealTime &&
-              (recipe.mealTime || recipe.momento || recipe.tipo)
-            ) {
+            if (!mealTime && (recipe.mealTime || recipe.momento || recipe.tipo)) {
               setMealTime(recipe.mealTime || recipe.momento || recipe.tipo);
             }
 
-            // otros mappings si existen
             if (recipe.diners || recipe.comensales) {
               setDiners(
                 typeof recipe.diners === "number"
                   ? recipe.diners
-                  : recipe.comensales || 1
+                  : Number(recipe.comensales) || 1
               );
             }
 
             if (recipe.cuisineStyle || recipe.estilo) {
               setCuisineStyle(recipe.cuisineStyle || recipe.estilo);
+            }
+
+            // Dificultad desde receta
+            if (recipe.difficulty || recipe.dificultad) {
+              const d = recipe.difficulty || recipe.dificultad;
+              if (d === 'Principiante' || d === 'Intermedio' || d === 'Chef') setDifficulty(d);
+              else if (typeof d === 'string') {
+                const dif = d.toLowerCase();
+                if (dif.includes('principi')) setDifficulty('Principiante');
+                else if (dif.includes('inter')) setDifficulty('Intermedio');
+                else if (dif.includes('chef') || dif.includes('avanz')) setDifficulty('Chef');
+              }
+            }
+
+            // Utensilios desde receta
+            const maybeUtensils = recipe.utensils || recipe.utensilios || null;
+            if (maybeUtensils) {
+              if (Array.isArray(maybeUtensils)) {
+                const newUtensils = utensilsList.reduce<Record<string, boolean>>(
+                  (acc, u) => ({ ...acc, [u.key]: maybeUtensils.includes(u.key) }),
+                  {}
+                );
+                setUtensils(newUtensils);
+              } else if (typeof maybeUtensils === "object") {
+                const newUtensils = utensilsList.reduce<Record<string, boolean>>(
+                  (acc, u) => ({ ...acc, [u.key]: maybeUtensils[u.key] ?? true }),
+                  {}
+                );
+                setUtensils(newUtensils);
+              }
+            }
+
+            // Macros desde receta
+            const normalizedFromRecipe = normalizeMacros(recipe.macronutrients ?? recipe.macros ?? recipe);
+            if (normalizedFromRecipe) {
+              setMacros(normalizedFromRecipe);
             }
           } catch (err) {
             console.warn("Error parseando generatedRecipe:", err);
@@ -807,8 +913,6 @@ const CulinariumForm: React.FC = () => {
       }
 
       setAutoTriggered(true);
-      // Permite que React aplique los estados antes de enviar (si queremos auto-submit)
-      // Solo requestSubmit si hemos poblado algo
       if (didPopulate) {
         setTimeout(() => {
           formRef.current?.requestSubmit();
@@ -816,6 +920,7 @@ const CulinariumForm: React.FC = () => {
       }
     }
   }, [loadingUser, searchParams, autoTriggered]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br pt-[5%] from-[var(--background)] to-[var(--background)] py-10 flex items-center justify-center font-sans">
@@ -833,8 +938,20 @@ const CulinariumForm: React.FC = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-12 md:py-12 max-w-screen-2xl mx-auto"
+        className="w-full px-4 lg:px-8 xl:px-12 bg-white rounded-3xl shadow-xl py-4 md:py-4 max-w-screen-2xl mx-auto"
       >
+        {/* Botón para abrir utensilios - fuera del formulario principal */}
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={() => setShowUtensilsModal(true)}
+            className="px-4 py-2 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)] hover:bg-[var(--primary)]/20 transition-colors flex items-center gap-2"
+          >
+            <GiChopsticks className="w-5 h-5" />
+            Utensilios
+          </button>
+        </div>
+
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-10">
           {/* Contenedor principal del formulario con grid para 3 columnas en pantallas grandes */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar lg:h-auto lg:overflow-visible">
@@ -983,35 +1100,44 @@ const CulinariumForm: React.FC = () => {
                   </select>
                 </section>
 
-                {/* Utensilios disponibles */}
+                {/* NUEVA SECCIÓN: Dificultad (movida a Columna 1) */}
                 <section className="mt-4">
-                  <h4 className="text-lg font-semibold text-[var(--foreground)] mb-2">Utensilios disponibles</h4>
-                  <p className="text-sm text-[var(--muted)] mb-3">Haz clic para desactivar los que NO tienes (todos activos por defecto).</p>
+                  <h3 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center">
+                    <span className="mr-2 text-[var(--highlight)] text-2xl">🎯</span> Nivel de dificultad
+                  </h3>
+                  <p className="text-sm text-[var(--muted)] mb-3">Selecciona qué nivel prefieres que tenga la receta.</p>
 
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                    {utensilsList.map((u) => {
-                      const active = utensils[u.key];
-                      return (
-                        <button
-                          key={u.key}
-                          type="button"
-                          onClick={() => toggleUtensil(u.key)}
-                          aria-pressed={active}
-                          title={active ? `Tienes: ${u.label}` : `No tienes: ${u.label}`}
-                          className={`flex flex-col items-center justify-center gap-1 p-3 rounded-full transition-all border 
-            ${active ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)]" : "opacity-60 border border-[var(--primary)] bg-[var(--background)] text-[var(--muted)]"}`}
-                        >
-                          <span className="text-xs text-center">{u.label}</span>
-                        </button>
-                      );
-                    })}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setDifficulty('Principiante')}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Principiante' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
+                    >
+                      Principiante
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDifficulty('Intermedio')}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Intermedio' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
+                    >
+                      Intermedio
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDifficulty('Chef')}
+                      className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Chef' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
+                    >
+                      Chef
+                    </button>
                   </div>
                 </section>
 
               </section>
             </div>
-            {/* COLUMNA 2: Momento del Día y Cantidad de Personas */}
-            {/* COLUMNA 2: Momento del Día, Cantidad de Personas y Dificultad */}
+
+            {/* COLUMNA 2: Momento del Día, Cantidad de Personas */}
             <div className="lg:col-span-1 flex flex-col space-y-6">
               {/* Sección de Momento del Día */}
               <section
@@ -1096,39 +1222,6 @@ const CulinariumForm: React.FC = () => {
                 </div>
               </section>
 
-              {/* NUEVA SECCIÓN: Dificultad de la receta */}
-              <section className="bg-[var(--background)] p-4 rounded-2xl form-custom-shadow">
-                <h3 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center">
-                  <span className="mr-2 text-[var(--highlight)] text-2xl">🎯</span> Nivel de dificultad
-                </h3>
-                <p className="text-sm text-[var(--muted)] mb-3">Selecciona qué nivel prefieres que tenga la receta.</p>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setDifficulty('Principiante')}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Principiante' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
-                  >
-                    Principiante
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDifficulty('Intermedio')}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Intermedio' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
-                  >
-                    Intermedio
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDifficulty('Chef')}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Chef' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
-                  >
-                    Chef
-                  </button>
-                </div>
-              </section>
             </div>
 
 
@@ -1353,8 +1446,9 @@ const CulinariumForm: React.FC = () => {
               />
 
             </div>
-          </div>{" "}
+          </div>
           {/* Fin del grid de 3 columnas */}
+
           {/* Disable button if user is not loaded or form is submitting */}
           <motion.button
             type="submit"
@@ -1436,6 +1530,63 @@ const CulinariumForm: React.FC = () => {
               <p className="text-sm text-[var(--muted)]">
                 La imagen se generará en segundo plano.
               </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Utensils Modal */}
+      <AnimatePresence>
+        {showUtensilsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-60 flex items-end md:items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/40" onClick={() => setShowUtensilsModal(false)} />
+            <motion.div
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="relative w-full md:max-w-xl bg-[var(--background)] rounded-2xl shadow-2xl p-6 z-50"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Utensilios disponibles</h3>
+              </div>
+
+              <p className="text-sm text-[var(--muted)] mb-4">Haz clic para activar/desactivar los utensilios que tienes.</p>
+
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {utensilsList.map((u) => {
+                  const active = utensils[u.key];
+                  return (
+                    <button
+                      key={u.key}
+                      type="button"
+                      onClick={() => toggleUtensil(u.key)}
+                      aria-pressed={active}
+                      title={active ? `Tienes: ${u.label}` : `No tienes: ${u.label}`}
+                      className={`flex flex-col items-center justify-center gap-1 p-3 rounded-full transition-all border 
+            ${active ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)]" : "opacity-60 border border-[var(--primary)] bg-[var(--background)] text-[var(--muted)]"}`}
+                    >
+                      <Icon path={u.icon} size={1.2} className="text-2xl" aria-hidden="true" />
+                      <span className="text-[14px] text-center mt-1">{u.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowUtensilsModal(false)}
+                  className="px-4 py-2 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)] hover:bg-[var(--primary)]/20"
+                >
+                  Hecho
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
