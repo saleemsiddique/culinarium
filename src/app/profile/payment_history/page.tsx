@@ -5,19 +5,21 @@ import { motion } from "framer-motion";
 import { useUser } from "@/context/user-context";
 import { useSubscription } from "@/context/subscription-context";
 import { useTokenPurchases } from "@/context/tokenpurchases-context";
+import { useTranslation } from "react-i18next";
 
 export default function PaymentDashboard() {
   const { user, loading: loadingUser } = useUser();
   const { subscription, loading: loadingSub } = useSubscription();
   const { purchases, loading: loadingPurchases } = useTokenPurchases();
+  const { t } = useTranslation();
 
   // Mostrar loader hasta que todo cargue
   if (loadingUser || loadingSub || loadingPurchases) {
-    return <div className="p-8 text-center text-[var(--foreground)]">Cargando datos...</div>;
+    return <div className="p-8 text-center text-[var(--foreground)]">{t("payments.dashboard.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="p-8 text-center text-[var(--foreground)]">Inicia sesión para ver tu historial</div>;
+    return <div className="p-8 text-center text-[var(--foreground)]">{t("payments.dashboard.loginRequired")}</div>;
   }
 
   const totalSpent = purchases.reduce((sum: number, p) => sum + Number(p.price), 0);
@@ -47,8 +49,8 @@ export default function PaymentDashboard() {
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="text-center text-[var(--text2)] mb-4"
         >
-          <h1 className="text-4xl font-extrabold drop-shadow-lg">💳 Historial de Pagos</h1>
-          <p className="mt-2 text-lg">Gestiona tu suscripción y revisa tus compras de tokens</p>
+          <h1 className="text-4xl font-extrabold drop-shadow-lg">{t("payments.dashboard.title")}</h1>
+          <p className="mt-2 text-lg">{t("payments.dashboard.subtitle")}</p>
         </motion.div>
 
         {/* Suscripción */}
@@ -62,7 +64,7 @@ export default function PaymentDashboard() {
             <div className="p-8 space-y-6">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="flex items-center space-x-4">
-                  <span className="text-2xl font-semibold text-[var(--foreground)]">🔄 Suscripción Premium</span>
+                  <span className="text-2xl font-semibold text-[var(--foreground)]">{t("payments.subscription.title")}</span>
                   {/* Cambiamos el color del badge de estado */}
                   <span className="px-4 py-1 bg-[var(--highlight)] text-[var(--text2)] rounded-full text-sm font-bold">
                     {subscription.status.toUpperCase()}
@@ -71,17 +73,17 @@ export default function PaymentDashboard() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-[var(--foreground)]">
                 <div>
-                  <div className="text-sm text-gray-600">Plan Actual</div>
+                  <div className="text-sm text-gray-600">{t("payments.subscription.plan")}</div>
                   <div className="text-lg font-semibold">{subscription.planName}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Próxima Facturación</div>
+                  <div className="text-sm text-gray-600">{t("payments.subscription.nextBilling")}</div>
                   <div className="text-lg font-semibold">
                     {formatDate(subscription.endsAt.toDate())}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Monto Mensual</div>
+                  <div className="text-sm text-gray-600">{t("payments.subscription.monthlyAmount")}</div>
                   <div className="text-lg font-semibold">
                     €{subscription.price}
                   </div>
@@ -98,11 +100,11 @@ export default function PaymentDashboard() {
         >
           <div className="flex flex-col sm:flex-row justify-between items-center border-b pb-4 border-gray-300">
             <div>
-              <h2 className="text-2xl font-semibold text-[var(--foreground)]">🪙 Compras de Tokens</h2>
-              <p className="text-[var(--foreground)] opacity-80">Historial de todas tus compras de tokens</p>
+              <h2 className="text-2xl font-semibold text-[var(--foreground)]">{t("payments.tokens.title")}</h2>
+              <p className="text-[var(--foreground)] opacity-80">{t("payments.tokens.subtitle")}</p>
             </div>
             <div className="mt-4 sm:mt-0 text-[var(--foreground)] font-semibold">
-              Total gastado: €{totalSpent.toFixed(2)}
+              {t("payments.tokens.totalSpent", { amount: totalSpent.toFixed(2) })}
             </div>
           </div>
 
@@ -127,15 +129,15 @@ export default function PaymentDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[var(--foreground)] opacity-90">
                   <div>
-                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">Tokens</div>
+                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">{t("payments.tokens.tokens")}</div>
                     <div className="font-medium">{row.tokensAmount}</div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">Paquete</div>
+                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">{t("payments.tokens.package")}</div>
                     <div className="font-medium">{row.productName}</div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">Estado</div>
+                    <div className="text-xs uppercase text-[var(--foreground)] opacity-60">{t("payments.tokens.status")}</div>
                     <div className="font-medium">{row.status}</div>
                   </div>
                 </div>

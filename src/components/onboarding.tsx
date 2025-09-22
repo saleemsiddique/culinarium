@@ -1,32 +1,15 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 export default function Onboarding({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
 
-  const steps = [
-    {
-      title: "👋 Bienvenido",
-      text: "Gracias por unirte a nuestra aplicación. Te mostraremos lo esencial.",
-      image: "/onboarding/step1.jpg",
-    },
-    {
-      title: "🥘 Tokens y Recetas",
-      text: "¡Los tokens son tu recurso más valioso! Cada vez que crees una receta gastarás tokens, y siempre podrás ver el coste de tokens indicado antes de crearla.",
-      image: "/onboarding/step2.jpg",
-    },
-    {
-      title: "🔄 Renovación",
-      text: "Tus tokens se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
-      image: "/onboarding/step3.jpg",
-    },
-    {
-      title: "🚀 Listo",
-      text: "Ya conoces lo básico, hora de cocinar.",
-      image: "/onboarding/step4.jpg",
-    },
-  ];
+  const steps = Array.isArray(t("onboarding.steps", { returnObjects: true }))
+    ? (t("onboarding.steps", { returnObjects: true }) as Array<{ title: string; image: string; text: string }>)
+    : [];
 
   const nextStep = () => {
     if (step < steps.length - 1) {
@@ -62,7 +45,7 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
               onClick={prevStep}
               className="bg-gray-300 px-4 py-2 rounded-lg"
             >
-              Atrás
+              {t("onboarding.buttons.back")}
             </button>
           ) : (
             <div></div>
@@ -72,7 +55,8 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
             onClick={nextStep}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg"
           >
-            {step < steps.length - 1 ? "Siguiente" : "Finalizar"}
+            {step < steps.length - 1 ? t("onboarding.buttons.next") 
+              : t("onboarding.buttons.finish")}
           </button>
         </div>
 

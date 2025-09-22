@@ -566,5 +566,157 @@
   },
   "checkout":{
     "subscribe":"Suscribirse"
+  },
+  "profile": {
+    "title": "Perfil",
+    "greeting": "¡Hola, {{name}}!",
+    "subtitle": "Gestiona tu perfil y configuraciones",
+    "personalInfo": {
+      "title": "Información Personal",
+      "name": "Nombre",
+      "namePlaceholder": "Ingresa tu nombre",
+      "email": "Email",
+      "saving": "Guardando...",
+      "save": "Guardar",
+      "edit": "Editar",
+      "nameRequired": "El nombre no puede estar vacío.",
+      "nameUpdated": "Nombre actualizado exitosamente.",
+      "nameError": "Error al actualizar el nombre. Por favor, inténtalo de nuevo."
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "billing": "Billing",
+      "paymentHistory": "Historial de Pagos",
+      "howItWorks": "Cómo Funciona"
+    },
+    "subscription": {
+      "premium": {
+        "title": "Suscripción Premium",
+        "description": "Disfruta de todos los beneficios",
+        "status": {
+          "active": "Activa",
+          "cancelled": "Cancelada (activa hasta el final del período)",
+          "paymentFailed": "Pago Fallido. Gestiona tu suscripción",
+          "noSubscription": "Sin suscripción"
+        },
+        "nextBilling": "Próxima facturación",
+        "availableTokens": "Tokens disponibles",
+        "cancel": "Cancelar Suscripción",
+        "cancelNow": "Cancelar Suscripción Ahora",
+        "reactivate": "Reactivar Suscripción",
+        "cancelledNotice": "Tu suscripción ha sido cancelada pero seguirás teniendo acceso hasta el {{date}}"
+      },
+      "free": {
+        "title": "Cuenta Gratuita",
+        "description": "Desbloquea todo el potencial con Premium",
+        "subscribe": "Suscribirse"
+      }
+    },
+    "logout": {
+      "title": "Cerrar Sesión",
+      "description": "Salir de tu cuenta de forma segura",
+      "button": "Cerrar Sesión"
+    },
+    "modals": {
+      "cancelSubscription": {
+        "title": "¿Cancelar Suscripción?",
+        "message": "Tu suscripción se cancelará, pero mantendrás acceso a todas las funciones Premium hasta el final de tu período actual de facturación.",
+        "keep": "Mantener Suscripción",
+        "confirm": "Confirmar Cancelación",
+        "cancelling": "Cancelando..."
+      },
+      "cancelNow": {
+        "title": "¿Cancelar Suscripción?",
+        "message": "Tu suscripción se cancelará de inmediato y perderás acceso a todas las funciones Premium.",
+        "keep": "Mantener Suscripción",
+        "confirm": "Confirmar Cancelación",
+        "cancelling": "Cancelando..."
+      },
+      "reactivate": {
+        "title": "¿Reactivar Suscripción?",
+        "message": "Tu suscripción se reactivará y tendrás acceso a todas las funciones Premium nuevamente.",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Reactivación",
+        "reactivating": "Reactivando..."
+      },
+      "message": {
+        "success": "Éxito",
+        "error": "Error",
+        "subscriptionCancelled": "Suscripción cancelada exitosamente. Mantendrás acceso hasta el final del período actual. Hemos enviado un correo de confirmación a tu dirección.",
+        "subscriptionCancelledNow": "Suscripción cancelada exitosamente.",
+        "subscriptionReactivated": "Suscripción reactivada exitosamente.",
+        "subscriptionError": "Error al cancelar la suscripción. Por favor, inténtalo de nuevo.",
+        "subscriptionReactivateError": "Error al reactivar la suscripción. Por favor, inténtalo de nuevo.",
+        "close": "Cerrar"
+      }
+    },
+    "errors": {
+      "logout": "Error al cerrar sesión",
+      "paymentHistory": "Error al entrar en payment history",
+      "billing": "Error al entrar en billing"
+    }
+  },
+  "onboarding": {
+    "steps": [
+      {
+        "title": "👋 Bienvenido",
+        "text": "Gracias por unirte a nuestra aplicación. Te mostraremos lo esencial.",
+        "image": "/onboarding/step1.jpg"
+      },
+      {
+        "title": "🥘 Tokens y Recetas",
+        "text": "¡Los tokens son tu recurso más valioso! Cada vez que crees una receta gastarás tokens, y siempre podrás ver el coste de tokens indicado antes de crearla.",
+        "image": "/onboarding/step2.jpg"
+      },
+      {
+        "title": "🔄 Renovación",
+        "text": "Tus tokens se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
+        "image": "/onboarding/step3.jpg"
+      },
+      {
+        "title": "🚀 Listo",
+        "text": "Ya conoces lo básico, hora de cocinar.",
+        "image": "/onboarding/step4.jpg"
+      }
+    ],
+    "buttons": {
+      "back": "Atrás",
+      "next": "Siguiente",
+      "finish": "Finalizar"
+    }
+  },
+  "payments": {
+    "dashboard": {
+      "title": "💳 Historial de Pagos",
+      "subtitle": "Gestiona tu suscripción y revisa tus compras de tokens",
+      "loading": "Cargando datos...",
+      "loginRequired": "Inicia sesión para ver tu historial"
+    },
+    "subscription": {
+      "title": "🔄 Suscripción Premium",
+      "plan": "Plan Actual",
+      "nextBilling": "Próxima Facturación",
+      "monthlyAmount": "Monto Mensual",
+      "status": {
+        "active": "ACTIVA",
+        "canceled": "CANCELADA",
+        "past_due": "PENDIENTE",
+        "trialing": "PRUEBA"
+      }
+    },
+    "tokens": {
+      "title": "💰 Compras de Tokens",
+      "subtitle": "Historial de todas tus compras de tokens",
+      "totalSpent": "Total gastado: €{{amount}}",
+      "date": "Fecha",
+      "tokens": "Tokens",
+      "package": "Paquete",
+      "status": "Estado",
+      "statusTypes": {
+        "completed": "Completado",
+        "pending": "Pendiente",
+        "failed": "Fallido"
+      }
+    }
   }
 }
