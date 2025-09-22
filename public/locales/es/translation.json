@@ -718,5 +718,120 @@
         "failed": "Fallido"
       }
     }
+  },
+  "billing": {
+    "portal": {
+      "title": "Portal de Facturación",
+      "description": "Gestiona tus facturas y métodos de pago"
+    },
+    "tabs": {
+      "invoices": {
+        "label": "Facturas",
+        "title": "Historial de facturas",
+        "description": "Todas tus facturas y pagos realizados"
+      },
+      "paymentMethods": {
+        "label": "Métodos de pago",
+        "title": "Métodos de pago",
+        "description": "Gestiona tus tarjetas de crédito y débito"
+      }
+    },
+    "invoices": {
+      "headers": {
+        "date": "Fecha",
+        "description": "Concepto",
+        "amount": "Importe",
+        "status": "Estado",
+        "invoice": "Factura"
+      },
+      "status": {
+        "paid": "Pagado",
+        "open": "Pendiente",
+        "void": "Anulado",
+        "unknown": "Desconocido"
+      },
+      "types": {
+        "subscription": "Suscripción"
+      },
+      "empty": {
+        "title": "No tienes facturas disponibles",
+        "description": "Las facturas aparecerán aquí después de tu primer pago."
+      },
+      "loading": "Cargando facturas...",
+      "download": "PDF"
+    },
+    "paymentMethods": {
+      "addCard": "Añadir tarjeta",
+      "addFirstCard": "Añadir primera tarjeta",
+      "empty": {
+        "title": "No tienes métodos de pago",
+        "description": "Añade una tarjeta para continuar con tus pagos"
+      },
+      "card": {
+        "default": "Predeterminada",
+        "expires": "Caduca",
+        "setAsDefault": "Establecer como predeterminada",
+        "delete": "Eliminar tarjeta",
+        "cannotDeleteDefault": "No puedes eliminar la tarjeta predeterminada"
+      },
+      "brands": {
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "amex": "American Express",
+        "discover": "Discover",
+        "other": "Otra tarjeta"
+      }
+    },
+    "modals": {
+      "success": {
+        "title": "Éxito",
+        "close": "Cerrar",
+        "cardDeleted": "La tarjeta se eliminó correctamente ✅"
+      },
+      "confirm": {
+        "title": "Confirmar acción",
+        "message": "¿Estás seguro de que quieres eliminar esta tarjeta?",
+        "warning": "Esta acción no se puede deshacer.",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "deleting": "Eliminando..."
+      },
+      "errors": {
+        "setDefault": "Error al establecer la tarjeta predeterminada.",
+        "invoiceUrl": "URL de la factura no encontrada."
+      }
+    },
+    "loading": {
+      "processing": "Procesando...",
+      "data": "Cargando datos..."
+    },
+    "addCard": {
+      "title": "Añadir nueva tarjeta",
+      "cardholderName": "Nombre en la tarjeta",
+      "cardholderPlaceholder": "Juan Pérez",
+      "cardNumber": "Número de tarjeta",
+      "expiryDate": "Fecha de caducidad",
+      "cvc": "CVC",
+      "country": "País o región",
+      "postalCode": {
+        "label": "Código Postal",
+        "usPlaceholder": "Ej: 94105",
+        "gbPlaceholder": "Ej: SW1A 1AA"
+      },
+      "consent": "Guardar tarjeta para pagos futuros y aceptar términos.",
+      "buttons": {
+        "cancel": "Cancelar",
+        "add": "Añadir tarjeta",
+        "adding": "Añadiendo..."
+      },
+      "errors": {
+        "stripeNotLoaded": "Stripe no está cargado correctamente",
+        "cardholderRequired": "El nombre del titular es requerido",
+        "consentRequired": "El usuario debe consentir guardar la tarjeta para futuros pagos",
+        "cardElementNotFound": "Elemento de tarjeta no encontrado",
+        "authenticationFailed": "La autenticación de la tarjeta no se completó correctamente",
+        "paymentMethodNotFound": "No se obtuvo payment_method del SetupIntent"
+      }
+    }
   }
 }

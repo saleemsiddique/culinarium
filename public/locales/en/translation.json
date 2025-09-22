@@ -718,5 +718,120 @@
         "failed": "Failed"
       }
     }
+  },
+  "billing": {
+    "portal": {
+      "title": "Billing Portal",
+      "description": "Manage your invoices and payment methods"
+    },
+    "tabs": {
+      "invoices": {
+        "label": "Invoices",
+        "title": "Invoice History",
+        "description": "All your invoices and payments made"
+      },
+      "paymentMethods": {
+        "label": "Payment Methods",
+        "title": "Payment Methods",
+        "description": "Manage your credit and debit cards"
+      }
+    },
+    "invoices": {
+      "headers": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Amount",
+        "status": "Status",
+        "invoice": "Invoice"
+      },
+      "status": {
+        "paid": "Paid",
+        "open": "Pending",
+        "void": "Void",
+        "unknown": "Unknown"
+      },
+      "types": {
+        "subscription": "Subscription"
+      },
+      "empty": {
+        "title": "You have no invoices available",
+        "description": "Invoices will appear here after your first payment."
+      },
+      "loading": "Loading invoices...",
+      "download": "PDF"
+    },
+    "paymentMethods": {
+      "addCard": "Add card",
+      "addFirstCard": "Add first card",
+      "empty": {
+        "title": "You have no payment methods",
+        "description": "Add a card to continue with your payments"
+      },
+      "card": {
+        "default": "Default",
+        "expires": "Expires",
+        "setAsDefault": "Set as default",
+        "delete": "Delete card",
+        "cannotDeleteDefault": "You cannot delete the default card"
+      },
+      "brands": {
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "amex": "American Express",
+        "discover": "Discover",
+        "other": "Other card"
+      }
+    },
+    "modals": {
+      "success": {
+        "title": "Success",
+        "close": "Close",
+        "cardDeleted": "Card deleted successfully ✅"
+      },
+      "confirm": {
+        "title": "Confirm action",
+        "message": "Are you sure you want to delete this card?",
+        "warning": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting..."
+      },
+      "errors": {
+        "setDefault": "Error setting default card.",
+        "invoiceUrl": "Invoice URL not found."
+      }
+    },
+    "loading": {
+      "processing": "Processing...",
+      "data": "Loading data..."
+    },
+    "addCard": {
+      "title": "Add new card",
+      "cardholderName": "Name on card",
+      "cardholderPlaceholder": "John Doe",
+      "cardNumber": "Card number",
+      "expiryDate": "Expiry date",
+      "cvc": "CVC",
+      "country": "Country or region",
+      "postalCode": {
+        "label": "Postal Code",
+        "usPlaceholder": "Ex: 94105",
+        "gbPlaceholder": "Ex: SW1A 1AA"
+      },
+      "consent": "Save card for future payments and accept terms.",
+      "buttons": {
+        "cancel": "Cancel",
+        "add": "Add card",
+        "adding": "Adding..."
+      },
+      "errors": {
+        "stripeNotLoaded": "Stripe is not loaded correctly",
+        "cardholderRequired": "Cardholder name is required",
+        "consentRequired": "User must consent to save the card for future payments",
+        "cardElementNotFound": "Card element not found",
+        "authenticationFailed": "Card authentication did not complete successfully",
+        "paymentMethodNotFound": "Payment method not obtained from SetupIntent"
+      }
+    }
   }
 }

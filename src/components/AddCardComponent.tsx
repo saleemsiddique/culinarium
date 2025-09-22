@@ -22,6 +22,7 @@ interface PaymentMethod {
   is_default: boolean;
 }
 import CountrySelect from "./countrySelect";
+import { useTranslation } from "react-i18next";
 
 interface AddCardComponentProps {
   customerId: string;
@@ -43,6 +44,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const { t } = useTranslation();
 
   const cardElementOptions = {
     style: {
@@ -60,16 +62,16 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
     setError("");
 
     if (!stripe || !elements) {
-      setError("Stripe no está cargado correctamente");
+      setError(t("billing.addCard.errors.stripeNotLoaded"));
       return;
     }
     if (!cardholderName.trim()) {
-      setError("El nombre del titular es requerido");
+      setError(t("billing.addCard.errors.cardholderRequired"));
       return;
     }
     if (!consent) {
       setError(
-        "El usuario debe consentir guardar la tarjeta para futuros pagos"
+        t("billing.addCard.errors.consentRequired")
       );
       return;
     }
@@ -94,7 +96,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
 
       // 2) Confirmar el SetupIntent en el cliente
       const cardElement = elements.getElement(CardNumberElement);
-      if (!cardElement) throw new Error("Elemento de tarjeta no encontrado");
+      if (!cardElement) throw new Error(t("billing.addCard.errors.cardElementNotFound"));
 
       const confirmResult = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
@@ -112,13 +114,13 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
       const setupIntent = confirmResult.setupIntent;
       if (!setupIntent || setupIntent.status !== "succeeded") {
         throw new Error(
-          "La autenticación de la tarjeta no se completó correctamente"
+          t("billing.addCard.errors.authenticationFailed")
         );
       }
 
       const paymentMethodId = setupIntent.payment_method as string;
       if (!paymentMethodId)
-        throw new Error("No se obtuvo payment_method del SetupIntent");
+        throw new Error(t("billing.addCard.errors.paymentMethodNotFound"));
 
       // 3) Avisar al backend para obtener los datos del método y marcar por defecto si aplica
       const completeResp = await fetch("/api/payment-methods/complete-setup", {
@@ -170,7 +172,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold mb-4">Añadir nueva tarjeta</h3>
+      <h3 className="text-lg font-semibold mb-4">{t("billing.addCard.title")}</h3>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -181,7 +183,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
       <form onSubmit={handleAddCard} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre en la tarjeta
+            {t("billing.addCard.cardholderName")}
           </label>
           <input
             type="text"
@@ -195,7 +197,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Número de tarjeta
+            {t("billing.addCard.cardNumber")}
           </label>
           <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
             <CardNumberElement options={cardElementOptions} />
@@ -205,7 +207,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de caducidad
+              {t("billing.addCard.expiryDate")}
             </label>
             <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
               <CardExpiryElement options={cardElementOptions} />
@@ -221,7 +223,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              País o región
+              {t("billing.addCard.country")}
             </label>
             <div className="w-full min-h-[48px] p-3 border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 bg-white">
               <CountrySelect value={country} onChange={setCountry} />
@@ -230,7 +232,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
               {(country === "US" || country === "GB") && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Código Postal
+                    {t("billing.addCard.postalCode.label")}
                   </label>
                   <input
                     type="text"
@@ -257,7 +259,7 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
             onChange={() => setConsent(!consent)}
           />
           <label htmlFor="saveConsent" className="text-sm text-gray-700">
-            Guardar tarjeta para pagos futuros y aceptar términos.
+            {t("billing.addCard.consent")}
           </label>
         </div>
 
@@ -268,14 +270,14 @@ const AddCardComponent: React.FC<AddCardComponentProps> = ({
             className="flex-1 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             disabled={loading}
           >
-            Cancelar
+            {t("billing.addCard.buttons.cancel")}
           </button>
           <button
             type="submit"
             disabled={!stripe || loading}
             className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Añadiendo..." : "Añadir tarjeta"}
+            {loading ? t("billing.addCard.buttons.adding") : t("billing.addCard.buttons.add")}
           </button>
         </div>
       </form>
