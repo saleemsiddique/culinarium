@@ -1,24 +1,31 @@
+// context/user-context.tsx
 "use client";
 
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
   useState,
   useCallback,
   ReactNode,
+  useRef,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   doc,
   setDoc,
   updateDoc,
   Timestamp,
   getDoc,
+  runTransaction,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import {
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
@@ -43,6 +50,10 @@ export interface CustomUser {
   subscriptionStatus: string;
   subscriptionCanceled: boolean;
   tokens_reset_date: Timestamp;
+  // Optional debug fields:
+  stripeCreationFailed?: boolean;
+  stripeCreationErrorMsg?: string;
+  stripeCustomerCreatedAt?: Timestamp | any;
 }
 
 interface UserContextType {
@@ -56,7 +67,8 @@ interface UserContextType {
     name: string,
     surname: string
   ) => Promise<string>;
-  loginWithGoogle: () => Promise<{ user: CustomUser; isNewUser: boolean }>;
+  // Ahora loginWithGoogle inicia el redirect (no devuelve user inmediatamente)
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateUserName: (newName: string) => Promise<void>;
   deductTokens: (amount: number) => Promise<void>;
@@ -68,22 +80,25 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+const STRIPE_PLACEHOLDER = "__STRIPE_CREATING__";
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const redirectProcessedRef = useRef(false); // evita re-procesar si ya lo hicimos esta sesión
+  const router = useRouter();
 
-  // ✅ Función para verificar y resetear tokens mensuales
+  // ---------------------------
+  // Utilities ya presentes
+  // ---------------------------
   const checkAndResetMonthlyTokens = async (userData: CustomUser): Promise<CustomUser> => {
-    // Solo verificar para usuarios sin suscripción activa
     if (userData.isSubscribed && (userData.subscriptionStatus === 'active' || userData.subscriptionStatus === 'cancel_at_period_end')) {
       return userData;
     }
 
     const now = Timestamp.now();
     const resetDate = userData.tokens_reset_date;
-
-    // 30 días en milisegundos
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
     const timeDiff = now.toMillis() - resetDate.toMillis();
 
@@ -97,17 +112,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
           tokens_reset_date: newResetDate,
         });
 
-
-        // Retornar datos actualizados
         return {
           ...userData,
           monthly_tokens: 50,
           tokens_reset_date: newResetDate,
         };
-
       } catch (error) {
         console.error("Error al resetear tokens:", error);
-        // Si falla el update, devolver datos originales
         return userData;
       }
     }
@@ -115,85 +126,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return userData;
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
-      setFirebaseUser(userAuth);
-      if (userAuth?.email) {
-        const userDocRef = doc(db, "user", userAuth.uid);
-        const userSnapshot = await getDoc(userDocRef);
-
-        if (userSnapshot.exists()) {
-          let docData = userSnapshot.data() as CustomUser;
-          docData.uid = userSnapshot.id;
-
-          // ✅ Verificar y resetear tokens si es necesario
-          docData = await checkAndResetMonthlyTokens(docData);
-
-          setUser(docData);
-        } else {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-
-
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // 🆕 Función para refrescar los datos del usuario desde la base de datos
-  const refreshUser = useCallback(async () => {
-    if (!firebaseUser?.email) {
-      console.warn("No hay usuario autenticado para refrescar");
-      return;
-    }
-
-    try {
-      const userDocRef = doc(db, "user", firebaseUser.uid);
-      const userSnapshot = await getDoc(userDocRef);
-
-      if (userSnapshot.exists()) {
-        const docData = userSnapshot.data() as CustomUser;
-        docData.uid = userSnapshot.id;
-        setUser(docData);
-      } else {
-        console.warn("No se encontró el usuario en la base de datos");
-      }
-
-    } catch (error) {
-      console.error("Error al refrescar datos del usuario:", error);
-    }
-  }, [firebaseUser?.email]);
-
-  // Listener para eventos de actualización de tokens (ej: después de compras)
-  useEffect(() => {
-    const handleTokenUpdate = () => {
-      refreshUser().catch(console.error);
-    };
-
-    const handleVisibilityChange = () => {
-      // Refrescar cuando el usuario regrese a la pestaña (útil después de completar compras en Stripe)
-      if (!document.hidden && firebaseUser?.email) {
-        setTimeout(() => {
-          refreshUser().catch(console.error);
-        }, 1000); // Delay para asegurar que los webhooks se hayan procesado
-      }
-    };
-
-    // Escuchar eventos personalizados de actualización de tokens
-    window.addEventListener('token_update', handleTokenUpdate);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('token_update', handleTokenUpdate);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [firebaseUser?.email, refreshUser]);
-
-  // Función helper para crear customer en Stripe
+  // createStripeCustomer llama a tu endpoint server-side (ya lo tenías)
   const createStripeCustomer = async (email: string, userId: string) => {
     try {
       const response = await fetch("/api/create-stripe-customer", {
@@ -217,6 +150,235 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ---------------------------
+  // Función que inicia el redirect (reemplaza signInWithPopup)
+  // ---------------------------
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    // Si necesitas scopes extra: provider.addScope("...");
+    await signInWithRedirect(auth, provider);
+    // la app será redirigida y NO obtendrás user aquí
+  };
+
+  // ---------------------------
+  // Función que procesa el resultado del redirect (evita duplicados Stripe)
+  // ---------------------------
+  // Esta función intenta replicar y mejorar la lógica anterior usando transacciones
+  // para evitar que varios clientes creen clientes Stripe duplicados.
+  const handleLoginRedirectResult = async (): Promise<{ user: CustomUser | null; isNewUser: boolean }> => {
+    try {
+      const result = await getRedirectResult(auth);
+
+      if (!result || !result.user) {
+        return { user: null, isNewUser: false };
+      }
+
+      const userInfo = result.user;
+      const email = userInfo.email;
+      if (!email) throw new Error("No se pudo obtener el email del usuario Google.");
+
+      const additionalInfo = getAdditionalUserInfo(result);
+      const firebaseSaysNew = Boolean(additionalInfo?.isNewUser);
+
+      const userDocRef = doc(db, "user", userInfo.uid);
+
+      // tokens_reset_date = +1 mes
+      const nowDate = new Date();
+      nowDate.setMonth(nowDate.getMonth() + 1);
+      const tokens_reset_date = Timestamp.fromDate(nowDate);
+
+      let userData: CustomUser | null = null;
+      let isNewUser = false;
+
+      // 1) Transacción para crear documento con placeholder si no existe
+      const txResult = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(userDocRef);
+        if (snap.exists()) {
+          return { existed: true, data: snap.data() as CustomUser };
+        } else {
+          // crear doc con placeholder de stripe
+          isNewUser = true;
+          const newDoc = {
+            uid: userInfo.uid,
+            email,
+            firstName: userInfo.displayName?.split(" ")[0] || "",
+            lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
+            created_at: serverTimestamp(),
+            extra_tokens: 0,
+            isSubscribed: false,
+            lastRenewal: serverTimestamp(),
+            monthly_tokens: 50,
+            stripeCustomerId: STRIPE_PLACEHOLDER,
+            subscriptionId: "",
+            subscriptionStatus: "cancelled",
+            subscriptionCanceled: false,
+            tokens_reset_date,
+          };
+          tx.set(userDocRef, newDoc);
+          return { existed: false };
+        }
+      });
+
+      if (txResult.existed) {
+        // Ya existía: leer y aplicar check/reset tokens
+        userData = txResult.data!;
+        userData.uid = userDocRef.id;
+        userData = await checkAndResetMonthlyTokens(userData);
+        isNewUser = firebaseSaysNew || false;
+      } else {
+        // Acabamos de crear placeholder: ahora crear cliente Stripe fuera de la transacción.
+        try {
+          const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
+
+          // Actualizar condicionalmente el stripeCustomerId (solo si sigue el placeholder)
+          await runTransaction(db, async (tx) => {
+            const snap = await tx.get(userDocRef);
+            if (!snap.exists()) throw new Error("Documento desapareció tras crear placeholder.");
+            const cur = snap.data() as any;
+            if (cur.stripeCustomerId === STRIPE_PLACEHOLDER) {
+              tx.update(userDocRef, {
+                stripeCustomerId,
+                stripeCustomerCreatedAt: serverTimestamp(),
+              });
+            } else {
+              // otro proceso ya actualizó stripeCustomerId -> no hacer nada
+            }
+          });
+        } catch (stripeErr) {
+          console.error("Error creando cliente Stripe:", stripeErr);
+          // Intentar limpiar placeholder y marcar fallo para reintentos posteriores
+          try {
+            await runTransaction(db, async (tx) => {
+              const snap = await tx.get(userDocRef);
+              if (!snap.exists()) return;
+              const cur = snap.data() as any;
+              if (cur.stripeCustomerId === STRIPE_PLACEHOLDER) {
+                tx.update(userDocRef, {
+                  stripeCustomerId: "",
+                  stripeCreationFailed: true,
+                  stripeCreationErrorMsg: (stripeErr instanceof Error ? stripeErr.message : String(stripeErr)),
+                });
+              }
+            });
+          } catch (e) {
+            console.error("No se pudo limpiar placeholder tras fallo de Stripe:", e);
+          }
+        }
+
+        // Leer documento final y aplicar check/reset tokens
+        const finalSnap = await getDoc(userDocRef);
+        if (!finalSnap.exists()) {
+          throw new Error("Documento debería existir después de la creación pero no está.");
+        }
+        userData = finalSnap.data() as CustomUser;
+        userData.uid = finalSnap.id;
+        userData = await checkAndResetMonthlyTokens(userData);
+        // isNewUser ya es true en este camino
+        isNewUser = firebaseSaysNew || true;
+      }
+
+      return { user: userData, isNewUser };
+    } catch (err) {
+      console.error("Error procesando redirect result:", err);
+      return { user: null, isNewUser: false };
+    }
+  };
+
+  // ---------------------------
+  // useEffect: procesar redirect (se ejecuta una sola vez al montar)
+  // ---------------------------
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        // Evitar re-procesar si ya se hizo en esta sesión
+        if (redirectProcessedRef.current) {
+          return;
+        }
+
+        const { user: redirectUser, isNewUser } = await handleLoginRedirectResult();
+
+        if (redirectUser) {
+          // Guardar usuario en estado
+          setUser(redirectUser);
+          // Actualiza firebaseUser si auth ya tiene el user
+          setFirebaseUser(auth.currentUser);
+
+          // Marcar que ya procesamos el redirect (para esta sesión)
+          redirectProcessedRef.current = true;
+
+          // Si es nuevo usuario, enviar email y redirigir a onboarding
+          if (isNewUser) {
+            try {
+              await fetch("/api/send-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  to: redirectUser.email,
+                  type: "welcome",
+                  data: { firstName: redirectUser.firstName || "Usuario" },
+                }),
+              });
+            } catch (e) {
+              console.error("Error enviando welcome email:", e);
+            }
+
+            try {
+              router.push("/kitchen?onboarding=1");
+            } catch (e) {
+              // en algunos entornos router.push podría fallar — no es crítico
+              console.warn("No se pudo redirigir automáticamente tras onboarding:", e);
+            }
+          } else {
+            // Para usuarios existentes re-dirigir al kitchen (o no, según tu flujo)
+            // router.push("/kitchen");
+          }
+        }
+      } catch (e) {
+        console.error("Error en procesamiento de redirect en UserProvider:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ---------------------------
+  // Listener de auth state normal (mantener sincronía)
+  // ---------------------------
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
+      setFirebaseUser(userAuth);
+      if (userAuth?.email) {
+        const userDocRef = doc(db, "user", userAuth.uid);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          let docData = userSnapshot.data() as CustomUser;
+          docData.uid = userSnapshot.id;
+
+          docData = await checkAndResetMonthlyTokens(docData);
+
+          setUser(docData);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ---------------------------
+  // Resto de funciones (login, register, logout, updateUserName, tokens, etc.)
+  // Mantengo tus implementaciones prácticamente igual; copia/pega las tuyas
+  // y he ajustado register/login para usar la createStripeCustomer que ya está arriba.
+  // ---------------------------
+
   const login = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = result.user;
@@ -231,12 +393,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     let docData = snapshot.data() as CustomUser;
     docData.uid = snapshot.id;
 
-    // ✅ Verificar y resetear tokens si es necesario
     docData = await checkAndResetMonthlyTokens(docData);
 
     setUser(docData);
   };
-
 
   const register = async (
     email: string,
@@ -247,7 +407,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const id = userCredential.user.uid;
-      // const token = await userCredential.user.getIdToken();
       const now = new Date();
       now.setMonth(now.getMonth() + 1);
       const tokens_reset_date = Timestamp.fromDate(now);
@@ -274,76 +433,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const docRef = doc(db, "user", id);
       await setDoc(docRef, newUser);
 
-      /*
-      const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"];
-      const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
-      const clientTimestamp = new Date().toISOString();
-
-      const accepted = CONSENT_TYPES.map(type => ({
-        type,
-        granted: true,
-        version: POLICY_VERSION,
-        details: {},
-      }));
-
-      const payload = {
-        accepted,
-        user_id: newUser.uid,
-        client_timestamp: clientTimestamp,
-        origin: typeof window !== "undefined" ? window.location.origin : null,
-        ref: typeof document !== "undefined" ? document.referrer || null : null,
-        path: typeof window !== "undefined" ? window.location.pathname : null,
-        details: {},
-      };
-
-      const consentResponse = await fetch("/api/consent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!consentResponse.ok) {
-        console.error("Error al registrar el consentimiento:", await consentResponse.json());
-      } else {
-
-        // Guardar en localStorage (solo en cliente)
-        if (typeof window !== "undefined") {
-          try {
-            const saveObj: Record<string, string> = {};
-            CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-            localStorage.setItem("consent_versions", JSON.stringify(saveObj));
-            localStorage.setItem("consent_version", POLICY_VERSION);
-          } catch (e) {
-            console.warn("No se pudo escribir consent en localStorage:", e);
-          }
-
-          // DISPATCH: notificar al resto de la app que el consentimiento ya está guardado
-          try {
-            window.dispatchEvent(
-              new CustomEvent("consent_updated", {
-                detail: { userId: id, source: "register" },
-              })
-            );
-          } catch {
-            // noop
-          }
-        }
-      }
-
-      if (!consentResponse.ok) {
-        console.error("Error al registrar el consentimiento:", await consentResponse.json());
-      } else {
-        // ✅ Nueva línea: Guardar en localStorage para evitar que el modal aparezca inmediatamente
-        const saveObj: Record<string, string> = {};
-        CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-        localStorage.setItem("consent_versions", JSON.stringify(saveObj));
-        localStorage.setItem("consent_version", POLICY_VERSION); // Por si acaso
-      }
-      */
-
       setUser(newUser);
       setFirebaseUser(userCredential.user);
       setLoading(false);
@@ -365,69 +454,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const userInfo = result.user;
-
-    const email = userInfo.email;
-    if (!email) throw new Error("No se pudo obtener el email");
-
-    const userDocRef = doc(db, "user", userInfo.uid);
-    const userSnapshot = await getDoc(userDocRef);
-
-    const now = new Date();
-    now.setMonth(now.getMonth() + 1);
-    const tokens_reset_date = Timestamp.fromDate(now);
-
-    let userData: CustomUser;
-    let isNewUser = false; // ✅ Flag para detectar usuario nuevo
-
-    if (!userSnapshot.exists()) {
-      // ✅ Nuevo usuario con Google, creamos copia en Firestore
-      isNewUser = true; // Marcamos como usuario nuevo
-
-      const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
-
-      userData = {
-        uid: userInfo.uid,
-        email: email,
-        firstName: userInfo.displayName?.split(" ")[0] || "",
-        lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
-        created_at: Timestamp.now(),
-        extra_tokens: 0,
-        isSubscribed: false,
-        lastRenewal: Timestamp.now(),
-        monthly_tokens: 50,
-        stripeCustomerId: stripeCustomerId,
-        subscriptionId: "",
-        subscriptionStatus: "cancelled",
-        subscriptionCanceled: false,
-        tokens_reset_date: tokens_reset_date,
-      };
-
-      const docRef = doc(db, "user", userInfo.uid);
-      await setDoc(docRef, userData);
-    } else {
-      userData = userSnapshot.data() as CustomUser;
-      userData.uid = userSnapshot.id;
-      userData = await checkAndResetMonthlyTokens(userData);
-    }
-
-    setUser(userData);
-
-    return {
-      user: userData,
-      isNewUser: isNewUser
-    };
-  };
-
   const logout = async () => {
     await signOut(auth);
     setUser(null);
   };
 
-  // 🆕 Nueva función para actualizar el nombre de usuario
   const updateUserName = async (newName: string) => {
     if (!user) {
       throw new Error("No hay usuario autenticado");
@@ -438,13 +469,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Actualizar en Firestore
       const userDocRef = doc(db, "user", user.uid);
       await updateDoc(userDocRef, {
         firstName: newName.trim(),
       });
 
-      // Actualizar el estado local
       setUser((prevUser) => {
         if (!prevUser) return null;
         return {
@@ -458,14 +487,34 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // 🆕 Función para verificar si el usuario tiene suficientes tokens
   const hasEnoughTokens = (amount: number) => {
     if (!user) return false;
     const totalTokens = (user.monthly_tokens || 0) + (user.extra_tokens || 0);
     return totalTokens >= amount;
   };
 
-  // 🆕 Función para descontar tokens
+  const refreshUser = useCallback(async () => {
+    if (!firebaseUser?.email) {
+      console.warn("No hay usuario autenticado para refrescar");
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, "user", firebaseUser.uid);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (userSnapshot.exists()) {
+        const docData = userSnapshot.data() as CustomUser;
+        docData.uid = userSnapshot.id;
+        setUser(docData);
+      } else {
+        console.warn("No se encontró el usuario en la base de datos");
+      }
+    } catch (error) {
+      console.error("Error al refrescar datos del usuario:", error);
+    }
+  }, [firebaseUser?.email]);
+
   const deductTokens = async (amount: number) => {
     if (!user || !firebaseUser) {
       throw new Error("No hay usuario autenticado");
@@ -493,7 +542,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
       const { updatedUser } = await response.json();
 
-      // Actualizar el estado local con los nuevos valores de tokens
       setUser((prevUser) => {
         if (!prevUser) return null;
         return {
@@ -503,18 +551,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      // También refrescar los datos desde la base de datos para asegurar sincronización
       setTimeout(() => {
         refreshUser().catch(console.error);
-      }, 100); // Pequeño delay para asegurar que la base de datos se haya actualizado
+      }, 100);
     } catch (error) {
       console.error("Error al descontar tokens:", error);
       throw error;
     }
   };
 
-
-  // 🆕 Nueva función para enviar el correo de restablecimiento
   const sendPasswordResetEmail = async (email: string) => {
     try {
       await firebaseSendPasswordResetEmail(auth, email);
@@ -524,7 +569,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // 🆕 Nueva función para confirmar el restablecimiento de la contraseña
   const confirmPasswordReset = async (oobCode: string, newPassword: string) => {
     try {
       await firebaseConfirmPasswordReset(auth, oobCode, newPassword);
@@ -540,7 +584,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     loading,
     login,
     register,
-    loginWithGoogle,
+    loginWithGoogle, // inicia redirect
     logout,
     updateUserName,
     deductTokens,

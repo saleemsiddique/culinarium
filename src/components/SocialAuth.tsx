@@ -14,7 +14,7 @@ export function SocialAuth() {
   const { loginWithGoogle } = useUser();
   const router = useRouter();
 
-    // Función auxiliar para extraer el nombre de pila
+  // Helper para mostrar nombre si lo necesitas (no se usa aquí para redirect)
   const getFirstName = (displayName: string | null) => {
     if (!displayName) return "Usuario";
     return displayName.split(" ")[0];
@@ -23,29 +23,14 @@ export function SocialAuth() {
   const handleGoogleLogin = async () => {
     setLoading("google");
     try {
-      const result = await loginWithGoogle(); 
-      
-      if (result?.isNewUser) {
-
-        // ✅ Nueva línea: Enviar el correo de bienvenida a los nuevos usuarios
-        await fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: result.user.email,
-            type: "welcome",
-            data: { firstName: getFirstName(result.user.firstName) },
-          }),
-        });
-
-        router.push("/kitchen?onboarding=1"); 
-      } else {
-        router.push("/kitchen");
-      }
+      // START: iniciar flujo de redirect. NO devuelve resultado.
+      await loginWithGoogle();
+      // La app se redirigirá; cuando regrese, UserProvider procesará el resultado
     } catch (error) {
-      console.error("Error al iniciar sesión con Google:", error);
-      // Aquí podrías mostrar un toast o mensaje de error
+      console.error("Error al iniciar login con Google:", error);
+      // mostrar toast si quieres
     } finally {
+      // no importa mucho porque la página normalmente se redirige
       setLoading(null);
     }
   };
