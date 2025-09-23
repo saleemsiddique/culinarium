@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoChevronUpCircleOutline, IoChevronDownCircleOutline } from "react-icons/io5";
+import { useTranslation } from "react-i18next";
 
 type MacroPercents = { protein: number; carbs: number; fats: number };
 type Mode = "basic" | "pro";
@@ -64,6 +65,9 @@ export default function ControlMacronutrientes({
         carbs: clamp(initialPercents.carbs, LIMITS.carbs.min, LIMITS.carbs.max),
         fats: clamp(initialPercents.fats, LIMITS.fats.min, LIMITS.fats.max),
     });
+
+    const { t } = useTranslation();
+    
 
     // Nota: permitimos que el usuario vea Pro aunque no sea premium (por eso no forzamos a basic).
     // Solo mostramos controles inactivos.
@@ -172,9 +176,17 @@ export default function ControlMacronutrientes({
             type="button"
             onClick={() => onRequestUpgrade?.()}
             className="absolute inset-0 bg-transparent"
-            aria-label={label ? `Acceder a ${label} (Premium)` : "Función Premium"}
+            aria-label={label ? t("macronutrients.premium.upgradePrompt", { label }) : t("macronutrients.premium.upgradeGeneric")}
         />
     );
+
+        // Obtener texto del preset básico
+    const getBasicGoalText = () => {
+        if (!basicGoal) return t("macronutrients.basic.freeMode");
+        
+        const preset = t(`macronutrients.basic.presets.${basicGoal}`);
+        return `${t(`macronutrients.basic.presets.${basicGoal}.emoji`)} ${t(`macronutrients.basic.presets.${basicGoal}.label`)}`;
+    };
 
     return (
         <section className={`bg-[var(--background)] p-4 rounded-xl form-custom-shadow ${className}`}>
@@ -182,8 +194,8 @@ export default function ControlMacronutrientes({
                 <div className="flex items-center gap-2">
                     <span className="text-2xl">📊</span>
                     <div>
-                        <div className="font-bold text-[var(--foreground)]">Macronutrientes</div>
-                        <div className="text-xs text-[var(--muted)]">Usar responsablemente ⚠️</div>
+                        <div className="font-bold text-[var(--foreground)]">{t("macronutrients.title")}</div>
+                        <div className="text-xs text-[var(--muted)]">{t("macronutrients.warning")}</div>
                     </div>
                 </div>
                 <motion.button
@@ -218,13 +230,13 @@ export default function ControlMacronutrientes({
                                     onClick={() => handleSetMode("basic")}
                                     className={`px-3 py-1 rounded-md text-xs font-semibold ${mode === "basic" ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
                                 >
-                                    Básico
+                                    {t("macronutrients.modes.basic")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleSetMode("pro")}
                                     aria-pressed={mode === "pro"}
-                                    title={!isSubscribed ? "Pro (vista previa) — necesita suscripción para editar" : undefined}
+                                    title={!isSubscribed ? t("macronutrients.premium.tooltip") : undefined}
                                     className={`relative px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-2
                     ${mode === "pro" ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}
                     ${!isSubscribed ? "opacity-80" : ""}`}
@@ -239,15 +251,7 @@ export default function ControlMacronutrientes({
                             </div>
 
                             <div className="text-xs text-[var(--muted)]">
-                                {mode === "basic"
-                                    ? basicGoal
-                                        ? basicGoal === "gain_muscle"
-                                            ? "🏋️ Ganar músculo"
-                                            : basicGoal === "more_carbs"
-                                                ? "⚡ Más energía"
-                                                : "🥑 Más saciante"
-                                        : "Modo rápido"
-                                    : `${calories} kcal`}
+                                {mode === "basic" ? getBasicGoalText() : `${calories} kcal`}
                             </div>
                         </div>
 
@@ -259,7 +263,7 @@ export default function ControlMacronutrientes({
                                     className={`flex flex-col items-center p-2 rounded-lg text-xs font-medium ${basicGoal === "gain_muscle" ? "border-[var(--highlight)] bg-[var(--highlight)]/20" : "border border-[var(--primary)]"}`}
                                 >
                                     <div className="text-lg">🏋️</div>
-                                    <div className="mt-1">Ganar músculo</div>
+                                    <div className="mt-1">{t(`macronutrients.basic.presets.gain_muscle.label`)}</div>
                                 </button>
 
                                 <button
@@ -268,7 +272,7 @@ export default function ControlMacronutrientes({
                                     className={`flex flex-col items-center p-2 rounded-lg text-xs font-medium ${basicGoal === "more_carbs" ? "border-[var(--highlight)] bg-[var(--highlight)]/20" : "border border-[var(--primary)]"}`}
                                 >
                                     <div className="text-lg">⚡</div>
-                                    <div className="mt-1">Más energía</div>
+                                    <div className="mt-1">{t(`macronutrients.basic.presets.more_carbs.label`)}</div>
                                 </button>
 
                                 <button
@@ -277,13 +281,13 @@ export default function ControlMacronutrientes({
                                     className={`flex flex-col items-center p-2 rounded-lg text-xs font-medium ${basicGoal === "more_fats" ? "border-[var(--highlight)] bg-[var(--highlight)]/20" : "border border-[var(--primary)]"}`}
                                 >
                                     <div className="text-lg">🥑</div>
-                                    <div className="mt-1">Más saciante</div>
+                                    <div className="mt-1">{t(`macronutrients.basic.presets.more_fats.label`)}</div>
                                 </button>
                             </div>
                         ) : (
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3 relative">
-                                    <label className="text-xs font-medium w-28">Calorías</label>
+                                    <label className="text-xs font-medium w-28">{t("macronutrients.pro.calories")}</label>
                                     <div className="relative">
                                         <input
                                             type="number"
@@ -292,11 +296,11 @@ export default function ControlMacronutrientes({
                                             value={calories}
                                             onChange={(e) => setCalories(clamp(Number(e.target.value || 0), LIMITS.kcal.min, LIMITS.kcal.max))}
                                             className={`w-28 p-1 rounded-md border border-[var(--primary)] text-sm ${proBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
-                                            aria-label="Calorías objetivo"
+                                            aria-label={t("macronutrients.pro.caloriesLabel")}
                                             disabled={proBlocked}
-                                            title={proBlocked ? "Función Pro — requiere suscripción para editar" : undefined}
+                                            title={proBlocked ? t("macronutrients.premium.tooltip") : undefined}
                                         />
-                                        {proBlocked && <UpgradeOverlay label="Editar calorías (Pro)" />}
+                                        {proBlocked && <UpgradeOverlay label={t("macronutrients.pro.calories")} />}
                                     </div>
                                     <div className="text-xs text-[var(--muted)]">{calories} kcal</div>
                                 </div>
@@ -305,7 +309,7 @@ export default function ControlMacronutrientes({
                                     {/* Proteínas */}
                                     <div className="relative">
                                         <div className="flex justify-between items-baseline text-xs mb-1">
-                                            <span>Proteínas 🥩</span>
+                                            <span>{t("macronutrients.pro.protein")}</span>
                                             <span className="text-[var(--muted)]">{percents.protein}% • {calcGrams(calories, percents.protein, 4)} g</span>
                                         </div>
                                         <div className="relative">
@@ -323,14 +327,14 @@ export default function ControlMacronutrientes({
                                                 }}
                                                 className={`w-full ${proBlocked ? "opacity-50" : ""}`}
                                             />
-                                            {proBlocked && <UpgradeOverlay label="Editar proteínas (Pro)" />}
+                                            {proBlocked && <UpgradeOverlay label={t("macronutrients.pro.protein")} />}
                                         </div>
                                     </div>
 
                                     {/* Carbs */}
                                     <div className="relative">
                                         <div className="flex justify-between items-baseline text-xs mb-1">
-                                            <span>Carbohidratos 🍚</span>
+                                            <span>{t("macronutrients.pro.carbs")}</span>
                                             <span className="text-[var(--muted)]">{percents.carbs}% • {calcGrams(calories, percents.carbs, 4)} g</span>
                                         </div>
                                         <div className="relative">
@@ -348,14 +352,14 @@ export default function ControlMacronutrientes({
                                                 }}
                                                 className={`w-full ${proBlocked ? "opacity-50" : ""}`}
                                             />
-                                            {proBlocked && <UpgradeOverlay label="Editar carbohidratos (Pro)" />}
+                                            {proBlocked && <UpgradeOverlay label={t("macronutrients.pro.carbs")} />}
                                         </div>
                                     </div>
 
                                     {/* Fats */}
                                     <div className="relative">
                                         <div className="flex justify-between items-baseline text-xs mb-1">
-                                            <span>Grasas 🥑</span>
+                                            <span>{t("macronutrients.pro.fats")}</span>
                                             <span className="text-[var(--muted)]">{percents.fats}% • {calcGrams(calories, percents.fats, 9)} g</span>
                                         </div>
                                         <div className="relative">
@@ -373,16 +377,16 @@ export default function ControlMacronutrientes({
                                                 }}
                                                 className={`w-full ${proBlocked ? "opacity-50" : ""}`}
                                             />
-                                            {proBlocked && <UpgradeOverlay label="Editar grasas (Pro)" />}
+                                            {proBlocked && <UpgradeOverlay label={t("macronutrients.pro.fats")} />}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between text-xs mt-1">
                                     <div className="text-[var(--muted)]">
-                                        Total: <span className="font-medium text-[var(--foreground)]">{percents.protein + percents.carbs + percents.fats}%</span>
+                                        {t("macronutrients.pro.total")}:{" "}<span className="font-medium text-[var(--foreground)]">{percents.protein + percents.carbs + percents.fats}%</span>
                                     </div>
-                                    <div className="text-[var(--muted)]">Valores aproximados</div>
+                                    <div className="text-[var(--muted)]">{t("macronutrients.pro.approximate")}</div>
                                 </div>
                             </div>
                         )}

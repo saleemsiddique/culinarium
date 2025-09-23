@@ -41,7 +41,7 @@
       "error": "Could not send reset link. Please check your email address.",
       "backToLogin": "Back to Login"
     },
-     "resetPassword": {
+    "resetPassword": {
       "title": "Set a new password",
       "subtitle": "Enter and confirm your new password.",
       "newPasswordLabel": "New Password",
@@ -496,6 +496,28 @@
     },
     "error": {
       "title": "Oops! Something went wrong"
+    },
+    "difficulty": {
+      "title": "Level",
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "descriptions": {
+        "beginner": "Simple techniques · Short times",
+        "intermediate": "Moderate steps · Some technique",
+        "advanced": "Advanced techniques · Precision and time"
+      }
+    },
+    "macronutrients": {
+      "title": "Macronutrients",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "fats": "Fats",
+      "unitCalories": "kcal",
+      "unitGrams": "g"
     }
   },
   "tokens": {
@@ -564,8 +586,8 @@
       }
     }
   },
-  "checkout":{
-    "subscribe":"Subscribe"
+  "checkout": {
+    "subscribe": "Subscribe"
   },
   "profile": {
     "title": "Profile",
@@ -832,6 +854,224 @@
         "authenticationFailed": "Card authentication did not complete successfully",
         "paymentMethodNotFound": "Payment method not obtained from SetupIntent"
       }
+    }
+  },
+  "culinarium": {
+    "form": {
+      "commonIngredients": {
+        "chicken": "Pollo",
+        "beef": "Carne", 
+        "fish": "Pescado",
+        "eggs": "Huevos",
+        "milk": "Leche",
+        "cheese": "Queso",
+        "rice": "Arroz",
+        "pasta": "Pasta",
+        "bread": "Pan",
+        "potatoes": "Patatas",
+        "onion": "Cebolla",
+        "garlic": "Ajo",
+        "tomato": "Tomate",
+        "bellPepper": "Pimiento",
+        "carrot": "Zanahoria",
+        "oliveOil": "Aceite de oliva"
+      },
+       "actions": {
+        "regenerate": "regenerate a recipe",
+        "generate": "generate a recipe"
+      },
+      "title": "Culinarium - Find Your Recipe",
+      "description": "Find your ideal recipe with Culinarium's interactive form.",
+      "sections": {
+        "ingredients": {
+          "title": "What do you have on hand?",
+          "placeholder": "E.g.: Chicken, rice, tomato...",
+          "instructions": "Type an ingredient and press <b>Enter</b> to add it. Tap to delete.",
+          "suggestions": "Suggested ingredients:",
+          "empty": "Start adding your ingredients!",
+          "error": "Please add at least one ingredient!",
+          "addButton": "Add",
+          "touchHint": "Tap ingredients to delete them."
+        },
+        "time": {
+          "title": "How much time do you have?",
+          "noLimit": "No time limit",
+          "options": {
+            "15": "15 minutes",
+            "30": "30 minutes",
+            "45": "45 minutes",
+            "60": "1 hour",
+            "90": "1 hour 30 minutes",
+            "120": "2 hours"
+          }
+        },
+        "difficulty": {
+          "title": "Difficulty level",
+          "description": "Select the difficulty level you'd prefer for the recipe.",
+          "levels": {
+            "beginner": "Beginner",
+            "intermediate": "Intermediate",
+            "chef": "Chef"
+          }
+        },
+        "mealTime": {
+          "title": "What meal is it for?",
+          "options": {
+            "breakfast": {
+              "label": "Breakfast",
+              "emoji": "☕"
+            },
+            "lunch": {
+              "label": "Lunch",
+              "emoji": "🍲"
+            },
+            "dinner": {
+              "label": "Dinner",
+              "emoji": "🌙"
+            },
+            "snack": {
+              "label": "Snack",
+              "emoji": "🍎"
+            }
+          },
+          "error": "Please select a meal time!"
+        },
+        "diners": {
+          "title": "How many people will eat?",
+          "premiumBadge": "PREMIUM"
+        },
+        "restrictions": {
+          "title": "Any dietary restrictions?",
+          "description": "Select any dietary preferences.",
+          "premiumDescription": "With Premium, you can set these dietary restrictions:",
+          "avoidTitle": "Ingredients to avoid:",
+          "avoidPlaceholder": "E.g.: Peanuts, cilantro, mushrooms...",
+          "avoidInstructions": "Type an ingredient and press Enter to add it.",
+          "premiumAvoid": "Premium feature – Subscribe to use",
+          "empty": "Add ingredients you want to avoid!",
+          "options": {
+            "vegetarian": "Vegetarian",
+            "vegan": "Vegan",
+            "glutenFree": "Gluten-Free",
+            "lactoseFree": "Lactose-Free",
+            "keto": "Keto"
+          }
+        },
+        "cuisine": {
+          "title": "Cuisine style?",
+          "premiumDescription": "With Premium, you can choose from these cuisine styles:",
+          "styles": {
+            "japanese": {
+              "label": "Japanese",
+              "icon": "sushi"
+            },
+            "mexican": {
+              "label": "Mexican",
+              "icon": "taco"
+            },
+            "italian": {
+              "label": "Italian",
+              "icon": "pizza"
+            },
+            "american": {
+              "label": "American",
+              "icon": "hamburger"
+            },
+            "spanish": {
+              "label": "Spanish",
+              "icon": "rice"
+            },
+            "jamaican": {
+              "label": "Jamaican",
+              "icon": "chopsticks"
+            },
+            "indian": {
+              "label": "Indian",
+              "icon": "fastfood"
+            }
+          }
+        },
+        "utensils": {
+          "title": "Available utensils",
+          "description": "Click to enable/disable the utensils you have.",
+          "done": "Done",
+          "list": {
+            "oven": "Oven",
+            "microwave": "Microwave",
+            "airfryer": "Airfryer",
+            "pan": "Frying Pan",
+            "pot": "Pot",
+            "blender": "Blender",
+            "mixer": "Mixer",
+            "grill": "Grill",
+            "board": "Cutting Board",
+            "peeler": "Peeler"
+          }
+        }
+      },
+      "buttons": {
+        "generate": {
+          "loadingUser": "Loading user...",
+          "generating": "Generating Recipe...",
+          "ready": "Generate My Recipe!",
+          "cost": "Cost: {{cost}} tokens"
+        },
+        "utensils": "Utensils"
+      },
+      "messages": {
+        "authError": "Please sign up to generate recipes and manage your tokens.",
+        "tokenError": "⚡ You need {{tokens}} tokens to {{action}}. You currently have {{current}} tokens. Buy more tokens from the side menu.",
+        "success": "Recipe {{action}} successfully! {{tokens}} tokens have been deducted.",
+        "duplicateIngredient": "Ingredient already added",
+        "duplicateExcluded": "Ingredient to avoid already added",
+        "usedBefore": "Used before",
+        "generatingImage": "The image will be generated in the background."
+      },
+      "loading": {
+        "title": "Generating your Recipe...",
+        "subtitle": "The image will be generated in the background."
+      }
+    }
+  },
+  "macronutrients": {
+    "title": "Macronutrients",
+    "warning": "Use responsibly ⚠️",
+    "modes": {
+      "basic": "Basic",
+      "pro": "Pro"
+    },
+    "basic": {
+      "freeMode": "Quick mode",
+      "presets": {
+        "gain_muscle": {
+          "label": "Gain muscle",
+          "emoji": "🏋️"
+        },
+        "more_carbs": {
+          "label": "More energy", 
+          "emoji": "⚡"
+        },
+        "more_fats": {
+          "label": "More satiating",
+          "emoji": "🥑"
+        }
+      }
+    },
+    "pro": {
+      "calories": "Calories",
+      "caloriesLabel": "Target calories",
+      "protein": "Proteins 🥩",
+      "carbs": "Carbs 🍚", 
+      "fats": "Fats 🥑",
+      "total": "Total",
+      "approximate": "Approximate values",
+      "grams": "g"
+    },
+    "premium": {
+      "badge": "PREMIUM",
+      "tooltip": "Pro feature — requires subscription to edit",
+      "upgradePrompt": "Access {{label}} (Premium)",
+      "upgradeGeneric": "Premium feature"
     }
   }
 }

@@ -496,6 +496,28 @@
     },
     "error": {
       "title": "¡Ups! Algo salió mal"
+    },
+    "difficulty": {
+      "title": "Nivel",
+      "levels": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado"
+      },
+      "descriptions": {
+        "beginner": "Técnicas simples · Tiempos cortos",
+        "intermediate": "Pasos moderados · Algo de técnica",
+        "advanced": "Técnicas avanzadas · Precisión y tiempo"
+      }
+    },
+    "macronutrients": {
+      "title": "Macronutrientes",
+      "calories": "Calorías",
+      "protein": "Proteínas",
+      "carbs": "Carbohidratos",
+      "fats": "Grasas",
+      "unitCalories": "kcal",
+      "unitGrams": "g"
     }
   },
   "tokens": {
@@ -832,6 +854,224 @@
         "authenticationFailed": "La autenticación de la tarjeta no se completó correctamente",
         "paymentMethodNotFound": "No se obtuvo payment_method del SetupIntent"
       }
+    }
+  },
+  "culinarium": {
+    "form": {
+      "commonIngredients": {
+        "chicken": "Chicken",
+        "beef": "Beef", 
+        "fish": "Fish",
+        "eggs": "Eggs",
+        "milk": "Milk",
+        "cheese": "Cheese",
+        "rice": "Rice",
+        "pasta": "Pasta",
+        "bread": "Bread",
+        "potatoes": "Potatoes",
+        "onion": "Onion",
+        "garlic": "Garlic",
+        "tomato": "Tomato",
+        "bellPepper": "Bell Pepper",
+        "carrot": "Carrot",
+        "oliveOil": "Olive Oil"
+      },
+      "actions": {
+        "regenerate": "regenerar una receta",
+        "generate": "generar una receta"
+      },
+      "title": "Culinarium - Encuentra tu Receta",
+      "description": "Encuentra tu receta ideal con el formulario interactivo de Culinarium.",
+      "sections": {
+        "ingredients": {
+          "title": "¿Qué tienes a mano?",
+          "placeholder": "Ej: Pollo, arroz, tomate...",
+          "instructions": "Escribe un ingrediente y presenta <b>Enter</b> para añadirlo. Toca para borrar.",
+          "suggestions": "Ingredientes sugeridos:",
+          "empty": "¡Empieza a añadir tus ingredientes!",
+          "error": "¡Por favor, añade al menos un ingrediente!",
+          "addButton": "Añadir",
+          "touchHint": "Toca los ingredientes para borrarlos."
+        },
+        "time": {
+          "title": "¿Cuánto tiempo tienes?",
+          "noLimit": "Prefiero no limitar",
+          "options": {
+            "15": "15 minutos",
+            "30": "30 minutos", 
+            "45": "45 minutos",
+            "60": "1 hora",
+            "90": "1 hora 30 minutos",
+            "120": "2 horas"
+          }
+        },
+        "difficulty": {
+          "title": "Nivel de dificultad",
+          "description": "Selecciona qué nivel prefieres que tenga la receta.",
+          "levels": {
+            "beginner": "Principiante",
+            "intermediate": "Intermedio", 
+            "chef": "Chef"
+          }
+        },
+        "mealTime": {
+          "title": "¿Para cuándo es?",
+          "options": {
+            "breakfast": {
+              "label": "Desayuno",
+              "emoji": "☕"
+            },
+            "lunch": {
+              "label": "Comida", 
+              "emoji": "🍲"
+            },
+            "dinner": {
+              "label": "Cena",
+              "emoji": "🌙"
+            },
+            "snack": {
+              "label": "Snack",
+              "emoji": "🍎"
+            }
+          },
+          "error": "¡Por favor, selecciona un momento del día!"
+        },
+        "diners": {
+          "title": "¿Cuántos van a comer?",
+          "premiumBadge": "PREMIUM"
+        },
+        "restrictions": {
+          "title": "¿Alguna restricción?",
+          "description": "Selecciona si hay alguna preferencia dietética.",
+          "premiumDescription": "Con Premium puedes configurar estas restricciones dietéticas:",
+          "avoidTitle": "Ingredientes a evitar:",
+          "avoidPlaceholder": "Ej: Cacahuetes, cilantro, champiñones...",
+          "avoidInstructions": "Escribe un ingrediente y presiona Enter para añadirlo.",
+          "premiumAvoid": "Función Premium - Suscríbete para usar",
+          "empty": "¡Añade ingredientes que quieras evitar!",
+          "options": {
+            "vegetarian": "Vegetariano",
+            "vegan": "Vegano", 
+            "glutenFree": "Sin Gluten",
+            "lactoseFree": "Sin Lactosa",
+            "keto": "Keto"
+          }
+        },
+        "cuisine": {
+          "title": "¿Qué estilo te apetece?",
+          "premiumDescription": "Con Premium puedes elegir entre estos estilos de cocina:",
+          "styles": {
+            "japanese": {
+              "label": "Japonesa",
+              "icon": "sushi"
+            },
+            "mexican": {
+              "label": "Mexicana", 
+              "icon": "taco"
+            },
+            "italian": {
+              "label": "Italiana",
+              "icon": "pizza"
+            },
+            "american": {
+              "label": "Americana",
+              "icon": "hamburger"
+            },
+            "spanish": {
+              "label": "Española",
+              "icon": "rice"
+            },
+            "jamaican": {
+              "label": "Jamaiquina",
+              "icon": "chopsticks"
+            },
+            "indian": {
+              "label": "India",
+              "icon": "fastfood"
+            }
+          }
+        },
+        "utensils": {
+          "title": "Utensilios disponibles",
+          "description": "Haz clic para activar/desactivar los utensilios que tienes.",
+          "done": "Hecho",
+          "list": {
+            "oven": "Horno",
+            "microwave": "Microondas",
+            "airfryer": "Airfryer",
+            "pan": "Sartén", 
+            "pot": "Olla",
+            "blender": "Batidora",
+            "mixer": "Licuadora",
+            "grill": "Plancha",
+            "board": "Tabla de cortar",
+            "peeler": "Pelador"
+          }
+        }
+      },
+      "buttons": {
+        "generate": {
+          "loadingUser": "Cargando usuario...",
+          "generating": "Generando Receta...",
+          "ready": "¡Genera mi Receta!",
+          "cost": "Costo: {{cost}} tokens"
+        },
+        "utensils": "Utensilios"
+      },
+      "messages": {
+        "authError": "Por favor, regístrate para generar recetas y gestionar tus tokens.",
+        "tokenError": "⚡ Necesitas {{tokens}} tokens para {{action}}. Tienes {{current}} tokens disponibles. Compra más tokens desde el menú lateral.",
+        "success": "¡Receta {{action}} exitosamente! Se han descontado {{tokens}} tokens.",
+        "duplicateIngredient": "Ingrediente ya añadido",
+        "duplicateExcluded": "Ingrediente a evitar ya añadido",
+        "usedBefore": "Usado antes",
+        "generatingImage": "La imagen se generará en segundo plano."
+      },
+      "loading": {
+        "title": "Generando tu Receta...",
+        "subtitle": "La imagen se generará en segundo plano."
+      }
+    }
+  },
+    "macronutrients": {
+    "title": "Macronutrientes",
+    "warning": "Usar responsablemente ⚠️",
+    "modes": {
+      "basic": "Básico",
+      "pro": "Pro"
+    },
+    "basic": {
+      "freeMode": "Modo rápido",
+      "presets": {
+        "gain_muscle": {
+          "label": "Ganar músculo",
+          "emoji": "🏋️"
+        },
+        "more_carbs": {
+          "label": "Más energía", 
+          "emoji": "⚡"
+        },
+        "more_fats": {
+          "label": "Más saciante",
+          "emoji": "🥑"
+        }
+      }
+    },
+    "pro": {
+      "calories": "Calorías",
+      "caloriesLabel": "Calorías objetivo",
+      "protein": "Proteínas 🥩",
+      "carbs": "Carbohidratos 🍚", 
+      "fats": "Grasas 🥑",
+      "total": "Total",
+      "approximate": "Valores aproximados",
+      "grams": "g"
+    },
+    "premium": {
+      "badge": "PREMIUM",
+      "tooltip": "Función Pro — requiere suscripción para editar",
+      "upgradePrompt": "Acceder a {{label}} (Premium)",
+      "upgradeGeneric": "Función Premium"
     }
   }
 }

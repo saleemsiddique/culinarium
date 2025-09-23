@@ -57,6 +57,19 @@ const RecipePage: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
   const { t } = useTranslation();
 
+  // Función para mapear la dificultad a las claves de traducción
+  const getDifficultyKey = (dificultad: string) => {
+    const difficultyMap: { [key: string]: string } = {
+      "Principiante": "beginner",
+      "Intermedio": "intermediate",
+      "Avanzado": "advanced",
+      "Beginner": "beginner",
+      "Intermediate": "intermediate",
+      "Advanced": "advanced"
+    };
+    return difficultyMap[dificultad] || "beginner";
+  };
+
   // Helper to get cuisine style icon
   const getCuisineIcon = (style: string | null) => {
     switch (style) {
@@ -350,40 +363,53 @@ const RecipePage: React.FC = () => {
                 </div>
               )}
 
-              {/* Dificultad */}
+              {/* Dificultad */} 
               {recipe.dificultad && (
                 <div className="p-4 rounded-xl shadow-sm flex items-center space-x-3"
                   // background color depending on difficulty
                   style={{
                     background:
-                      recipe.dificultad === "Principiante"
-                        ? "rgba(16,185,129,0.08)" // green-ish
-                        : recipe.dificultad === "Intermedio"
-                          ? "rgba(250,204,21,0.08)" // yellow-ish
-                          : "rgba(139,92,246,0.06)" // purple-ish
+                        recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                        recipe.dificultad === "Principiante" || 
+                        recipe.dificultad === "Beginner"
+                          ? "rgba(16,185,129,0.08)" // green-ish
+                          : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                            recipe.dificultad === "Intermedio" || 
+                            recipe.dificultad === "Intermediate"
+                            ? "rgba(250,204,21,0.08)" // yellow-ish
+                            : "rgba(139,92,246,0.06)" // purple-ish
                   }}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center
-            ${recipe.dificultad === "Principiante" ? "bg-green-100 text-green-600" :
-                      recipe.dificultad === "Intermedio" ? "bg-yellow-100 text-yellow-600" :
-                        "bg-purple-100 text-purple-600"}`}>
+                    ${recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                      recipe.dificultad === "Principiante" || 
+                      recipe.dificultad === "Beginner"
+                        ? "bg-green-100 text-green-600"
+                        : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                          recipe.dificultad === "Intermedio" || 
+                          recipe.dificultad === "Intermediate"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-purple-100 text-purple-600"
+                    }`}>
                     <GiChefToque className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-md font-semibold text-[var(--foreground)]">Nivel</h3>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.difficulty.title")}</h3>
                     <p className="text-lg font-bold" style={{
                       color:
-                        recipe.dificultad === "Principiante"
-                          ? "var(--success)" // if you have CSS vars, otherwise fallback below
-                          : recipe.dificultad === "Intermedio"
+                        recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                        recipe.dificultad === "Principiante" || 
+                        recipe.dificultad === "Beginner"
+                          ? "var(--success)"
+                          : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                            recipe.dificultad === "Intermedio" || 
+                            recipe.dificultad === "Intermediate"
                             ? "var(--highlight)"
                             : "var(--primary)"
                     }}>
-                      {recipe.dificultad}
+                      {t(`recipeDetail.difficulty.levels.${getDifficultyKey(recipe.dificultad)}`)}
                     </p>
                     <p className="text-xs text-[var(--muted)] mt-1">
-                      {recipe.dificultad === "Principiante" ? "Técnicas simples · Tiempos cortos" :
-                        recipe.dificultad === "Intermedio" ? "Pasos moderados · Algo de técnica" :
-                          "Técnicas avanzadas · Precisión y tiempo"}
+                      {t(`recipeDetail.difficulty.descriptions.${getDifficultyKey(recipe.dificultad)}`)}
                     </p>
                   </div>
                 </div>
@@ -394,25 +420,25 @@ const RecipePage: React.FC = () => {
                 <div className="bg-[var(--primary)]/10 p-4 rounded-xl shadow-sm flex flex-col space-y-2">
                   <h3 className="text-md font-semibold text-[var(--foreground)] flex items-center">
                     <MdOutlineFastfood className="w-6 h-6 mr-2 text-[var(--primary)]" />
-                    Macronutrientes
+                    {t("recipeDetail.macronutrients.title")}
                   </h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <span className="text-[var(--foreground)]">Calorías:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.calories")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.calorias ?? '-'} kcal
                     </span>
 
-                    <span className="text-[var(--foreground)]">Proteínas:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.protein")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.proteinas_g ?? '-'} g
                     </span>
 
-                    <span className="text-[var(--foreground)]">Carbohidratos:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.carbs")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.carbohidratos_g ?? '-'} g
                     </span>
 
-                    <span className="text-[var(--foreground)]">Grasas:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.fats")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.grasas_g ?? '-'} g
                     </span>
