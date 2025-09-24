@@ -48,6 +48,7 @@ import {
   mdiKnife
 } from "@mdi/js";
 import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
 async function loadImageFromDataUrl(
@@ -199,8 +200,9 @@ const CulinariumForm: React.FC = () => {
   const [ingredientError, setIngredientError] = useState<boolean>(false);
 
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const { t } = useTranslation();
   const { ingredientHistory, /*addToHistory,*/ getSuggestions } =
-    useIngredientHistory();
+    useIngredientHistory(t);
 
   // Nuevo estado: tiempo disponible
   const [availableTime, setAvailableTime] = useState<string>("30");
@@ -238,7 +240,6 @@ const CulinariumForm: React.FC = () => {
 
   // Nuevo: modal/slide para utensilios
   const [showUtensilsModal, setShowUtensilsModal] = useState<boolean>(false);
-  const { t } = useTranslation();
 
   // lista de utensilios importantes (puedes editar/añadir)
   const utensilsList = [
@@ -578,6 +579,7 @@ const CulinariumForm: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
+          "Accept-Language":i18n.language
         },
         body: JSON.stringify(formData),
       });
@@ -1024,18 +1026,18 @@ const CulinariumForm: React.FC = () => {
                     0 && (
                       <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-[var(--primary)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
                         {getSuggestions(currentIngredient, ingredients).map(
-                          (suggestion, index) => (
-                            <button
-                              key={`${suggestion}-${index}`}
-                              onClick={() => handleSelectSuggestion(suggestion)}
-                              className="w-full text-left px-4 py-2 hover:bg-[var(--highlight)]/10 focus:bg-[var(--highlight)]/20 focus:outline-none transition-colors first:rounded-t-xl last:rounded-b-xl flex justify-between items-center"
-                            >
-                              <span className="text-[var(--foreground)]">
-                                {suggestion}
-                              </span>
-                            </button>
-                          )
-                        )}
+                            (suggestion, index) => (
+                              <button
+                                key={`${suggestion}-${index}`}
+                                onClick={() => handleSelectSuggestion(suggestion)}
+                                className="w-full text-left px-4 py-2 hover:bg-[var(--highlight)]/10 focus:bg-[var(--highlight)]/20 focus:outline-none transition-colors first:rounded-t-xl last:rounded-b-xl flex justify-between items-center"
+                              >
+                                <span className="text-[var(--foreground)]">
+                                  {t(suggestion)}   {/* 👈 traducir aquí */}
+                                </span>
+                              </button>
+                            )
+                          )}
                       </div>
                     )}
                 </div>
@@ -1048,23 +1050,21 @@ const CulinariumForm: React.FC = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {ingredientHistory
-                        .filter(
-                          (ing) =>
-                            !ingredients
-                              .map((i) => i.toLowerCase())
-                              .includes(ing.toLowerCase())
-                        )
-                        .slice(0, 6)
-                        .map((ingredient) => (
-                          <button
-                            key={ingredient}
-                            onClick={() => handleSelectSuggestion(ingredient)}
-                            type="button"
-                            className="px-3 py-1 bg-orange-100 text-orange-600 text-sm rounded-full hover:bg-orange-200 transition-colors border border-orange-300"
-                          >
-                            + {ingredient}
-                          </button>
-                        ))}
+                         .filter( 
+                           (ing) =>
+                             !ingredients.map((i) => i.toLowerCase()).includes(ing.toLowerCase())
+                         )
+                         .slice(0, 6)
+                         .map((ingredient) => (
+                           <button
+                             key={ingredient}
+                             onClick={() => handleSelectSuggestion(ingredient)}
+                             type="button"
+                             className="px-3 py-1 bg-orange-100 text-orange-600 text-sm rounded-full hover:bg-orange-200 transition-colors border border-orange-300"
+                           >
+                             + {t(ingredient)}   {/* 👈 traducir aquí */}
+                           </button>
+                         ))}
                     </div>
                   </div>
                 )}
@@ -1079,8 +1079,8 @@ const CulinariumForm: React.FC = () => {
                     {ingredients.map((ing) => (
                       <Tag
                         key={ing}
-                        label={ing}
-                        onRemove={handleRemoveIngredient}
+                        label={t(ing)}
+                        onRemove={() => handleRemoveIngredient(ing)}
                       />
                     ))}
                   </AnimatePresence>
@@ -1502,7 +1502,7 @@ const CulinariumForm: React.FC = () => {
           </motion.button>
           {status === "error" && (
             <p className="text-[var(--highlight)] text-center">
-              Error: {error}. {t("common.tryAgain")}
+              Error: {error}.
             </p>
           )}
         </form>

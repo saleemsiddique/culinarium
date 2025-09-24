@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 interface SessionData {
   status: string;
@@ -14,11 +15,12 @@ export default function CheckoutReturn() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function checkSession() {
       if (!sessionId) {
-        setError("No se encontró ID de sesión");
+        setError(t("checkout.return.errors.noSessionId"));
         setLoading(false);
         return;
       }
@@ -37,11 +39,11 @@ export default function CheckoutReturn() {
             }, 500);
           }
         } else {
-          setError(data.error || "Error al verificar la sesión");
+          setError(data.error || t("checkout.return.errors.sessionError"));
         }
       } catch (err) {
         console.error('Error checking session:', err);
-        setError("Error al verificar el pago");
+        setError(t("checkout.return.errors.paymentError"));
       } finally {
         setLoading(false);
       }
@@ -55,7 +57,7 @@ export default function CheckoutReturn() {
       <div className="min-h-screen w-full flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="text-gray-600 mt-4">Verificando pago...</p>
+          <p className="text-gray-600 mt-4">{t("checkout.return.loading")}</p>
         </div>
       </div>
     );
@@ -65,13 +67,13 @@ export default function CheckoutReturn() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Error</h1>
+          <h1 className="text-2xl font-bold text-red-600">{t("checkout.return.general.errorTitle")}</h1>
           <p className="text-gray-600 mt-2">{error}</p>
           <Link 
             href="/" 
             className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Volver al inicio
+            {t("checkout.return.general.homeButton")}
           </Link>
         </div>
       </div>
@@ -82,13 +84,13 @@ export default function CheckoutReturn() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Pago fallido</h1>
-          <p className="text-gray-600 mt-2">El pago no se completó correctamente.</p>
+          <h1 className="text-2xl font-bold text-red-600">{t("checkout.return.failed.title")}</h1>
+          <p className="text-gray-600 mt-2">{t("checkout.return.failed.message")}</p>
           <Link 
             href="/" 
             className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Volver al inicio
+            {t("checkout.return.failed.button")}
           </Link>
         </div>
       </div>
@@ -99,15 +101,15 @@ export default function CheckoutReturn() {
     return (
       <div className="min-h-screen w-full flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-green-600">¡Pago exitoso!</h1>
+          <h1 className="text-2xl font-bold text-green-600">{t("checkout.return.success.title")}</h1>
           <p className="text-gray-600 mt-2">
-            Gracias por tu compra. Tus tokens se han actualizado automáticamente.
+            {t("checkout.return.success.message")}
           </p>
           <Link 
             href="/kitchen" 
             className="mt-4 inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Ir al Dashboard
+            {t("checkout.return.success.button")}
           </Link>
         </div>
       </div>
@@ -118,7 +120,7 @@ export default function CheckoutReturn() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-        <p className="text-gray-600 mt-4">Procesando pago...</p>
+        <p className="text-gray-600 mt-4">{t("checkout.return.processing")}</p>
       </div>
     </div>
   );

@@ -12,7 +12,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const TOKENS_PER_RECIPE = 10;
 
 export async function POST(request: NextRequest) {
-  try {
+    const languageCode = request.headers.get("accept-language")?.split(",")[0] || "es";
+
+    try {
     // Verificar autenticación
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -46,6 +48,9 @@ export async function POST(request: NextRequest) {
 
     // Monta el prompt robusto sin usar backticks internos ni fences
     const prompt = `Eres un asistente de recetas profesional y extremadamente preciso. Tu tarea es generar una receta basándote en los datos proporcionados por el usuario, adhiriéndote estrictamente al formato de salida JSON y a las reglas de validación.
+
+**IDIOMA DE SALIDA:**
+- El idioma de la receta debe coincidir con el idioma preferido del usuario, que es "${languageCode}".
 
 **INSTRUCCIÓN IMPORTANTE - DIFICULTAD:**
 - El usuario ha indicado el nivel de dificultad deseado en la clave "difficulty". Debes reflejar ese nivel en la salida usando la clave "dificultad" con uno de estos valores exactos: "Principiante", "Intermedio" o "Chef".

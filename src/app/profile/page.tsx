@@ -29,6 +29,7 @@ import { useSubscription } from "@/context/subscription-context";
 import Onboarding from "@/components/onboarding";
 import { PremiumModal } from "@/components/SideMenu/PremiumModal";
 import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 export default function ProfilePage() {
   return (
@@ -476,6 +477,21 @@ function ProfileContent() {
                   <BookOpen className="h-4 w-4 mr-3" />
                   {t("profile.quickActions.howItWorks")}
                 </Button>
+              </div>
+              {/* Language Switcher */}
+              <div className="mt-4 flex space-x-3">
+                <button
+                  onClick={() => i18n.changeLanguage("en")}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => i18n.changeLanguage("es")}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors"
+                >
+                  Español
+                </button>
               </div>
             </div>
           </div>

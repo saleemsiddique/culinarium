@@ -8,11 +8,14 @@ import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 import { usePathname } from "next/navigation";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { useTranslation } from "react-i18next";
 
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.5";
 const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
 
 export default function ConsentModal() {
+  const { t } = useTranslation();
+
   const pathname = usePathname();
 
   // Si la ruta comienza por `${url_base}/consent`, NO mostrar el modal:
@@ -188,14 +191,14 @@ export default function ConsentModal() {
                 return;
               }
             } catch {
-              console.error("Error al verificar el consentimiento:");
+              console.error(t("consent.modal.errors.checkConsent"));
             }
           }
 
           setShow(true);
         }
       } catch (error) {
-        console.error("Error al verificar el consentimiento:", error);
+        console.error(t("consent.modal.errors.checkConsent"), error);
         setShow(true);
       } finally {
         setLoading(false);
@@ -287,7 +290,7 @@ export default function ConsentModal() {
       });
 
       if (!res.ok) {
-        console.error("Error al guardar el consentimiento:", await res.text());
+        console.error(t("consent.modal.errors.saveConsent"), await res.text());
         setShow(true);
       } else {
         // Guardamos en localStorage igual que en anónimo (consistencia)
@@ -311,7 +314,7 @@ export default function ConsentModal() {
         setShow(false);
       }
     } catch (err) {
-      console.error("Error en la petición de consentimiento:", err);
+      console.error(t("consent.modal.errors.requestError"), err);
       setShow(true);
     } finally {
       setLoading(false);
@@ -326,19 +329,19 @@ export default function ConsentModal() {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
       <div className="bg-[var(--background)] text-[var(--text)] p-6 rounded-lg max-w-lg w-full shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Política y Condiciones</h2>
+        <h2 className="text-xl font-bold mb-4">{t("consent.modal.title")}</h2>
         <p className="mb-4">
-          Al continuar usando este sitio, confirmas que aceptas nuestros{" "}
+          {t("consent.modal.message")}{" "}
           <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline">
-            Términos y Condiciones
+            {t("consent.modal.terms")}
           </a>
           ,{" "}
           <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline">
-            Política de Privacidad
+            {t("consent.modal.privacy")}
           </a>{" "}
-          y{" "}
+          {t("and")}{" "}
           <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline">
-            Política de Cookies
+           {t("consent.modal.cookies")}
           </a>
           .
         </p>
@@ -347,7 +350,7 @@ export default function ConsentModal() {
           className="bg-[var(--highlight)] text-[var(--text2)] px-4 py-2 rounded hover:bg-[var(--highlight-dark)]"
           disabled={loading}
         >
-          {loading ? "Aceptando..." : "Aceptar"}
+          {loading ? t("consent.modal.acceptingButton") : t("consent.modal.acceptButton")}
         </button>
       </div>
     </div>

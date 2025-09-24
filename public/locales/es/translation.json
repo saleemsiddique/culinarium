@@ -461,6 +461,7 @@
     }
   },
   "recipeDetail": {
+    "of": "de",
     "loadingRecipe": "Cargando receta...",
     "description": "Receta para {{title}} generada por Culinarium.",
     "backButton": {
@@ -587,7 +588,30 @@
     }
   },
   "checkout":{
-    "subscribe":"Suscribirse"
+    "subscribe":"Suscribirse",
+    "return": {
+      "loading": "Verificando pago...",
+      "processing": "Procesando pago...",
+      "errors": {
+        "noSessionId": "No se encontró ID de sesión",
+        "sessionError": "Error al verificar la sesión",
+        "paymentError": "Error al verificar el pago"
+      },
+      "success": {
+        "title": "¡Pago exitoso!",
+        "message": "Gracias por tu compra. Tus tokens se han actualizado automáticamente.",
+        "button": "Ir al Dashboard"
+      },
+      "failed": {
+        "title": "Pago fallido",
+        "message": "El pago no se completó correctamente.",
+        "button": "Volver al inicio"
+      },
+      "general": {
+        "errorTitle": "Error",
+        "homeButton": "Volver al inicio"
+      }
+    }
   },
   "profile": {
     "title": "Perfil",
@@ -1072,6 +1096,93 @@
       "tooltip": "Función Pro — requiere suscripción para editar",
       "upgradePrompt": "Acceder a {{label}} (Premium)",
       "upgradeGeneric": "Función Premium"
+    }
+  },
+  "ingredients": {
+    "chicken": "Pollo",
+    "beef": "Carne",
+    "fish": "Pescado",
+    "eggs": "Huevos",
+    "milk": "Leche",
+    "cheese": "Queso",
+    "rice": "Arroz",
+    "pasta": "Pasta",
+    "bread": "Pan",
+    "potatoes": "Patatas",
+    "onion": "Cebolla",
+    "garlic": "Ajo",
+    "tomato": "Tomate",
+    "pepper": "Pimiento",
+    "carrot": "Zanahoria",
+    "olive_oil": "Aceite de oliva"
+  },
+  "notFound": {
+    "errorCode": "404",
+    "title": "Página no encontrada",
+    "description": "Lo sentimos, no pudimos encontrar la página que estás buscando.",
+    "button": "Volver al inicio"
+  },
+  "emails": {
+    "welcome": {
+      "title": "¡Bienvenido a la comunidad, {{name}}!",
+      "message": "Estamos encantados de tenerte a bordo. Prepárate para una aventura culinaria única, donde la inteligencia artificial te ayuda a crear platos espectaculares. ¡Tu cocina está a punto de transformarse!",
+      "button": "Empieza a cocinar"
+    },
+    "unsubscribe": {
+      "title": "¡Te extrañaremos, {{name}}!",
+      "message1": "Hemos recibido tu solicitud para cancelar tu suscripción. Queremos agradecerte por haber formado parte de nuestra comunidad culinaria y esperamos que vuelvas a unirte pronto. Tu cuenta y acceso a todas nuestras recetas permanecerán activos hasta el {{endDate}}",
+      "message2": "Si cambias de opinión, solo tienes que volver a iniciar sesión y desde Mi Perfil podras reactivar tu suscripcion antes de que se acabe.",
+      "button": "Regresar a Culinarium"
+    },
+    "common": {
+      "company": "Culinarium",
+      "copyright": "Todos los derechos reservados.",
+      "links": {
+        "privacy": "Política de Privacidad",
+        "terms": "Términos de Servicio", 
+        "cookies": "Política de Cookies"
+      }
+    }
+  },
+  "consent": {
+    "modal": {
+      "title": "Política y Condiciones",
+      "message": "Al continuar usando este sitio, confirmas que aceptas nuestros",
+      "terms": "Términos y Condiciones",
+      "privacy": "Política de Privacidad", 
+      "cookies": "Política de Cookies",
+      "acceptButton": "Aceptar",
+      "acceptingButton": "Aceptando...",
+      "errors": {
+        "checkConsent": "Error al verificar el consentimiento:",
+        "saveConsent": "Error al guardar el consentimiento:",
+        "requestError": "Error en la petición de consentimiento:"
+      }
+    }
+  },
+  "and":" y ",
+  "infoBox": {
+    "badge": "Cocina Inteligente",
+    "title": "Revoluciona tu forma de",
+    "cooking": "cocinar",
+    "description": "Culinarium utiliza inteligencia artificial para transformar ingredientes simples en recetas extraordinarias, adaptadas perfectamente a tus gustos y necesidades.",
+    "features": {
+      "recipeGeneration": {
+        "name": "Generación de recetas con IA",
+        "description": "Crea recetas personalizadas a partir de los ingredientes que tienes en casa, gracias a nuestra inteligencia artificial culinaria avanzada."
+      },
+      "adaptedRecipes": {
+        "name": "Recetas inteligentes adaptadas",
+        "description": "Nuestra IA aprende de tus preferencias alimentarias y dietéticas para sugerirte las recetas perfectas para ti."
+      },
+      "enhancedExperience": {
+        "name": "Experiencia culinaria mejorada",
+        "description": "Disfruta de una interfaz intuitiva que hace que cocinar sea más divertido y accesible para todos los niveles."
+      },
+      "macrosCalculation": {
+        "name": "Cálculo de macros y calorías",
+        "description": "Consulta el desglose nutricional de cada receta y ajusta las porciones para recalcular automáticamente calorías y macros."
+      }
     }
   }
 }

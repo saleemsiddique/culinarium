@@ -140,8 +140,6 @@ export default function Footer() {
                   Español
                 </button>
               </div>
-
-              <p className="mt-2 text-xs text-gray-500">Current language: {i18n.language}</p>
             </div>
           </div>
         </div>
