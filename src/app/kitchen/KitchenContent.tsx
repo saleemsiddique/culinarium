@@ -1241,9 +1241,9 @@ const CulinariumForm: React.FC = () => {
 
 
             {/* COLUMNA 3: MAS OPCIONES */}
-            <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar">
+            <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar ">
               {/* Sección de Restricciones y Exclusiones (colapsable) */}
-              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
+              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow ">
                 <button
                   type="button"
                   onClick={() =>
@@ -1456,7 +1456,7 @@ const CulinariumForm: React.FC = () => {
                 initialBasicGoal={null}
                 onChange={handleMacrosChange}
                 isSubscribed={user?.isSubscribed}
-                onRequestUpgrade={() => setShowTokens(true)}
+                onRequestUpgrade={() => {}}
               />
 
             </div>

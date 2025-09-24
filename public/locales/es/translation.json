@@ -1184,5 +1184,99 @@
         "description": "Consulta el desglose nutricional de cada receta y ajusta las porciones para recalcular automáticamente calorías y macros."
       }
     }
+  },
+  "pricing": {
+    "section": {
+      "label": "PRECIOS",
+      "title": "Elige el plan que te llevará a otro nivel",
+      "subtitle": "¿Listo para empezar? Elige tu plan y comienza a cocinar con la magia de la IA."
+    },
+    "plans": {
+      "free": {
+        "title": "Gratis",
+        "description": "Ideal para empezar a explorar la cocina con IA.",
+        "price": "0€",
+        "features": [
+          "5 recetas gratis al mes (50 tokens)",
+          "Creación de recetas básicas",
+          "Funcionalidades restringidas",
+          "Sin restricciones dietéticas",
+          "Sin estilos de cocina específicos"
+        ]
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "¡Desbloquea tu potencial culinario sin límites!",
+        "price": "7,99€",
+        "features": [
+          "30 recetas al mes (300 tokens)",
+          "Todas las funcionalidades premium",
+          "Restricciones dietéticas personalizadas",
+          "Estilos de cocina (japonesa, española...)",
+          "Soporte prioritario",
+          "Acceso anticipado a nuevas funciones"
+        ]
+      }
+    },
+    "common": {
+      "perMonth": "/mes",
+      "getStarted": "Empezar"
+    }
+  },
+  "faq": {
+    "section": {
+      "title": "Preguntas frecuentes",
+      "subtitle": "Todo lo que necesitas saber sobre Culinarium",
+      "description": "Resolvemos las dudas más comunes sobre nuestra plataforma y servicios."
+    },
+    "questions": [
+      {
+        "question": "¿Cómo funciona la generación de recetas con IA?",
+        "answer": "Nuestra plataforma utiliza inteligencia artificial de última generación, impulsada por la tecnología de OpenAI, para analizar tus ingredientes y generar recetas personalizadas adaptadas a tus gustos y necesidades."
+      },
+      {
+        "question": "¿Hay opciones para dietas especiales?",
+        "answer": "Absolutamente. Culinarium soporta múltiples tipos de dietas, incluyendo vegetariana, vegana, keto, sin gluten y más."
+      },
+      {
+        "question": "¿Hay recetas en varios idiomas?",
+        "answer": "Actualmente solo están disponibles en español e inglés."
+      },
+      {
+        "question": "¿Qué pasa si se me acaban los tokens?",
+        "answer": "Podrás comprar paquetes adicionales desde tu cuenta en cualquier momento para seguir generando recetas. O también puedes esperar a la siguiente vez que se reinicien los tokens de tu plan actual, aunque sea el gratuito."
+      },
+      {
+        "question": "¿Tienen una versión gratuita?",
+        "answer": "Sí, ofrecemos un plan gratuito que incluye 50 tokens mensuales para que puedas probar nuestro servicio."
+      },
+      {
+        "question": "¿Los tokens de la suscripción son permanentes?",
+        "answer": "No, los tokens que recibes con tu suscripción no son acumulables de un periodo a otro. Al finalizar el periodo de la suscripción, el saldo de tokens se restablece y recibes la cantidad correspondiente al nuevo periodo. Ten en cuenta que los tokens no utilizados no se reembolsan."
+      },
+      {
+        "question": "¿Cómo puedo cancelar mi suscripción?",
+        "answer": "Puedes cancelar tu suscripción en cualquier momento desde la pagina de perfil. La cancelación será efectiva al final del período de facturación actual."
+      },
+      {
+        "question": "¿Ofrecen reembolsos?",
+        "answer": "No ofrecemos reembolsos. Una vez compras tokens, se quedan en la pagina para consumo."
+      },
+      {
+        "question": "¿Ofrecen soporte técnico?",
+        "answer": "Sí, puedes contactarnos por email enviandonos un mensaje a culinariumofficial@gmail.com."
+      },
+      {
+        "question": "¿Puedo sugerir nuevas funcionalidades o mejoras?",
+        "answer": "Sí, nos encanta recibir sugerencias. Puedes enviarlas a través de nuestro correo culinariumofficial@gmail.com."
+      }
+    ],
+    "buttons": {
+      "startNow": "Empieza Ahora"
+    },
+    "contact": {
+      "message": "¿No encuentras la respuesta que buscas?",
+      "linkText": "Contáctanos"
+    }
   }
 }

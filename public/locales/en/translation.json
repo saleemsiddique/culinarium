@@ -1184,5 +1184,99 @@
         "description": "Check the nutritional breakdown of each recipe and adjust portions to automatically recalculate calories and macros."
       }
     }
+  },
+  "pricing": {
+    "section": {
+      "label": "PRICING",
+      "title": "Choose the plan that will take you to the next level",
+      "subtitle": "Ready to get started? Choose your plan and start cooking with AI magic."
+    },
+    "plans": {
+      "free": {
+        "title": "Free",
+        "description": "Perfect for starting to explore AI cooking.",
+        "price": "0€",
+        "features": [
+          "5 free recipes per month (50 tokens)",
+          "Basic recipe creation",
+          "Limited functionalities",
+          "No dietary restrictions",
+          "No specific cooking styles"
+        ]
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Unlock your culinary potential without limits!",
+        "price": "7.99€",
+        "features": [
+          "30 recipes per month (300 tokens)",
+          "All premium functionalities",
+          "Custom dietary restrictions",
+          "Cooking styles (Japanese, Spanish...)",
+          "Priority support",
+          "Early access to new features"
+        ]
+      }
+    },
+    "common": {
+      "perMonth": "/month",
+      "getStarted": "Get Started"
+    }
+  },
+  "faq": {
+    "section": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about Culinarium",
+      "description": "We resolve the most common questions about our platform and services."
+    },
+    "questions": [
+      {
+        "question": "How does AI recipe generation work?",
+        "answer": "Our platform uses state-of-the-art artificial intelligence, powered by OpenAI technology, to analyze your ingredients and generate personalized recipes tailored to your tastes and needs."
+      },
+      {
+        "question": "Are there options for special diets?",
+        "answer": "Absolutely. Culinarium supports multiple diet types, including vegetarian, vegan, keto, gluten-free and more."
+      },
+      {
+        "question": "Are there recipes in multiple languages?",
+        "answer": "Currently they are only available in Spanish and English."
+      },
+      {
+        "question": "What happens if I run out of tokens?",
+        "answer": "You can purchase additional packages from your account at any time to continue generating recipes. You can also wait for the next time your current plan tokens reset, even if it's the free one."
+      },
+      {
+        "question": "Do you have a free version?",
+        "answer": "Yes, we offer a free plan that includes 50 monthly tokens so you can try our service."
+      },
+      {
+        "question": "Are subscription tokens permanent?",
+        "answer": "No, the tokens you receive with your subscription are not transferable from one period to another. At the end of the subscription period, the token balance is reset and you receive the amount corresponding to the new period. Keep in mind that unused tokens are not refunded."
+      },
+      {
+        "question": "How can I cancel my subscription?",
+        "answer": "You can cancel your subscription at any time from the profile page. The cancellation will be effective at the end of the current billing period."
+      },
+      {
+        "question": "Do you offer refunds?",
+        "answer": "We do not offer refunds. Once you buy tokens, they stay on the page for consumption."
+      },
+      {
+        "question": "Do you offer technical support?",
+        "answer": "Yes, you can contact us by email by sending us a message to culinariumofficial@gmail.com."
+      },
+      {
+        "question": "Can I suggest new features or improvements?",
+        "answer": "Yes, we love receiving suggestions. You can send them through our email culinariumofficial@gmail.com."
+      }
+    ],
+    "buttons": {
+      "startNow": "Get Started"
+    },
+    "contact": {
+      "message": "Can't find the answer you're looking for?",
+      "linkText": "Contact us"
+    }
   }
 }

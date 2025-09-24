@@ -1,33 +1,23 @@
 "use client";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function Pricing() {
+    const { t } = useTranslation();
+
   const pricingData = [
     {
-      title: "Gratis",
-      description: "Ideal para empezar a explorar la cocina con IA.",
-      price: "0€",
-      features: [
-        "5 recetas gratis al mes (50 tokens)",
-        "Creación de recetas básicas",
-        "Funcionalidades restringidas",
-        "Sin restricciones dietéticas",
-        "Sin estilos de cocina específicos"
-      ],
+      title: t("pricing.plans.free.title"),
+      description: t("pricing.plans.free.description"),
+      price: t("pricing.plans.free.price"),
+      features: t("pricing.plans.free.features", { returnObjects: true }) as string[],
       isHighlighted: false,
     },
     {
-      title: "Premium",
-      description: "¡Desbloquea tu potencial culinario sin límites!",
-      price: "7,99€",
-      features: [
-        "30 recetas al mes (300 tokens)",
-        "Todas las funcionalidades premium",
-        "Restricciones dietéticas personalizadas",
-        "Estilos de cocina (japonesa, española...)",
-        "Soporte prioritario",
-        "Acceso anticipado a nuevas funciones"
-      ],
+      title: t("pricing.plans.premium.title"),
+      description: t("pricing.plans.premium.description"),
+      price: t("pricing.plans.premium.price"),
+      features: t("pricing.plans.premium.features", { returnObjects: true }) as string[],
       isHighlighted: true,
     },
   ];
@@ -43,13 +33,13 @@ export default function Pricing() {
           className="text-center"
         >
           <div className="font-bold text-base md:text-xl text-orange-200 mb-4">
-            PRECIOS
+            {t("pricing.section.label")}
           </div>
           <div className="font-bold text-3xl md:text-5xl text-white mb-4 leading-tight">
-            Elige el plan que te llevará a otro nivel
+            {t("pricing.section.title")}
           </div>
           <p className="mt-4 text-lg text-orange-100 max-w-2xl mx-auto leading-relaxed">
-            ¿Listo para empezar? Elige tu plan y comienza a cocinar con la magia de la IA.
+            {t("pricing.section.subtitle")}
           </p>
         </motion.div>
 
@@ -94,7 +84,7 @@ export default function Pricing() {
                   </span>
                   <span className={`text-base font-semibold ml-1 ${plan.isHighlighted ? 'text-orange-100' : 'text-slate-500'
                     }`}>
-                    /mes
+                    {t("pricing.common.perMonth")}
                   </span>
                 </div>
 
@@ -128,7 +118,7 @@ export default function Pricing() {
                       : 'bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-700 hover:to-orange-800'
                     }`}
                 >
-                  Empezar
+                  {t("pricing.common.getStarted")}
                 </a>
               </motion.div>
             </div>
