@@ -199,6 +199,7 @@ export default function ControlMacronutrientes({
                     </div>
                 </div>
                 <motion.button
+                    type="button" 
                     onClick={() => setShow((s) => !s)}
                     aria-expanded={show}
                     className="flex items-center"
