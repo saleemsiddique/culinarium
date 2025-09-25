@@ -57,7 +57,7 @@ interface UserContextType {
     name: string,
     surname: string
   ) => Promise<string>;
-  loginWithGoogle: () => Promise<{ user: CustomUser; isNewUser: boolean }>;
+  loginWithGoogle: () => Promise<{ user: CustomUser | null; isNewUser: boolean }>;
   logout: () => Promise<void>;
   updateUserName: (newName: string) => Promise<void>;
   deductTokens: (amount: number) => Promise<void>;
@@ -404,7 +404,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!userSnapshot.exists()) {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
-      
+
       const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
 
       userData = {
