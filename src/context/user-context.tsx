@@ -19,6 +19,7 @@ import { db, auth } from "@/lib/firebase";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
@@ -365,11 +366,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Detecta si está en un InAppBrowser problemático
+  const isInAppBrowser = function isInAppBrowser() {
+    if (typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes("tiktok") || ua.includes("instagram") || ua.includes("fbav") || ua.includes("fb_iab");
+  }
+
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const userInfo = result.user;
 
+    // Usa redirect si es InAppBrowser, si no usa popup
+    let result;
+    if (isInAppBrowser()) {
+      await signInWithRedirect(auth, provider);
+      // El flujo con redirect requiere que el usuario vuelva a la app y se procese en onAuthStateChanged
+      // Aquí puedes retornar un estado especial si lo necesitas
+      return { user: null, isNewUser: false };
+    } else {
+      result = await signInWithPopup(auth, provider);
+    }
+
+    const userInfo = result.user;
     const email = userInfo.email;
     if (!email) throw new Error("No se pudo obtener el email");
 
@@ -386,7 +404,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!userSnapshot.exists()) {
       // ✅ Nuevo usuario con Google, creamos copia en Firestore
       isNewUser = true; // Marcamos como usuario nuevo
-
+      
       const stripeCustomerId = await createStripeCustomer(email, userInfo.uid);
 
       userData = {
