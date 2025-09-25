@@ -1456,7 +1456,7 @@ const CulinariumForm: React.FC = () => {
                 initialBasicGoal={null}
                 onChange={handleMacrosChange}
                 isSubscribed={user?.isSubscribed}
-                onRequestUpgrade={() => {}}
+                onRequestUpgrade={() => user ? setShowTokens(true) : {}}
               />
 
             </div>
