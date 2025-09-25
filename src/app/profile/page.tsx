@@ -480,19 +480,33 @@ function ProfileContent() {
               </div>
               {/* Language Switcher */}
               <div className="mt-4 flex space-x-3">
-                <button
-                  onClick={() => i18n.changeLanguage("en")}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 text-white font-semibold shadow-lg hover:from-[var(--primary)]/90 hover:to-[var(--primary)]/80 transition-colors"
-                >
-                  English
-                </button>
-                <button
-                  onClick={() => i18n.changeLanguage("es")}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white font-semibold shadow-lg hover:from-[var(--highlight)]/90 hover:to-[var(--highlight-dark)]/90 transition-colors"
-                >
-                  Español
-                </button>
-              </div>
+  <button
+    onClick={() => i18n.changeLanguage("en")}
+    className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${
+      i18n.language === "en"
+        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 text-white ring-2 ring-[var(--primary)]/50 ring-offset-2"
+        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+    }`}
+  >
+    English
+    {i18n.language === "en" && (
+      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+    )}
+  </button>
+  <button
+    onClick={() => i18n.changeLanguage("es")}
+    className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${
+      i18n.language === "es"
+        ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white ring-2 ring-[var(--highlight)]/50 ring-offset-2"
+        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+    }`}
+  >
+    Español
+    {i18n.language === "es" && (
+      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+    )}
+  </button>
+</div>
             </div>
           </div>
 
