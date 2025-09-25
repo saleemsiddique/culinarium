@@ -129,13 +129,13 @@ export default function Footer() {
               <div className="mt-4">
                 <button 
                   onClick={() => i18n.changeLanguage("en")}
-                  className="mr-2 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+                  className="mr-2 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
                 >
                   English
                 </button>
                 <button 
                   onClick={() => i18n.changeLanguage("es")}
-                  className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+                  className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
                 >
                   Español
                 </button>

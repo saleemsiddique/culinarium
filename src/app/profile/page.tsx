@@ -482,13 +482,13 @@ function ProfileContent() {
               <div className="mt-4 flex space-x-3">
                 <button
                   onClick={() => i18n.changeLanguage("en")}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 text-white font-semibold shadow-lg hover:from-[var(--primary)]/90 hover:to-[var(--primary)]/80 transition-colors"
                 >
                   English
                 </button>
                 <button
                   onClick={() => i18n.changeLanguage("es")}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white font-semibold shadow-lg hover:from-[var(--highlight)]/90 hover:to-[var(--highlight-dark)]/90 transition-colors"
                 >
                   Español
                 </button>
