@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -14,6 +15,9 @@ const itemVariants = {
 };
 
 export default function CookiesContent() {
+  const { t  } = useTranslation();
+
+  
   return (
     <motion.main
       className="bg-gray-950 text-gray-300 min-h-screen w-screen flex flex-col justify-center px-6 py-12 lg:py-24"
@@ -24,61 +28,61 @@ export default function CookiesContent() {
       <div className="max-w-3xl w-full mx-auto flex flex-col overflow-y-auto">
         <motion.div variants={itemVariants}>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text">
-            Política de Cookies
+            {t("cookies.title")}
           </h1>
           <p className="mt-4 text-gray-400">
-            <strong>Última actualización:</strong> 9 de agosto de 2025 — <strong>Versión:</strong> v2025-08-09
+            <strong>{t("cookies.lastUpdated")}</strong> 9 de agosto de 2025 — <strong>{t("cookies.version")}</strong> v2025-08-09
           </p>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-12 space-y-8 text-gray-400">
           <section>
-            <h2 className="text-2xl font-semibold text-gray-100">¿Qué son las cookies?</h2>
+            <h2 className="text-2xl font-semibold text-gray-100">{t("cookies.sections.whatAreCookies.title")}</h2>
             <p className="mt-2">
-              Las cookies son pequeños archivos que se almacenan en tu navegador para mantener la sesión, recordar tus preferencias o recoger datos analíticos de uso.
+              {t("cookies.sections.whatAreCookies.content")}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-100">Cookies que utilizamos</h2>
-            <ul className="mt-2 list-disc list-inside space-y-2">
-              <li>
-                <strong>Esenciales / funcionales:</strong> Cookies necesarias para el funcionamiento del servicio como la autenticación con Firebase Auth. No requieren tu consentimiento.
-              </li>
-              <li>
-                <strong>Analítica:</strong> Cookies de Vercel Analytics para medir el rendimiento y uso de la plataforma. Solo se activan si das tu consentimiento explícito.
-              </li>
-              <li>
-                <strong>Pagos:</strong> Stripe puede usar cookies propias para procesar pagos de forma segura (clasificadas como funcionales durante el checkout).
-              </li>
+            <h2 className="text-2xl font-semibold text-gray-100">{t("cookies.sections.cookiesWeUse.title")}</h2>
+           <ul className="mt-2 list-disc list-inside space-y-2">
+              {(t("cookies.sections.cookiesWeUse.items", { returnObjects: true }) as string[]).map((item: string, index: number) => (
+                <li 
+                  key={index} 
+                  dangerouslySetInnerHTML={{ __html: item }} 
+                />
+              ))}
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-100">Gestión del consentimiento</h2>
+            <h2 className="text-2xl font-semibold text-gray-100">{t("cookies.sections.consentManagement.title")}</h2>
             <p className="mt-2">
-              Puedes cambiar tus preferencias en cualquier momento desde la página de gestión de consentimientos.
+              {t("cookies.sections.consentManagement.content")}
             </p>
             <div className="mt-6">
               <a
                 href="/consent/gestion-consentimientos"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition"
               >
-                Ir a gestión de consentimientos
+                {t("cookies.sections.consentManagement.buttonText")}
               </a>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-100">Contacto</h2>
-            <p className="mt-2">
-              Para cualquier duda sobre cookies o privacidad, contacta con nosotros en: <strong>culinariumofficial@gmail.com</strong>
-            </p>
+            <h2 className="text-2xl font-semibold text-gray-100">{t("cookies.sections.contact.title")}</h2>
+            <p 
+              className="mt-2" 
+              dangerouslySetInnerHTML={{ 
+                __html: t("cookies.sections.contact.content")
+              }} 
+            />
           </section>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-16 text-sm text-gray-500 border-t border-gray-800 pt-8">
-          <p>Dirección: 03502, España — Equipo Culinarium</p>
+          <p>{t("terms.footer.content")}</p>
         </motion.div>
       </div>
     </motion.main>

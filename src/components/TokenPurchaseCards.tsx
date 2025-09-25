@@ -3,6 +3,7 @@
 import React from "react";
 import { Zap, TrendingUp, Crown, Star } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
+import { useTranslation } from "react-i18next";
 
 interface TokenPurchaseCardsProps {
   user: CustomUser | null;
@@ -123,6 +124,7 @@ export default function TokenPurchaseCards({
 
   const promoStyles = getPromoStyles();
   const hasPromo = Boolean(labelPromo && promoType);
+  const { t } = useTranslation();
 
   return (
     <button
@@ -197,7 +199,7 @@ export default function TokenPurchaseCards({
                   color: "white" 
                 }}
               >
-                ¡Ahorras €{savings}!
+                {t("tokens.modal.promoTypes.save")} €{savings}!
               </span>
             </div>
           )}
@@ -228,7 +230,7 @@ export default function TokenPurchaseCards({
               className="text-sm font-medium"
               style={{ color: "var(--foreground)", opacity: 0.7 }}
             >
-              €{(price / count).toFixed(2)} por token
+              €{(price / count).toFixed(2)} {t("tokens.modal.promoTypes.perToken")}
             </p>
           </div>
         </div>

@@ -1,0 +1,1282 @@
+{
+  "auth": {
+    "login": {
+      "socialDivider": "Or sign in with:",
+      "title": "Welcome back",
+      "subtitle": "Please sign in to continue",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "forgotPassword": "Forgot your password?",
+      "button": "Sign In",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account? Register"
+    },
+    "register": {
+      "title": "Create your account",
+      "firstNamePlaceholder": "First Name",
+      "lastNamePlaceholder": "Last Name",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "terms": "I accept the ",
+      "termsLink": "Terms and Conditions",
+      "privacyLink": "Privacy Policy",
+      "cookiesLink": "Cookies Policy",
+      "button": "Register",
+      "loading": "Registering...",
+      "and": " and ",
+      "socialDivider": "Or sign up with:",
+      "alreadyAccount": "Already have an account?"
+    },
+    "errors": {
+      "acceptTerms": "You must accept the terms and conditions, privacy policy, and cookies policy.",
+      "default": "An error has occurred"
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "subtitle": "Don't worry, we'll send you a message to help reset it.",
+      "submitted": "If there is an account for {{email}}, you will receive a link to reset your password shortly.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "Enter your email address",
+      "submitButton": "Send Reset Link",
+      "error": "Could not send reset link. Please check your email address.",
+      "backToLogin": "Back to Login"
+    },
+    "resetPassword": {
+      "title": "Set a new password",
+      "subtitle": "Enter and confirm your new password.",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "submitButton": "Change Password",
+      "successTitle": "Password Reset Successfully!",
+      "successSubtitle": "Your password has been changed successfully.",
+      "backToLogin": "Back to Log In",
+      "errors": {
+        "mismatch": "Passwords do not match.",
+        "minLength": "Password must be at least 6 characters long.",
+        "invalidCode": "Invalid reset code. Please try again.",
+        "default": "Could not change password. The link may have expired or already been used."
+      }
+    }
+  },
+  "footer": {
+    "brand": {
+      "slogan": "Discover a world of flavors."
+    },
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    },
+    "copyright": "All rights reserved.",
+    "contact": {
+      "title": "Contact us",
+      "email": "culinariumofficial@gmail.com"
+    },
+    "manageConsent": "Cookie and privacy settings"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "responsible": {
+        "title": "1. Responsible party and contact details",
+        "content": "Responsible: <strong>Culinarium Team</strong> — developers: Saleem Siddique, Hakeem Siddique and Wassim Atiki.<br />Contact address: <strong>03502, Spain</strong>.<br />Contact email (privacy): <strong>culinariumofficial@gmail.com</strong>.<br />We do not have a Data Protection Officer (DPO)."
+      },
+      "introduction": {
+        "title": "2. Introduction",
+        "content": "Culinarium is a SaaS application that generates recipes from the ingredients and preferences that users enter. This policy explains what data we collect, for what purpose, who processes it, where it is stored and how you can exercise your rights."
+      },
+      "dataCollected": {
+        "title": "3. Data we collect",
+        "items": [
+          "<strong>Account and profile data:</strong> email, firstName, lastName, uid, created_at, subscription fields and tokens (monthly_tokens, extra_tokens, subscriptionId, stripeCustomerId, subscriptionStatus, subscriptionCanceled, lastRenewal, tokens_reset_date).",
+          "<strong>History and usage:</strong> generated recipes (created_recipes), ingredients, instructions, timestamps, momento_del_dia, portions, restrictions, img_url.",
+          "<strong>Technical data:</strong> IP (logs), user_agent, device data and usage metrics (only if you give consent).",
+          "<strong>Payment data:</strong> we do not store card numbers; Stripe handles payment data. We store Stripe identifiers (stripeCustomerId) and metadata necessary for billing.",
+          "<strong>Cookies and consent:</strong> record of cookie consent and preferences (collection `consents`)."
+        ]
+      },
+      "purposes": {
+        "title": "4. Purposes and legal bases",
+        "items": [
+          "<strong>Service provision (contract execution):</strong> account creation and management, recipe generation, token usage and subscriptions.",
+          "<strong>Payments and billing (contract execution / legal obligation):</strong> management through Stripe.",
+          "<strong>Analytics and service improvement (consent):</strong> collection of metrics if the user expressly authorizes it.",
+          "<strong>Security and support (legitimate interest):</strong> fraud detection and customer service."
+        ]
+      },
+      "processors": {
+        "title": "5. Data processors / third parties",
+        "content": "The following third parties process data on behalf of Culinarium:",
+        "items": [
+          "<strong>OpenAI</strong> — recipe generation via API.",
+          "<strong>Stripe</strong> — payments and subscriptions.",
+          "<strong>Firebase (Firestore and Auth)</strong> — database and authentication (location: <em>europe-southwest1</em>).",
+          "<strong>Vercel</strong> — hosting and Vercel Analytics (only if you give consent).",
+          "<strong>GitHub</strong> — repository and CI/CD (deployment metadata)."
+        ],
+        "additional": "We maintain contractual agreements (DPA) with these providers when appropriate. Some may process data outside the EEA; we apply safeguards (SCCs or other measures) when necessary."
+      },
+      "transfers": {
+        "title": "6. International transfers",
+        "content": "Some providers may process data outside the EEA. In such cases we will apply appropriate safeguards (e.g. standard contractual clauses / SCCs) to protect your data."
+      },
+      "retention": {
+        "title": "7. Retention periods",
+        "items": [
+          "<strong>User / account data:</strong> until account cancellation.",
+          "<strong>Recipe history:</strong> preserved while the account exists; maximum 5 years if applicable.",
+          "<strong>Payment / accounting records:</strong> 5 years.",
+          "<strong>Consent records:</strong> 2 years."
+        ]
+      },
+      "rights": {
+        "title": "8. Data subject rights",
+        "content": "You have the right to access, rectify, delete, restrict processing, object and request portability. To exercise them contact <strong>culinariumofficial@gmail.com</strong> indicating your name, email and UID (if applicable). We will respond within the legal period (normally 1 month; may be extended in complex cases)."
+      },
+      "minors": {
+        "title": "9. Minors",
+        "content": "The service is intended for people over <strong>18 years of age</strong>. We do not allow registration of minors under 18 years of age. If we detect a minor's account we will suspend it and proceed according to applicable regulations."
+      },
+      "security": {
+        "title": "10. Security",
+        "content": "We implement reasonable technical and organizational measures: TLS, Firestore access controls, backups and good development practices. For payment data we use Stripe exclusively."
+      },
+      "complaints": {
+        "title": "11. Filing complaints",
+        "content": "If you are not satisfied with our response you can file a complaint with the competent supervisory authority (in Spain: <strong>AEPD</strong>)."
+      },
+      "changes": {
+        "title": "12. Policy changes",
+        "content": "We will publish the date of the last update in the header of this policy. If there are significant changes we will notify you and request additional consents if applicable."
+      }
+    },
+    "footer": {
+      "content": "Contact: culinariumofficial@gmail.com — Address: 03502, Spain."
+    }
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "parties": {
+        "title": "1. Parties",
+        "content": "Agreement between the user (you) and the <strong>Culinarium Team</strong> (Saleem Siddique, Hakeem Siddique and Wassim Atiki. By creating an account and using the service you accept these terms."
+      },
+      "serviceDescription": {
+        "title": "2. Service description",
+        "content": "Culinarium allows generating recipes from a form where you specify ingredients, available time, time of day, dietary restrictions and culinary style. Each recipe costs <strong>10 tokens</strong>."
+      },
+      "models": {
+        "title": "3. Models and generated content",
+        "content": "Recipes are generated using the OpenAI API or other models we may use. Model selection may change over time. Recipes are culinary suggestions and the user is responsible for verifying allergens, food safety and ingredient suitability."
+      },
+      "tokens": {
+        "title": "4. Tokens and plans",
+        "items": [
+          "<strong>Free plan:</strong> 50 tokens per month (equivalent to 5 recipes/month).",
+          "<strong>Subscription:</strong> monthly subscription grants 300 tokens + extra features. Subscription tokens <em>expire</em> at the end of each subscription period (they are not permanent).",
+          "<strong>Token packs (1–6):</strong> token packages purchased separately; these extra tokens remain available as long as the service exists.",
+          "<strong>Spending order:</strong> subscription tokens are consumed before tokens purchased in packs.",
+          "<strong>Generation costs:</strong> generating a new recipe costs 10 tokens, regenerating an existing recipe costs 5 tokens."
+        ]
+      },
+      "payments": {
+        "title": "5. Payments and billing",
+        "content": "All payments are managed through <strong>Stripe</strong>. By paying you accept Stripe's terms. Subscriptions renew automatically unless cancelled in advance."
+      },
+      "withdrawal": {
+        "title": "6. Right of withdrawal and immediate service commencement",
+        "content": "Because the service is provided immediately (recipe generation and token consumption at the moment), the user must expressly accept, at the time of payment, that the service begins immediately and waives the right of withdrawal when permitted by law."
+      },
+      "refunds": {
+        "title": "7. Refunds",
+        "content": "<strong>We do not offer refunds under any circumstances.</strong> This policy applies to token purchases and subscriptions, unless the law requires otherwise in a specific case."
+      },
+      "cancellation": {
+        "title": "8. Cancellation and token management",
+        "items": [
+          "If you cancel your subscription, the extra features remain until the end of the already paid period; subscription tokens are not cumulative or permanent.",
+          "Tokens purchased in packs will remain as long as the service is active (until possible service closure)."
+        ]
+      },
+      "suspension": {
+        "title": "9. Suspension and termination",
+        "content": "Culinarium reserves the right to suspend or terminate accounts for fraud, illegal activity or violation of these terms. In case of reasonable termination we will try to notify the user."
+      },
+      "liability": {
+        "title": "10. Limitation of liability",
+        "content": "Recipes are suggestions; we do not guarantee specific results. Culinarium Team will not be responsible for damages resulting from following a recipe (poisoning, allergies, etc.)."
+      },
+      "healthNotice": {
+        "title": "11. Health and nutrition notice",
+        "content": "We are not doctors, dietitians or licensed nutritionists. The content and recipes generated by Culinarium are solely culinary suggestions for informational and recreational purposes. They do not constitute medical, nutritional or professional advice. The user is responsible for checking the suitability of ingredients based on their allergies, intolerances, medical restrictions or personal needs. If you have any questions related to your health or diet, always consult with a qualified healthcare professional."
+      },
+      "acceptableUse": {
+        "title": "12. Acceptable use",
+        "content": "The user agrees not to use the service for illegal, fraudulent purposes or that harm third parties, nor to attempt to damage, overload or interfere with the platform's operation."
+      },
+      "warranty": {
+        "title": "13. Technical warranty disclaimer",
+        "content": "We do not guarantee that the service will work without interruptions, error-free or permanently available. There may be interruptions due to maintenance, updates or causes beyond our control."
+      },
+      "modification": {
+        "title": "14. Service modification",
+        "content": "We reserve the right to modify, suspend or interrupt part or all of the service functionalities at any time, giving reasonable advance notice when possible."
+      },
+      "minimumAge": {
+        "title": "15. Minimum age of use",
+        "content": "To use Culinarium you must be at least <strong>18 years old</strong>. By registering you declare that you meet this requirement."
+      },
+      "intellectualProperty": {
+        "title": "16. Intellectual property",
+        "content": "Users retain rights over the content they upload. By submitting ingredients and preferences you grant Culinarium a non-exclusive license to process, store and generate recipes. The use of generated recipes for commercial purposes or other uses should be consulted if there are restrictions."
+      },
+      "dataProtection": {
+        "title": "17. Data protection",
+        "content": {
+          "part1": "We process your data in accordance with our",
+          "linkText": "Privacy Policy",
+          "part2": ". Main processors: OpenAI, Stripe, Firebase, Vercel, GitHub."
+        }
+      },
+      "jurisdiction": {
+        "title": "18. Applicable law and jurisdiction",
+        "content": "These terms are governed by Spanish law. Any dispute will be submitted to the competent courts established by applicable law."
+      },
+      "changes": {
+        "title": "19. Changes to Terms",
+        "content": "We may modify these terms; we will publish the new version with date and will notify substantial changes with reasonable advance notice."
+      }
+    },
+    "footer": {
+      "content": "Contact: culinariumofficial@gmail.com — Address: 03502, Spain."
+    }
+  },
+  "cookies": {
+    "title": "Cookies Policy",
+    "lastUpdated": "Last updated:",
+    "version": "Version:",
+    "sections": {
+      "whatAreCookies": {
+        "title": "What are cookies?",
+        "content": "Cookies are small files that are stored in your browser to maintain the session, remember your preferences or collect analytical usage data."
+      },
+      "cookiesWeUse": {
+        "title": "Cookies we use",
+        "items": [
+          "<strong>Essential / functional:</strong> Cookies necessary for the service to function such as authentication with Firebase Auth. They do not require your consent.",
+          "<strong>Analytics:</strong> Vercel Analytics cookies to measure platform performance and usage. They are only activated if you give your explicit consent.",
+          "<strong>Payments:</strong> Stripe may use its own cookies to process payments securely (classified as functional during checkout)."
+        ]
+      },
+      "consentManagement": {
+        "title": "Consent management",
+        "content": "You can change your preferences at any time from the consent management page.",
+        "buttonText": "Go to consent management"
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "For any questions about cookies or privacy, contact us at: <strong>culinariumofficial@gmail.com</strong>"
+      }
+    },
+    "footer": {
+      "content": "Address: 03502, Spain — Culinarium Team"
+    }
+  },
+  "consentManagement": {
+    "title": "Consent management",
+    "subtitle": "Here you can view and modify the preferences saved in your account.",
+    "loading": "Loading status...",
+    "saveButton": "Save changes",
+    "saving": "Saving...",
+    "revokeAllButton": "Revoke all",
+    "processing": "Processing...",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "saveSuccess": "Preferences saved successfully",
+    "saveError": "Error saving preferences",
+    "revokeSuccess": "All consents have been revoked",
+    "revokeError": "Error revoking consents",
+    "version": "Version",
+    "rightsNotice": "Rights: you can revoke consent at any time. Revocation does not affect previous legitimate processing.",
+    "types": {
+      "terms_of_service": {
+        "title": "Terms and Conditions"
+      },
+      "privacy_policy": {
+        "title": "Privacy Policy"
+      },
+      "cookies_policy": {
+        "title": "Cookies Policy"
+      }
+    },
+    "unauthenticated": {
+      "title": "Manage consents",
+      "description": "This page is only available for authenticated users. If you want to manage your preferences or keep them across devices, please log in.",
+      "loginButton": "Log in",
+      "backButton": "Back"
+    }
+  },
+  "header": {
+    "brandName": "Culinarium",
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu",
+      "home": "Home",
+      "newRecipe": "New Recipe",
+      "myRecipes": "My Recipes",
+      "myProfile": "My Profile"
+    },
+    "tokens": {
+      "title": "Your Tokens",
+      "monthly": "Monthly:",
+      "extra": "Extra:",
+      "total": "Total:",
+      "buy": "Buy More Tokens!",
+      "buyMore": "Buy more tokens",
+      "premium": {
+        "subscribe": "Become Premium!",
+        "current": "Your Premium Plan",
+        "subscribeButton": "Subscribe to Premium"
+      },
+      "popup": {
+        "title": "Your Tokens",
+        "monthly": "Monthly:",
+        "extra": "Extra:",
+        "total": "Total:"
+      }
+    },
+    "auth": {
+      "getStarted": "Get Started"
+    }
+  },
+  "sideMenu": {
+    "new": "New",
+    "recipes": "Recipes",
+    "tokens": {
+      "button": "View Tokens",
+      "buy": "Buy",
+      "lowIndicator": "Low tokens"
+    },
+    "premium": {
+      "button": "Premium",
+      "active": "Active",
+      "inactive": "Premium"
+    },
+    "auth": {
+      "login": "Log In"
+    }
+  },
+  "recipes": {
+    "title": "My Recipes",
+    "description": "Your generated and saved recipes in Culinarium.",
+    "searchPlaceholder": "Search recipes, ingredients...",
+    "filters": {
+      "button": "Filters",
+      "title": "Filter Recipes",
+      "clear": "Clear filters",
+      "mealTime": {
+        "label": "Time of day",
+        "all": "All"
+      },
+      "timeRange": {
+        "label": "Preparation time",
+        "any": "Any time"
+      },
+      "portions": {
+        "label": "Number of portions",
+        "any": "Any amount"
+      },
+      "style": {
+        "label": "Cuisine style",
+        "all": "All styles"
+      },
+      "restrictions": {
+        "label": "Dietary restrictions"
+      },
+      "mealTimeOptions": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "snack": "Snack"
+      },
+      "timeRangeOptions": {
+        "0-15": "Less than 15 min",
+        "15-30": "15-30 min",
+        "30-60": "30-60 min",
+        "60+": "More than 1 hour"
+      },
+      "portionOptions": {
+        "1-2": "1-2 people",
+        "3-4": "3-4 people",
+        "5+": "5+ people"
+      },
+      "cuisineStyleOptions": {
+        "italian": "Italian",
+        "mexican": "Mexican",
+        "japanese": "Japanese",
+        "american": "American",
+        "spanish": "Spanish",
+        "indian": "Indian",
+        "jamaican": "Jamaican"
+      },
+      "dietaryRestrictionOptions": {
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "gluten-free": "Gluten Free",
+        "lactose-free": "Lactose Free",
+        "keto": "Keto"
+      }
+    },
+    "loading": "Loading your delicious recipes...",
+    "noResults": {
+      "title": "No recipes found with the selected filters.",
+      "clear": "Clear filters"
+    },
+    "empty": {
+      "title": "Oops! It seems you haven't generated any recipes yet.",
+      "description": "It's the perfect time to create your first culinary masterpiece!",
+      "button": "Start Cooking Now! 🍳"
+    },
+    "recipeCard": {
+      "time": "min",
+      "portions": "portions",
+      "viewRecipe": "View Recipe"
+    },
+    "results": "Showing {{current}} of {{total}} recipes",
+    "mealTimes": {
+      "breakfast": "🍳 Breakfast",
+      "lunch": "🍲 Lunch",
+      "dinner": "🌙 Dinner",
+      "snack": "🍎 Snack",
+      "default": "🍽️ Your Recipe"
+    },
+    "activeFilters": {
+      "search": "Search: {{term}}"
+    }
+  },
+  "recipeDetail": {
+    "of": "of",
+    "loadingRecipe": "Loading recipe...",
+    "description": "Recipe for {{title}} generated by Culinarium.",
+    "backButton": {
+      "toRecipes": "Back to My Recipes",
+      "toForm": "Back to Form"
+    },
+    "metadata": {
+      "totalTime": "Total Time",
+      "portions": "Portions",
+      "style": "Style",
+      "restrictions": "Restrictions",
+      "minutes": "min"
+    },
+    "sections": {
+      "ingredients": {
+        "title": " Ingredients"
+      },
+      "instructions": {
+        "title": " Instructions",
+        "step": "Step {{number}}"
+      },
+      "excluded": {
+        "title": "Excluded Ingredients"
+      }
+    },
+    "actions": {
+      "goToKitchen": "Go to Kitchen",
+      "generateAnother": "I Want Another Recipe!",
+      "cost": "Cost: {{tokens}} tokens"
+    },
+    "loading": {
+      "generatingImage": "Generating image..."
+    },
+    "error": {
+      "title": "Oops! Something went wrong"
+    },
+    "difficulty": {
+      "title": "Level",
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "descriptions": {
+        "beginner": "Simple techniques · Short times",
+        "intermediate": "Moderate steps · Some technique",
+        "advanced": "Advanced techniques · Precision and time"
+      }
+    },
+    "macronutrients": {
+      "title": "Macronutrients",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "fats": "Fats",
+      "unitCalories": "kcal",
+      "unitGrams": "g"
+    }
+  },
+  "tokens": {
+    "modal": {
+      "title": "Buy Extra Tokens",
+      "currentTokens": "Current tokens:",
+      "extra": "extra",
+      "monthly": "monthly",
+      "close": "Close",
+      "packages": {
+        "30": {
+          "label": "Occasional use (3 recipes)",
+          "promo": "Offer"
+        },
+        "60": {
+          "label": "Casual use (6 recipes)"
+        },
+        "120": {
+          "label": "Weekly use (12 recipes)"
+        },
+        "250": {
+          "label": "Frequent use (25 recipes)"
+        },
+        "600": {
+          "label": "Intensive use (60 recipes)",
+          "promo": "Most Popular"
+        },
+        "1200": {
+          "label": "Professional use (120 recipes)",
+          "promo": "Best Value"
+        }
+      },
+      "promoTypes": {
+        "save": "Save",
+        "limited": "Offer",
+        "popular": "Most Popular",
+        "value": "Best Value",
+        "perToken": "per token"
+      }
+    }
+  },
+  "premium": {
+    "modal": {
+      "title": "Culinarium Premium",
+      "close": "Close modal",
+      "subscribed": {
+        "title": "You're already a Premium subscriber!",
+        "thankYou": "Thank you for being a Premium subscriber!",
+        "message": "You keep your tokens and access to all premium features.",
+        "renewal": "Your subscription will automatically renew on {{date}}.",
+        "close": "Close",
+        "manage": "Manage Subscription"
+      },
+      "notSubscribed": {
+        "greeting": "Hello {{name}}, unlock all advanced features.",
+        "greetingFallback": "Hello there, unlock all advanced features.",
+        "price": "€7.99/month",
+        "cancel": "Cancel",
+        "features": [
+          "300 monthly tokens (30 recipes)",
+          "Access to exclusive premium forms",
+          "Priority in recipe generation",
+          "24/7 priority support",
+          "Early access to new features"
+        ]
+      }
+    }
+  },
+  "checkout": {
+    "subscribe": "Subscribe",
+    "return": {
+      "loading": "Verifying payment...",
+      "processing": "Processing payment...",
+      "errors": {
+        "noSessionId": "No session ID found",
+        "sessionError": "Error verifying session",
+        "paymentError": "Error verifying payment"
+      },
+      "success": {
+        "title": "Payment Successful!",
+        "message": "Thank you for your purchase. Your tokens have been updated automatically.",
+        "button": "Go to Dashboard"
+      },
+      "failed": {
+        "title": "Payment Failed",
+        "message": "The payment was not completed correctly.",
+        "button": "Return to Home"
+      },
+      "general": {
+        "errorTitle": "Error",
+        "homeButton": "Return to Home"
+      }
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "greeting": "Hello, {{name}}!",
+    "subtitle": "Manage your profile and settings",
+    "personalInfo": {
+      "title": "Personal Information",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "saving": "Saving...",
+      "save": "Save",
+      "edit": "Edit",
+      "nameRequired": "Name cannot be empty.",
+      "nameUpdated": "Name updated successfully.",
+      "nameError": "Error updating name. Please try again."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "billing": "Billing",
+      "paymentHistory": "Payment History",
+      "howItWorks": "How It Works"
+    },
+    "subscription": {
+      "premium": {
+        "title": "Premium Subscription",
+        "description": "Enjoy all the benefits",
+        "status": {
+          "active": "Active",
+          "cancelled": "Cancelled (active until end of period)",
+          "paymentFailed": "Payment Failed. Manage your subscription",
+          "noSubscription": "No subscription"
+        },
+        "nextBilling": "Next billing",
+        "availableTokens": "Available tokens",
+        "cancel": "Cancel Subscription",
+        "cancelNow": "Cancel Subscription Now",
+        "reactivate": "Reactivate Subscription",
+        "cancelledNotice": "Your subscription has been cancelled but you will maintain access until {{date}}"
+      },
+      "free": {
+        "title": "Free Account",
+        "description": "Unlock full potential with Premium",
+        "subscribe": "Subscribe"
+      }
+    },
+    "logout": {
+      "title": "Log Out",
+      "description": "Securely sign out of your account",
+      "button": "Log Out"
+    },
+    "modals": {
+      "cancelSubscription": {
+        "title": "Cancel Subscription?",
+        "message": "Your subscription will be cancelled, but you will maintain access to all Premium features until the end of your current billing period.",
+        "keep": "Keep Subscription",
+        "confirm": "Confirm Cancellation",
+        "cancelling": "Cancelling..."
+      },
+      "cancelNow": {
+        "title": "Cancel Subscription?",
+        "message": "Your subscription will be cancelled immediately and you will lose access to all Premium features.",
+        "keep": "Keep Subscription",
+        "confirm": "Confirm Cancellation",
+        "cancelling": "Cancelling..."
+      },
+      "reactivate": {
+        "title": "Reactivate Subscription?",
+        "message": "Your subscription will be reactivated and you will have access to all Premium features again.",
+        "cancel": "Cancel",
+        "confirm": "Confirm Reactivation",
+        "reactivating": "Reactivating..."
+      },
+      "message": {
+        "success": "Success",
+        "error": "Error",
+        "subscriptionCancelled": "Subscription cancelled successfully. You will maintain access until the end of the current period. We have sent a confirmation email to your address.",
+        "subscriptionCancelledNow": "Subscription cancelled successfully.",
+        "subscriptionReactivated": "Subscription reactivated successfully.",
+        "subscriptionError": "Error cancelling subscription. Please try again.",
+        "subscriptionReactivateError": "Error reactivating subscription. Please try again.",
+        "close": "Close"
+      }
+    },
+    "errors": {
+      "logout": "Error logging out",
+      "paymentHistory": "Error accessing payment history",
+      "billing": "Error accessing billing"
+    }
+  },
+  "onboarding": {
+    "steps": [
+      {
+        "title": "👋 Welcome",
+        "text": "Thank you for joining our application. We'll show you the essentials.",
+        "image": "/onboarding/step1.jpg"
+      },
+      {
+        "title": "🥘 Tokens and Recipes",
+        "text": "Tokens are your most valuable resource! Every time you create a recipe you'll spend tokens, and you'll always see the token cost indicated before creating it.",
+        "image": "/onboarding/step2.jpg"
+      },
+      {
+        "title": "🔄 Renewal",
+        "text": "Your tokens are automatically renewed every month, on the same date you joined or activated your premium plan.",
+        "image": "/onboarding/step3.jpg"
+      },
+      {
+        "title": "🚀 Ready",
+        "text": "You now know the basics, time to cook.",
+        "image": "/onboarding/step4.jpg"
+      }
+    ],
+    "buttons": {
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish"
+    }
+  },
+  "payments": {
+    "dashboard": {
+      "title": "💳 Payment History",
+      "subtitle": "Manage your subscription and review your token purchases",
+      "loading": "Loading data...",
+      "loginRequired": "Log in to view your history"
+    },
+    "subscription": {
+      "title": "🔄 Premium Subscription",
+      "plan": "Current Plan",
+      "nextBilling": "Next Billing",
+      "monthlyAmount": "Monthly Amount",
+      "status": {
+        "active": "ACTIVE",
+        "canceled": "CANCELED",
+        "past_due": "PAST DUE",
+        "trialing": "TRIALING"
+      }
+    },
+    "tokens": {
+      "title": "💰 Token Purchases",
+      "subtitle": "History of all your token purchases",
+      "totalSpent": "Total spent: €{{amount}}",
+      "date": "Date",
+      "tokens": "Tokens",
+      "package": "Package",
+      "status": "Status",
+      "statusTypes": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "failed": "Failed"
+      }
+    }
+  },
+  "billing": {
+    "portal": {
+      "title": "Billing Portal",
+      "description": "Manage your invoices and payment methods"
+    },
+    "tabs": {
+      "invoices": {
+        "label": "Invoices",
+        "title": "Invoice History",
+        "description": "All your invoices and payments made"
+      },
+      "paymentMethods": {
+        "label": "Payment Methods",
+        "title": "Payment Methods",
+        "description": "Manage your credit and debit cards"
+      }
+    },
+    "invoices": {
+      "headers": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Amount",
+        "status": "Status",
+        "invoice": "Invoice"
+      },
+      "status": {
+        "paid": "Paid",
+        "open": "Pending",
+        "void": "Void",
+        "unknown": "Unknown"
+      },
+      "types": {
+        "subscription": "Subscription"
+      },
+      "empty": {
+        "title": "You have no invoices available",
+        "description": "Invoices will appear here after your first payment."
+      },
+      "loading": "Loading invoices...",
+      "download": "PDF"
+    },
+    "paymentMethods": {
+      "addCard": "Add card",
+      "addFirstCard": "Add first card",
+      "empty": {
+        "title": "You have no payment methods",
+        "description": "Add a card to continue with your payments"
+      },
+      "card": {
+        "default": "Default",
+        "expires": "Expires",
+        "setAsDefault": "Set as default",
+        "delete": "Delete card",
+        "cannotDeleteDefault": "You cannot delete the default card"
+      },
+      "brands": {
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "amex": "American Express",
+        "discover": "Discover",
+        "other": "Other card"
+      }
+    },
+    "modals": {
+      "success": {
+        "title": "Success",
+        "close": "Close",
+        "cardDeleted": "Card deleted successfully ✅"
+      },
+      "confirm": {
+        "title": "Confirm action",
+        "message": "Are you sure you want to delete this card?",
+        "warning": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting..."
+      },
+      "errors": {
+        "setDefault": "Error setting default card.",
+        "invoiceUrl": "Invoice URL not found."
+      }
+    },
+    "loading": {
+      "processing": "Processing...",
+      "data": "Loading data..."
+    },
+    "addCard": {
+      "title": "Add new card",
+      "cardholderName": "Name on card",
+      "cardholderPlaceholder": "John Doe",
+      "cardNumber": "Card number",
+      "expiryDate": "Expiry date",
+      "cvc": "CVC",
+      "country": "Country or region",
+      "postalCode": {
+        "label": "Postal Code",
+        "usPlaceholder": "Ex: 94105",
+        "gbPlaceholder": "Ex: SW1A 1AA"
+      },
+      "consent": "Save card for future payments and accept terms.",
+      "buttons": {
+        "cancel": "Cancel",
+        "add": "Add card",
+        "adding": "Adding..."
+      },
+      "errors": {
+        "stripeNotLoaded": "Stripe is not loaded correctly",
+        "cardholderRequired": "Cardholder name is required",
+        "consentRequired": "User must consent to save the card for future payments",
+        "cardElementNotFound": "Card element not found",
+        "authenticationFailed": "Card authentication did not complete successfully",
+        "paymentMethodNotFound": "Payment method not obtained from SetupIntent"
+      }
+    }
+  },
+  "culinarium": {
+    "form": {
+      "commonIngredients": {
+        "chicken": "Pollo",
+        "beef": "Carne", 
+        "fish": "Pescado",
+        "eggs": "Huevos",
+        "milk": "Leche",
+        "cheese": "Queso",
+        "rice": "Arroz",
+        "pasta": "Pasta",
+        "bread": "Pan",
+        "potatoes": "Patatas",
+        "onion": "Cebolla",
+        "garlic": "Ajo",
+        "tomato": "Tomate",
+        "bellPepper": "Pimiento",
+        "carrot": "Zanahoria",
+        "oliveOil": "Aceite de oliva"
+      },
+       "actions": {
+        "regenerate": "regenerate a recipe",
+        "generate": "generate a recipe"
+      },
+      "title": "Culinarium - Find Your Recipe",
+      "description": "Find your ideal recipe with Culinarium's interactive form.",
+      "sections": {
+        "ingredients": {
+          "title": "What do you have on hand?",
+          "placeholder": "E.g.: Chicken, rice, tomato...",
+          "instructions": "Type an ingredient and press <b>Enter</b> to add it. Tap to delete.",
+          "suggestions": "Suggested ingredients:",
+          "empty": "Start adding your ingredients!",
+          "error": "Please add at least one ingredient!",
+          "addButton": "Add",
+          "touchHint": "Tap ingredients to delete them."
+        },
+        "time": {
+          "title": "How much time do you have?",
+          "noLimit": "No time limit",
+          "options": {
+            "15": "15 minutes",
+            "30": "30 minutes",
+            "45": "45 minutes",
+            "60": "1 hour",
+            "90": "1 hour 30 minutes",
+            "120": "2 hours"
+          }
+        },
+        "difficulty": {
+          "title": "Difficulty level",
+          "description": "Select the difficulty level you'd prefer for the recipe.",
+          "levels": {
+            "beginner": "Beginner",
+            "intermediate": "Intermediate",
+            "chef": "Chef"
+          }
+        },
+        "mealTime": {
+          "title": "What meal is it for?",
+          "options": {
+            "breakfast": {
+              "label": "Breakfast",
+              "emoji": "☕"
+            },
+            "lunch": {
+              "label": "Lunch",
+              "emoji": "🍲"
+            },
+            "dinner": {
+              "label": "Dinner",
+              "emoji": "🌙"
+            },
+            "snack": {
+              "label": "Snack",
+              "emoji": "🍎"
+            }
+          },
+          "error": "Please select a meal time!"
+        },
+        "diners": {
+          "title": "How many people will eat?",
+          "premiumBadge": "PREMIUM"
+        },
+        "restrictions": {
+          "title": "Any dietary restrictions?",
+          "description": "Select any dietary preferences.",
+          "premiumDescription": "With Premium, you can set these dietary restrictions:",
+          "avoidTitle": "Ingredients to avoid:",
+          "avoidPlaceholder": "E.g.: Peanuts, cilantro, mushrooms...",
+          "avoidInstructions": "Type an ingredient and press Enter to add it.",
+          "premiumAvoid": "Premium feature – Subscribe to use",
+          "empty": "Add ingredients you want to avoid!",
+          "options": {
+            "vegetarian": "Vegetarian",
+            "vegan": "Vegan",
+            "glutenFree": "Gluten-Free",
+            "lactoseFree": "Lactose-Free",
+            "keto": "Keto"
+          }
+        },
+        "cuisine": {
+          "title": "Cuisine style?",
+          "premiumDescription": "With Premium, you can choose from these cuisine styles:",
+          "styles": {
+            "japanese": {
+              "label": "Japanese",
+              "icon": "sushi"
+            },
+            "mexican": {
+              "label": "Mexican",
+              "icon": "taco"
+            },
+            "italian": {
+              "label": "Italian",
+              "icon": "pizza"
+            },
+            "american": {
+              "label": "American",
+              "icon": "hamburger"
+            },
+            "spanish": {
+              "label": "Spanish",
+              "icon": "rice"
+            },
+            "jamaican": {
+              "label": "Jamaican",
+              "icon": "chopsticks"
+            },
+            "indian": {
+              "label": "Indian",
+              "icon": "fastfood"
+            }
+          }
+        },
+        "utensils": {
+          "title": "Available utensils",
+          "description": "Click to enable/disable the utensils you have.",
+          "done": "Done",
+          "list": {
+            "oven": "Oven",
+            "microwave": "Microwave",
+            "airfryer": "Airfryer",
+            "pan": "Frying Pan",
+            "pot": "Pot",
+            "blender": "Blender",
+            "mixer": "Mixer",
+            "grill": "Grill",
+            "board": "Cutting Board",
+            "peeler": "Peeler"
+          }
+        }
+      },
+      "buttons": {
+        "generate": {
+          "loadingUser": "Loading user...",
+          "generating": "Generating Recipe...",
+          "ready": "Generate My Recipe!",
+          "cost": "Cost: {{cost}} tokens"
+        },
+        "utensils": "Utensils"
+      },
+      "messages": {
+        "authError": "Please sign up to generate recipes and manage your tokens.",
+        "tokenError": "⚡ You need {{tokens}} tokens to {{action}}. You currently have {{current}} tokens. Buy more tokens from the side menu.",
+        "success": "Recipe {{action}} successfully! {{tokens}} tokens have been deducted.",
+        "duplicateIngredient": "Ingredient already added",
+        "duplicateExcluded": "Ingredient to avoid already added",
+        "usedBefore": "Used before",
+        "generatingImage": "The image will be generated in the background."
+      },
+      "loading": {
+        "title": "Generating your Recipe...",
+        "subtitle": "The image will be generated in the background."
+      }
+    }
+  },
+  "macronutrients": {
+    "title": "Macronutrients",
+    "warning": "Use responsibly ⚠️",
+    "modes": {
+      "basic": "Basic",
+      "pro": "Pro"
+    },
+    "basic": {
+      "freeMode": "Quick mode",
+      "presets": {
+        "gain_muscle": {
+          "label": "Gain muscle",
+          "emoji": "🏋️"
+        },
+        "more_carbs": {
+          "label": "More energy", 
+          "emoji": "⚡"
+        },
+        "more_fats": {
+          "label": "More satiating",
+          "emoji": "🥑"
+        }
+      }
+    },
+    "pro": {
+      "calories": "Calories",
+      "caloriesLabel": "Target calories",
+      "protein": "Proteins 🥩",
+      "carbs": "Carbs 🍚", 
+      "fats": "Fats 🥑",
+      "total": "Total",
+      "approximate": "Approximate values",
+      "grams": "g"
+    },
+    "premium": {
+      "badge": "PREMIUM",
+      "tooltip": "Pro feature — requires subscription to edit",
+      "upgradePrompt": "Access {{label}} (Premium)",
+      "upgradeGeneric": "Premium feature"
+    }
+  },
+  "ingredients": {
+    "chicken": "Chicken",
+    "beef": "Beef",
+    "fish": "Fish",
+    "eggs": "Eggs",
+    "milk": "Milk",
+    "cheese": "Cheese",
+    "rice": "Rice",
+    "pasta": "Pasta",
+    "bread": "Bread",
+    "potatoes": "Potatoes",
+    "onion": "Onion",
+    "garlic": "Garlic",
+    "tomato": "Tomato",
+    "pepper": "Pepper",
+    "carrot": "Carrot",
+    "olive_oil": "Olive oil"
+  },
+  "notFound": {
+    "errorCode": "404",
+    "title": "Page not found",
+    "description": "Sorry, we couldn't find the page you're looking for.",
+    "button": "Return to home"
+  },
+  "emails": {
+    "welcome": {
+      "title": "Welcome to the community, {{name}}!",
+      "message": "We're thrilled to have you on board. Get ready for a unique culinary adventure where artificial intelligence helps you create spectacular dishes. Your kitchen is about to transform!",
+      "button": "Start Cooking"
+    },
+    "unsubscribe": {
+      "title": "We'll miss you, {{name}}!",
+      "message1": "We have received your request to cancel your subscription. We want to thank you for being part of our culinary community and hope you'll join us again soon. Your account and access to all our recipes will remain active until {{endDate}}.",
+      "message2": "If you change your mind, you just need to log back in and from My Profile you can reactivate your subscription before it ends.",
+      "button": "Return to Culinarium"
+    },
+    "common": {
+      "company": "Culinarium",
+      "copyright": "All rights reserved.",
+      "links": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "cookies": "Cookie Policy"
+      }
+    }
+  },
+  "consent": {
+    "modal": {
+      "title": "Policy and Terms",
+      "message": "By continuing to use this site, you confirm that you accept our",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy", 
+      "cookies": "Cookies Policy",
+      "acceptButton": "Accept",
+      "acceptingButton": "Accepting...",
+      "errors": {
+        "checkConsent": "Error checking consent:",
+        "saveConsent": "Error saving consent:",
+        "requestError": "Error in consent request:"
+      }
+    }
+  },
+  "and":" and ",
+  "infoBox": {
+    "badge": "Smart Cooking",
+    "title": "Revolutionize your way of",
+    "cooking": "cooking",
+    "description": "Culinarium uses artificial intelligence to transform simple ingredients into extraordinary recipes, perfectly adapted to your tastes and needs.",
+    "features": {
+      "recipeGeneration": {
+        "name": "AI Recipe Generation",
+        "description": "Create personalized recipes from ingredients you have at home, thanks to our advanced culinary artificial intelligence."
+      },
+      "adaptedRecipes": {
+        "name": "Smart Adapted Recipes",
+        "description": "Our AI learns from your food preferences and dietary needs to suggest the perfect recipes for you."
+      },
+      "enhancedExperience": {
+        "name": "Enhanced Culinary Experience",
+        "description": "Enjoy an intuitive interface that makes cooking more fun and accessible for all skill levels."
+      },
+      "macrosCalculation": {
+        "name": "Macros and Calories Calculation",
+        "description": "Check the nutritional breakdown of each recipe and adjust portions to automatically recalculate calories and macros."
+      }
+    }
+  },
+  "pricing": {
+    "section": {
+      "label": "PRICING",
+      "title": "Choose the plan that will take you to the next level",
+      "subtitle": "Ready to get started? Choose your plan and start cooking with AI magic."
+    },
+    "plans": {
+      "free": {
+        "title": "Free",
+        "description": "Perfect for starting to explore AI cooking.",
+        "price": "0€",
+        "features": [
+          "5 free recipes per month (50 tokens)",
+          "Basic recipe creation",
+          "Limited functionalities",
+          "No dietary restrictions",
+          "No specific cooking styles"
+        ]
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Unlock your culinary potential without limits!",
+        "price": "7.99€",
+        "features": [
+          "30 recipes per month (300 tokens)",
+          "All premium functionalities",
+          "Custom dietary restrictions",
+          "Cooking styles (Japanese, Spanish...)",
+          "Priority support",
+          "Early access to new features"
+        ]
+      }
+    },
+    "common": {
+      "perMonth": "/month",
+      "getStarted": "Get Started"
+    }
+  },
+  "faq": {
+    "section": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about Culinarium",
+      "description": "We resolve the most common questions about our platform and services."
+    },
+    "questions": [
+      {
+        "question": "How does AI recipe generation work?",
+        "answer": "Our platform uses state-of-the-art artificial intelligence, powered by OpenAI technology, to analyze your ingredients and generate personalized recipes tailored to your tastes and needs."
+      },
+      {
+        "question": "Are there options for special diets?",
+        "answer": "Absolutely. Culinarium supports multiple diet types, including vegetarian, vegan, keto, gluten-free and more."
+      },
+      {
+        "question": "Are there recipes in multiple languages?",
+        "answer": "Currently they are only available in Spanish and English."
+      },
+      {
+        "question": "What happens if I run out of tokens?",
+        "answer": "You can purchase additional packages from your account at any time to continue generating recipes. You can also wait for the next time your current plan tokens reset, even if it's the free one."
+      },
+      {
+        "question": "Do you have a free version?",
+        "answer": "Yes, we offer a free plan that includes 50 monthly tokens so you can try our service."
+      },
+      {
+        "question": "Are subscription tokens permanent?",
+        "answer": "No, the tokens you receive with your subscription are not transferable from one period to another. At the end of the subscription period, the token balance is reset and you receive the amount corresponding to the new period. Keep in mind that unused tokens are not refunded."
+      },
+      {
+        "question": "How can I cancel my subscription?",
+        "answer": "You can cancel your subscription at any time from the profile page. The cancellation will be effective at the end of the current billing period."
+      },
+      {
+        "question": "Do you offer refunds?",
+        "answer": "We do not offer refunds. Once you buy tokens, they stay on the page for consumption."
+      },
+      {
+        "question": "Do you offer technical support?",
+        "answer": "Yes, you can contact us by email by sending us a message to culinariumofficial@gmail.com."
+      },
+      {
+        "question": "Can I suggest new features or improvements?",
+        "answer": "Yes, we love receiving suggestions. You can send them through our email culinariumofficial@gmail.com."
+      }
+    ],
+    "buttons": {
+      "startNow": "Get Started"
+    },
+    "contact": {
+      "message": "Can't find the answer you're looking for?",
+      "linkText": "Contact us"
+    }
+  }
+}

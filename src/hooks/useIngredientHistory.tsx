@@ -1,11 +1,25 @@
 import { useState, useEffect } from 'react';
+import { TFunction } from 'i18next';
 
 const STORAGE_KEY = 'ingredient_history';
 
 const COMMON_INGREDIENTS: string[] = [
-  'Pollo', 'Carne', 'Pescado', 'Huevos', 'Leche', 'Queso',
-  'Arroz', 'Pasta', 'Pan', 'Patatas', 'Cebolla', 'Ajo',
-  'Tomate', 'Pimiento', 'Zanahoria', 'Aceite de oliva'
+  'ingredients.chicken',
+  'ingredients.beef',
+  'ingredients.fish',
+  'ingredients.eggs',
+  'ingredients.milk',
+  'ingredients.cheese',
+  'ingredients.rice',
+  'ingredients.pasta',
+  'ingredients.bread',
+  'ingredients.potatoes',
+  'ingredients.onion',
+  'ingredients.garlic',
+  'ingredients.tomato',
+  'ingredients.pepper',
+  'ingredients.carrot',
+  'ingredients.olive_oil',
 ];
 
 interface UseIngredientHistoryReturn {
@@ -14,7 +28,7 @@ interface UseIngredientHistoryReturn {
   getSuggestions: (query: string, currentIngredients?: string[]) => string[];
 }
 
-export const useIngredientHistory = (): UseIngredientHistoryReturn => {
+export const useIngredientHistory = (t: TFunction): UseIngredientHistoryReturn => {
   const [ingredientHistory, setIngredientHistory] = useState<string[]>(COMMON_INGREDIENTS);
 
   useEffect(() => {

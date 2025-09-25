@@ -3,39 +3,41 @@ import { motion } from "framer-motion";
 import { PiCookingPotFill } from "react-icons/pi";
 import { GiMeal, GiWeightScale } from "react-icons/gi";
 import { RiSparklingFill } from "react-icons/ri";
+import { useTranslation } from "react-i18next";
 
-const features = [
-  {
-    name: 'Generación de recetas con IA',
-    description:
-      'Crea recetas personalizadas a partir de los ingredientes que tienes en casa, gracias a nuestra inteligencia artificial culinaria avanzada.',
-    icon: PiCookingPotFill,
-    gradient: 'linear-gradient(135deg, #E67E22 0%, #C2651A 100%)',
-  },
-  {
-    name: 'Recetas inteligentes adaptadas',
-    description: 'Nuestra IA aprende de tus preferencias alimentarias y dietéticas para sugerirte las recetas perfectas para ti.',
-    icon: GiMeal,
-    gradient: 'linear-gradient(135deg, #2C3E50 0%, #1A252F 100%)',
-  },
-  {
-    name: 'Experiencia culinaria mejorada',
-    description:
-      'Disfruta de una interfaz intuitiva que hace que cocinar sea más divertido y accesible para todos los niveles.',
-    icon: RiSparklingFill,
-    gradient: 'linear-gradient(135deg, #E67E22 20%, #2C3E50 80%)',
-  },
-  {
-    name: 'Cálculo de macros y calorías',
-    description:
-      'Consulta el desglose nutricional de cada receta y ajusta las porciones para recalcular automáticamente calorías y macros.',
-    icon: GiWeightScale,
-    gradient: 'linear-gradient(135deg, #1ABC9C 0%, #16A085 100%)',
-  }
-];
+
 
 
 export default function InfoBox() {
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      name: t("infoBox.features.recipeGeneration.name"),
+      description: t("infoBox.features.recipeGeneration.description"),
+      icon: PiCookingPotFill,
+      gradient: 'linear-gradient(135deg, #E67E22 0%, #C2651A 100%)',
+    },
+    {
+      name: t("infoBox.features.adaptedRecipes.name"),
+      description: t("infoBox.features.adaptedRecipes.description"),
+      icon: GiMeal,
+      gradient: 'linear-gradient(135deg, #2C3E50 0%, #1A252F 100%)',
+    },
+    {
+      name: t("infoBox.features.enhancedExperience.name"),
+      description: t("infoBox.features.enhancedExperience.description"),
+      icon: RiSparklingFill,
+      gradient: 'linear-gradient(135deg, #E67E22 20%, #2C3E50 80%)',
+    },
+    {
+      name: t("infoBox.features.macrosCalculation.name"),
+      description: t("infoBox.features.macrosCalculation.description"),
+      icon: GiWeightScale,
+      gradient: 'linear-gradient(135deg, #1ABC9C 0%, #16A085 100%)',
+    }
+  ];
+
   return (
     <div style={{
       backgroundColor: '#FDF5E6',
@@ -75,7 +77,7 @@ export default function InfoBox() {
               letterSpacing: '1px'
             }}
           >
-            Cocina Inteligente
+            {t("infoBox.badge")}
           </motion.div>
 
           <motion.h1
@@ -91,14 +93,14 @@ export default function InfoBox() {
               marginBottom: '1.5rem'
             }}
           >
-            Revoluciona tu forma de{' '}
+            {t("infoBox.title")}{' '}
             <span style={{
               background: 'linear-gradient(135deg, #E67E22, #C2651A)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              cocinar
+              {t("infoBox.cooking")}
             </span>
           </motion.h1>
 
@@ -115,8 +117,7 @@ export default function InfoBox() {
               lineHeight: '1.6'
             }}
           >
-            Culinarium utiliza inteligencia artificial para transformar ingredientes simples
-            en recetas extraordinarias, adaptadas perfectamente a tus gustos y necesidades.
+            {t("infoBox.description")}
           </motion.p>
         </motion.div>
 

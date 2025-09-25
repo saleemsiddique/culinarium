@@ -7,8 +7,8 @@ import { TokenPurchasesProvider } from "@/context/tokenpurchases-context";
 import { StripeProvider } from "@/context/stripe-context";
 import ConsentModal from "@/components/ConsentModal";
 import AnalyticsGate from "@/components/AnalyticsGate"; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-
+import I18nProvider from "@/context/i18n-context";
+import AppReadyProvider from "@/context/appready-context";
 export const metadata = {
   title: "Culinarium – Generador de recetas con IA",
   description:
@@ -57,10 +57,9 @@ export const metadata = {
     creator: "@CulinariumOfficial",
   },
   icons: {
-    icon: '/Logo-Culinarium.png', // Debe estar en /public
+    icon: "/Logo-Culinarium.png", // Debe estar en /public
   },
 };
-
 
 export default function RootLayout({
   children,
@@ -72,15 +71,19 @@ export default function RootLayout({
           <SubscriptionProvider>
             <TokenPurchasesProvider>
               <StripeProvider>
-                <Header />
+                <I18nProvider>
+                  <AppReadyProvider>
+                  <Header />
 
-                {/* Modal que solo aparece si es necesario */}
-                {<ConsentModal />}
+                  {/* Modal que solo aparece si es necesario */}
+                  {<ConsentModal />}
 
-                {/* Contenedor que crece */}
-                <div className="flex-1 flex">{children}</div>
+                  {/* Contenedor que crece */}
+                  <div className="flex-1 flex">{children}</div>
 
-                <Footer />
+                  <Footer />
+                  </AppReadyProvider>
+                </I18nProvider>
               </StripeProvider>
             </TokenPurchasesProvider>
           </SubscriptionProvider>

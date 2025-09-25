@@ -5,6 +5,7 @@ import EmbeddedCheckoutButton from "../EmbeddedCheckoutForm";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { useTranslation } from "react-i18next";
 
 interface PremiumModalProps {
   onClose: () => void;
@@ -17,21 +18,18 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
   user,
 }) => {
   useBodyScrollLock(true); // Bloquea el scroll mientras el modal esté montado
+  const { t } = useTranslation();
 
   const isSubscribed = user?.isSubscribed || false;
-  const features = [
-    "300 tokens permiten acceder a 30 recetas distintas",
-    "Añade restricciones dietéticas para excluir ingredientes no deseados",
-    "Elige estilos de cocina de distintos países para un toque típico",
-  ];
+  const features: string[] = t("premium.modal.notSubscribed.features", { returnObjects: true }) as string[];
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+};
 
   return (
     <AnimatePresence>
@@ -51,7 +49,7 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
           {/* Botón de cerrar */}
           <button
             onClick={onClose}
-            aria-label="Cerrar modal"
+            aria-label={t("premium.modal.close")}
             className="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors z-10"
           >
             <X className="w-6 h-6" />
@@ -64,12 +62,15 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                 <Crown className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Culinarium Premium
+                {t("premium.modal.title")}
               </h2>
               <p className="text-gray-600 px-4 sm:px-0">
                 {isSubscribed
-                  ? "¡Gracias por ser un suscriptor Premium!"
-                  : `Hola ${user?.firstName || 'allí'}, desbloquea todas las funciones avanzadas.`}
+                  ? t("premium.modal.subscribed.thankYou")
+                  : t("premium.modal.notSubscribed.greeting", { 
+                      name: user?.firstName || t("premium.modal.notSubscribed.greetingFallback") 
+                    })
+                }
               </p>
             </div>
 
@@ -80,15 +81,16 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                     <Star className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    ¡Ya eres un suscriptor Premium!
+                    {t("premium.modal.subscribed.title")}
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Mantienes tus tokens y acceso a todas las funcionalidades premium.
+                    {t("premium.modal.subscribed.message")}
                   </p>
                   <p className="text-gray-600 text-sm mt-4">
-                    Tu suscripción se renovará automáticamente el{" "}
                     <span className="font-semibold">
-                      {user?.tokens_reset_date ? formatDate(user.tokens_reset_date.toDate()) : 'N/A'}
+                      {t("premium.modal.subscribed.renewal", { 
+                      date: user?.tokens_reset_date ? formatDate(user.tokens_reset_date.toDate()) : 'N/A'
+                    })}
                     </span>
                     .
                   </p>
@@ -103,8 +105,8 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                   <span className="text-gray-600 ml-2">/mes</span>
                 </div>
                 <ul className="space-y-3 text-left">
-                  {features.map((item) => (
-                    <li key={item} className="flex items-start text-sm md:text-base">
+                  {features.map((item, index) => (
+                    <li key={index} className="flex items-start text-sm md:text-base">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mr-3" />
                       <span className="text-gray-700">{item}</span>
                     </li>
@@ -122,13 +124,13 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                   onClick={onClose}
                   className="w-full sm:w-auto py-3 px-6 border-2 border-gray-300 rounded-full font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                 >
-                  Cerrar
+                  {t("premium.modal.subscribed.close")}
                 </button>
                 <Link
                   href="/profile"
                   className="w-full sm:w-auto flex items-center justify-center py-3 px-6 bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  Gestionar Suscripción
+                  {t("premium.modal.subscribed.manage")}
                 </Link>
               </div>
             ) : (
@@ -137,7 +139,7 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({
                   onClick={onClose}
                   className="w-full sm:w-auto py-3 px-6 border-2 border-gray-300 rounded-full font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
                 >
-                  Cancelar
+                  {t("premium.modal.notSubscribed.cancel")}
                 </button>
                 <EmbeddedCheckoutButton
                   priceId={"price_1RwHJCRpBiBhmezm4D1fPQt5"}

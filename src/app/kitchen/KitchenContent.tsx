@@ -47,6 +47,8 @@ import {
   mdiSilverwareForkKnife,
   mdiKnife
 } from "@mdi/js";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 // --- Helpers de imagen (compresión a <1MB en el cliente) ---
 async function loadImageFromDataUrl(
@@ -198,8 +200,9 @@ const CulinariumForm: React.FC = () => {
   const [ingredientError, setIngredientError] = useState<boolean>(false);
 
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const { t } = useTranslation();
   const { ingredientHistory, /*addToHistory,*/ getSuggestions } =
-    useIngredientHistory();
+    useIngredientHistory(t);
 
   // Nuevo estado: tiempo disponible
   const [availableTime, setAvailableTime] = useState<string>("30");
@@ -240,16 +243,16 @@ const CulinariumForm: React.FC = () => {
 
   // lista de utensilios importantes (puedes editar/añadir)
   const utensilsList = [
-    { key: "horno", label: "Horno", icon: mdiStove },
-    { key: "microondas", label: "Microondas", icon: mdiMicrowave },
-    { key: "airfryer", label: "Airfryer", icon: mdiPan },        // fallback visual (no icon MDI específico)
-    { key: "sarten", label: "Sartén", icon: mdiPan },
-    { key: "olla", label: "Olla", icon: mdiPot },
-    { key: "batidora", label: "Batidora", icon: mdiBlender },
-    { key: "licuadora", label: "Licuadora", icon: mdiBlender },
-    { key: "grill", label: "Plancha", icon: mdiGrill },
-    { key: "tabla", label: "Tabla de cortar", icon: mdiSilverwareForkKnife }, // uso utensilios genérico
-    { key: "pelador", label: "Pelador", icon: mdiKnife }
+    { key: "horno", label: t("culinarium.form.sections.utensils.list.oven"), icon: mdiStove },
+    { key: "microondas", label: t("culinarium.form.sections.utensils.list.microwave"), icon: mdiMicrowave },
+    { key: "airfryer", label: t("culinarium.form.sections.utensils.list.airfryer"), icon: mdiPan },        // fallback visual (no icon MDI específico)
+    { key: "sarten", label: t("culinarium.form.sections.utensils.list.pan"), icon: mdiPan },
+    { key: "olla", label: t("culinarium.form.sections.utensils.list.pot"), icon: mdiPot },
+    { key: "batidora", label: t("culinarium.form.sections.utensils.list.blender"), icon: mdiBlender },
+    { key: "licuadora", label: t("culinarium.form.sections.utensils.list.mixer"), icon: mdiBlender },
+    { key: "grill", label: t("culinarium.form.sections.utensils.list.grill"), icon: mdiGrill },
+    { key: "tabla", label: t("culinarium.form.sections.utensils.list.board"), icon: mdiSilverwareForkKnife }, // uso utensilios genérico
+    { key: "pelador", label: t("culinarium.form.sections.utensils.list.peeler"), icon: mdiKnife }
   ];
 
 
@@ -269,52 +272,52 @@ const CulinariumForm: React.FC = () => {
   };
 
   const mealTimes = [
-    { label: "Desayuno", value: "breakfast" },
-    { label: "Comida", value: "lunch" },
-    { label: "Cena", value: "dinner" },
-    { label: "Snack", value: "snack" },
+    { label: t("culinarium.form.sections.mealTime.options.breakfast.label"), value: "breakfast" },
+    { label: t("culinarium.form.sections.mealTime.options.lunch.label"), value: "lunch" },
+    { label: t("culinarium.form.sections.mealTime.options.dinner.label"), value: "dinner" },
+    { label: t("culinarium.form.sections.mealTime.options.snack.label"), value: "snack" },
   ];
   const MAX_DINERS = 8;
   const dietaryOptions = [
-    { label: "Vegetariano", value: "vegetarian" },
-    { label: "Vegano", value: "vegan" },
-    { label: "Sin Gluten", value: "gluten-free" },
-    { label: "Sin Lactosa", value: "lactose-free" },
-    { label: "Keto", value: "keto" },
+    { label: t("culinarium.form.sections.restrictions.options.vegetarian"), value: "vegetarian" },
+    { label: t("culinarium.form.sections.restrictions.options.vegan"), value: "vegan" },
+    { label: t("culinarium.form.sections.restrictions.options.glutenFree"), value: "gluten-free" },
+    { label: t("culinarium.form.sections.restrictions.options.lactoseFree"), value: "lactose-free" },
+    { label: t("culinarium.form.sections.restrictions.options.keto"), value: "keto" },
   ];
   const cuisineStyles = [
     {
-      label: "Japonesa",
+      label: t("culinarium.form.sections.cuisine.styles.japanese.label"),
       value: "japanese",
       icon: <GiSushis className="w-6 h-6" />,
     },
     {
-      label: "Mexicana",
+      label: t("culinarium.form.sections.cuisine.styles.mexican.label"),
       value: "mexican",
       icon: <GiTacos className="w-6 h-6" />,
     },
     {
-      label: "Italiana",
+      label: t("culinarium.form.sections.cuisine.styles.italian.label"),
       value: "italian",
       icon: <GiPizzaSlice className="w-6 h-6" />,
     },
     {
-      label: "Americana",
+      label: t("culinarium.form.sections.cuisine.styles.american.label"),
       value: "american",
       icon: <GiHamburger className="w-6 h-6" />,
     },
     {
-      label: "Española",
+      label: t("culinarium.form.sections.cuisine.styles.spanish.label"),
       value: "spanish",
       icon: <GiBowlOfRice className="w-6 h-6" />,
     },
     {
-      label: "Jamaiquina",
+      label: t("culinarium.form.sections.cuisine.styles.jamaican.label"),
       value: "jamaican",
       icon: <GiChopsticks className="w-6 h-6 rotate-45" />,
     },
     {
-      label: "India",
+      label: t("culinarium.form.sections.cuisine.styles.indian.label"),
       value: "indian",
       icon: <MdOutlineFastfood className="w-6 h-6" />,
     },
@@ -404,7 +407,7 @@ const CulinariumForm: React.FC = () => {
     );
 
     if (isDuplicate) {
-      setToastMessage("Ingrediente ya añadido");
+      setToastMessage(t("culinarium.form.messages.duplicateIngredient"));
     } else {
       setIngredients((prev) => [...prev, value]);
       // addToHistory(value);
@@ -444,7 +447,7 @@ const CulinariumForm: React.FC = () => {
         return;
       }
       if (excludedIngredients.includes(value)) {
-        setToastMessage("Ingrediente a evitar ya añadido");
+        setToastMessage(t("culinarium.form.messages.duplicateExcluded"));
       } else {
         setExcludedIngredients((prev) => [...prev, value]);
       }
@@ -492,7 +495,7 @@ const CulinariumForm: React.FC = () => {
     // Check if the user is anonymous (not registered)
     if (firebaseUser.isAnonymous) {
       setToastMessage(
-        "Por favor, regístrate para generar recetas y gestionar tus tokens."
+        t("culinarium.form.messages.authError")
       );
       return;
     }
@@ -501,14 +504,18 @@ const CulinariumForm: React.FC = () => {
     const isRegeneration = searchParams.get("regenerate") === "1";
     const TOKENS_PER_RECIPE = isRegeneration ? 5 : calculateTokenCost();
     const recipeType = isRegeneration
-      ? "regenerar una receta"
-      : "generar una receta";
+      ? t("culinarium.form.actions.regenerate")
+      : t("culinarium.form.actions.generate");
 
     if (!hasEnoughTokens(TOKENS_PER_RECIPE)) {
       const currentTokens =
         (user.monthly_tokens || 0) + (user.extra_tokens || 0);
       setToastMessage(
-        `⚡ Necesitas ${TOKENS_PER_RECIPE} tokens para ${recipeType}. Tienes ${currentTokens} tokens disponibles. Compra más tokens desde el menú lateral.`
+        t("culinarium.form.messages.tokenError", {
+          tokens: TOKENS_PER_RECIPE,
+          action: recipeType,
+          current: currentTokens
+        })
       );
       setShowTokens(true);
       return;
@@ -572,6 +579,7 @@ const CulinariumForm: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
+          "Accept-Language":i18n.language
         },
         body: JSON.stringify(formData),
       });
@@ -627,7 +635,10 @@ const CulinariumForm: React.FC = () => {
       setStatus("success");
       const actionMessage = isRegeneration ? "regenerada" : "generada";
       setToastMessage(
-        `¡Receta ${actionMessage} exitosamente! Se han descontado ${TOKENS_PER_RECIPE} tokens.`
+        t("culinarium.form.messages.success", {
+          action: actionMessage,
+          tokens: TOKENS_PER_RECIPE
+        })
       );
 
       // STEP 3: Store recipe in sessionStorage and navigate (user sees recipe immediately)
@@ -937,10 +948,10 @@ const CulinariumForm: React.FC = () => {
       {showOnboarding && <Onboarding onClose={handleFinishOnboarding} />}
 
       <Head>
-        <title>Culinarium - Encuentra tu Receta</title>
+        <title>{t("culinarium.form.title")}</title>
         <meta
           name="description"
-          content="Encuentra tu receta ideal con el formulario interactivo de Culinarium."
+          content={t("culinarium.form.description")}
         />
       </Head>
 
@@ -958,7 +969,7 @@ const CulinariumForm: React.FC = () => {
             className="px-4 py-2 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)] hover:bg-[var(--primary)]/20 transition-colors flex items-center gap-2"
           >
             <GiChopsticks className="w-5 h-5" />
-            Utensilios
+            {t("culinarium.form.buttons.utensils")}
           </button>
         </div>
 
@@ -975,12 +986,12 @@ const CulinariumForm: React.FC = () => {
                   <span className="mr-2 text-[var(--highlight)] text-3xl">
                     🍳
                   </span>{" "}
-                  ¿Qué tienes a mano?
+                  {t("culinarium.form.sections.ingredients.title")}
                 </h2>
-                <p className="text-[var(--foreground)] mb-4 text-sm">
-                  Escribe un ingrediente y presiona <b>Enter</b> para añadirlo.
-                  Toca para borrar.
-                </p>
+                 <p 
+                  className="text-[var(--foreground)] mb-4 text-sm"
+                  dangerouslySetInnerHTML={{ __html: t("culinarium.form.sections.ingredients.instructions") }}
+                />
                 <div className="relative">
                   <input
                     type="text"
@@ -993,12 +1004,12 @@ const CulinariumForm: React.FC = () => {
                     onBlur={() =>
                       setTimeout(() => setShowSuggestions(false), 200)
                     }
-                    placeholder="Ej: Pollo, arroz, tomate..."
+                    placeholder={t("culinarium.form.sections.ingredients.placeholder")}
                     className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg ${ingredientError
                       ? "border-[var(--highlight)]"
                       : "border-[var(--primary)]"
                       }`}
-                    aria-label="Añadir ingrediente"
+                    aria-label={t("culinarium.form.sections.ingredients.title")}
                     autoComplete="off"
                   />
 
@@ -1007,7 +1018,7 @@ const CulinariumForm: React.FC = () => {
                     onClick={handleAddIngredient}
                     className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-[var(--highlight)] text-white rounded-lg hover:opacity-90 text-sm"
                   >
-                    Añadir
+                    {t("culinarium.form.sections.ingredients.addButton")}
                   </button>
 
                   {showSuggestions &&
@@ -1015,21 +1026,18 @@ const CulinariumForm: React.FC = () => {
                     0 && (
                       <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-[var(--primary)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
                         {getSuggestions(currentIngredient, ingredients).map(
-                          (suggestion, index) => (
-                            <button
-                              key={`${suggestion}-${index}`}
-                              onClick={() => handleSelectSuggestion(suggestion)}
-                              className="w-full text-left px-4 py-2 hover:bg-[var(--highlight)]/10 focus:bg-[var(--highlight)]/20 focus:outline-none transition-colors first:rounded-t-xl last:rounded-b-xl flex justify-between items-center"
-                            >
-                              <span className="text-[var(--foreground)]">
-                                {suggestion}
-                              </span>
-                              <span className="text-xs text-[var(--muted)]">
-                                • Usado antes
-                              </span>
-                            </button>
-                          )
-                        )}
+                            (suggestion, index) => (
+                              <button
+                                key={`${suggestion}-${index}`}
+                                onClick={() => handleSelectSuggestion(suggestion)}
+                                className="w-full text-left px-4 py-2 hover:bg-[var(--highlight)]/10 focus:bg-[var(--highlight)]/20 focus:outline-none transition-colors first:rounded-t-xl last:rounded-b-xl flex justify-between items-center"
+                              >
+                                <span className="text-[var(--foreground)]">
+                                  {t(suggestion)}   {/* 👈 traducir aquí */}
+                                </span>
+                              </button>
+                            )
+                          )}
                       </div>
                     )}
                 </div>
@@ -1038,34 +1046,32 @@ const CulinariumForm: React.FC = () => {
                 {currentIngredient === "" && (
                   <div className="mt-3">
                     <p className="text-xs text-gray-500 mb-2">
-                      Ingredientes sugeridos:
+                      {t("culinarium.form.sections.ingredients.suggestions")}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {ingredientHistory
-                        .filter(
-                          (ing) =>
-                            !ingredients
-                              .map((i) => i.toLowerCase())
-                              .includes(ing.toLowerCase())
-                        )
-                        .slice(0, 6)
-                        .map((ingredient) => (
-                          <button
-                            key={ingredient}
-                            onClick={() => handleSelectSuggestion(ingredient)}
-                            type="button"
-                            className="px-3 py-1 bg-orange-100 text-orange-600 text-sm rounded-full hover:bg-orange-200 transition-colors border border-orange-300"
-                          >
-                            + {ingredient}
-                          </button>
-                        ))}
+                         .filter( 
+                           (ing) =>
+                             !ingredients.map((i) => i.toLowerCase()).includes(ing.toLowerCase())
+                         )
+                         .slice(0, 6)
+                         .map((ingredient) => (
+                           <button
+                             key={ingredient}
+                             onClick={() => handleSelectSuggestion(ingredient)}
+                             type="button"
+                             className="px-3 py-1 bg-orange-100 text-orange-600 text-sm rounded-full hover:bg-orange-200 transition-colors border border-orange-300"
+                           >
+                             + {t(ingredient)}   {/* 👈 traducir aquí */}
+                           </button>
+                         ))}
                     </div>
                   </div>
                 )}
 
                 {ingredientError && (
                   <p className="text-[var(--highlight)] text-sm mt-2">
-                    ¡Por favor, añade al menos un ingrediente!
+                    {t("culinarium.form.sections.ingredients.error")}
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap max-h-[250px] overflow-y-auto custom-scrollbar">
@@ -1073,49 +1079,48 @@ const CulinariumForm: React.FC = () => {
                     {ingredients.map((ing) => (
                       <Tag
                         key={ing}
-                        label={ing}
-                        onRemove={handleRemoveIngredient}
+                        label={t(ing)}
+                        onRemove={() => handleRemoveIngredient(ing)}
                       />
                     ))}
                   </AnimatePresence>
                 </div>
                 {ingredients.length === 0 && !ingredientError && (
                   <p className="text-[var(--muted)] text-sm mt-2">
-                    ¡Empieza a añadir tus ingredientes!
+                    {t("culinarium.form.sections.ingredients.empty")}
                   </p>
                 )}
                 <p className="md:hidden text-[var(--highlight)] text-sm mt-2 flex items-center">
-                  <IoAddCircleOutline className="w-5 h-5 mr-1" /> Toca los
-                  ingredientes para borrarlos.
+                  <IoAddCircleOutline className="w-5 h-5 mr-1" /> {t("culinarium.form.sections.ingredients.touchHint")}
                 </p>
 
                 {/* NUEVA SECCIÓN: Tiempo disponible */}
                 <section className="mt-6">
                   <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">
-                    ¿Cuánto tiempo tienes?
+                    {t("culinarium.form.sections.time.title")}
                   </h3>
                   <select
                     value={availableTime}
                     onChange={(e) => setAvailableTime(e.target.value)}
                     className="w-full p-3 border border-[var(--primary)] rounded-xl focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent text-lg"
-                    aria-label="Seleccionar tiempo disponible"
+                    aria-label={t("culinarium.form.sections.time.title")}
                   >
-                    <option value="no_limit">Prefiero no limitar</option>
-                    <option value="15">15 minutos</option>
-                    <option value="30">30 minutos</option>
-                    <option value="45">45 minutos</option>
-                    <option value="60">1 hora</option>
-                    <option value="90">1 hora 30 minutos</option>
-                    <option value="120">2 horas</option>
+                    <option value="no_limit">{t("culinarium.form.sections.time.noLimit")}</option>
+                    <option value="15">{t("culinarium.form.sections.time.options.15")}</option>
+                    <option value="30">{t("culinarium.form.sections.time.options.30")}</option>
+                    <option value="45">{t("culinarium.form.sections.time.options.45")}</option>
+                    <option value="60">{t("culinarium.form.sections.time.options.60")}</option>
+                    <option value="90">{t("culinarium.form.sections.time.options.90")}</option>
+                    <option value="120">{t("culinarium.form.sections.time.options.120")}</option>
                   </select>
                 </section>
 
                 {/* NUEVA SECCIÓN: Dificultad (movida a Columna 1) */}
                 <section className="mt-4">
                   <h3 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center">
-                    <span className="mr-2 text-[var(--highlight)] text-2xl">🎯</span> Nivel de dificultad
+                    <span className="mr-2 text-[var(--highlight)] text-2xl">🎯</span> {t("culinarium.form.sections.difficulty.title")}
                   </h3>
-                  <p className="text-sm text-[var(--muted)] mb-3">Selecciona qué nivel prefieres que tenga la receta.</p>
+                  <p className="text-sm text-[var(--muted)] mb-3">{t("culinarium.form.sections.difficulty.description")}</p>
 
                   <div className="flex gap-3">
                     <button
@@ -1123,7 +1128,7 @@ const CulinariumForm: React.FC = () => {
                       onClick={() => setDifficulty('Principiante')}
                       className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Principiante' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
                     >
-                      Principiante
+                      {t("culinarium.form.sections.difficulty.levels.beginner")}
                     </button>
 
                     <button
@@ -1131,7 +1136,7 @@ const CulinariumForm: React.FC = () => {
                       onClick={() => setDifficulty('Intermedio')}
                       className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Intermedio' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
                     >
-                      Intermedio
+                      {t("culinarium.form.sections.difficulty.levels.intermediate")}
                     </button>
 
                     <button
@@ -1139,7 +1144,7 @@ const CulinariumForm: React.FC = () => {
                       onClick={() => setDifficulty('Chef')}
                       className={`px-3 py-2 rounded-lg text-sm font-semibold w-full ${difficulty === 'Chef' ? "bg-[var(--highlight)]/20 border-[var(--highlight)]" : "bg-[var(--background)] border border-[var(--primary)]"}`}
                     >
-                      Chef
+                      {t("culinarium.form.sections.difficulty.levels.chef")}
                     </button>
                   </div>
                 </section>
@@ -1156,7 +1161,7 @@ const CulinariumForm: React.FC = () => {
               >
                 <h2 className="text-lg font-bold text-[var(--foreground)] mb-3 flex items-center justify-center">
                   <span className="mr-2 text-[var(--highlight)] text-xl">☀️</span>{" "}
-                  ¿Para cuándo es?
+                  {t("culinarium.form.sections.mealTime.title")}
                 </h2>
                 <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">
                   {mealTimes.map((time) => (
@@ -1186,7 +1191,7 @@ const CulinariumForm: React.FC = () => {
                   ))}
                 </div>
                 {mealTimeError && (
-                  <p className="text-[var(--highlight)] text-sm mt-2 text-center">¡Por favor, selecciona un momento del día!</p>
+                  <p className="text-[var(--highlight)] text-sm mt-2 text-center">{t("culinarium.form.sections.mealTime.error")}</p>
                 )}
               </section>
 
@@ -1196,7 +1201,7 @@ const CulinariumForm: React.FC = () => {
               >
                 <h2 className="text-xl font-bold text-[var(--foreground)] mb-4 text-center flex items-center justify-center">
                   <span className="mr-2 text-[var(--primary)] text-2xl">👨‍👩‍👧‍👦</span>{" "}
-                  ¿Cuántos van a comer?
+                  {t("culinarium.form.sections.diners.title")}
                   {!user?.isSubscribed && (
                     <span className="ml-2 px-2 py-1 text-xs font-semibold bg-gradient-to-r from-orange-500 to-yellow-400 text-white rounded-full">PREMIUM</span>
                   )}
@@ -1236,9 +1241,9 @@ const CulinariumForm: React.FC = () => {
 
 
             {/* COLUMNA 3: MAS OPCIONES */}
-            <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar">
+            <div className="lg:col-span-1 flex flex-col space-y-6 lg:max-h-[70vh] lg:overflow-y-auto custom-scrollbar ">
               {/* Sección de Restricciones y Exclusiones (colapsable) */}
-              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow">
+              <section className="bg-[var(--background)] p-6 rounded-2xl form-custom-shadow ">
                 <button
                   type="button"
                   onClick={() =>
@@ -1267,7 +1272,7 @@ const CulinariumForm: React.FC = () => {
                     <span className="mr-2 text-[var(--primary)] text-3xl">
                       🚫
                     </span>
-                    <span>¿Alguna restricción?</span>
+                    <span>{t("culinarium.form.sections.restrictions.title")}</span>
                   </div>
                 </button>
                 <AnimatePresence>
@@ -1281,8 +1286,8 @@ const CulinariumForm: React.FC = () => {
                     >
                       <p className="text-[var(--foreground)] mb-4 text-sm">
                         {user?.isSubscribed
-                          ? "Selecciona si hay alguna preferencia dietética."
-                          : "Con Premium puedes configurar estas restricciones dietéticas:"}
+                          ? t("culinarium.form.sections.restrictions.description")
+                          : t("culinarium.form.sections.restrictions.premiumDescription")}
                       </p>
                       <div className="flex flex-wrap gap-3 mb-6 m-2">
                         {dietaryOptions.map((opt) => (
@@ -1313,12 +1318,12 @@ const CulinariumForm: React.FC = () => {
                         <span className="mr-2 text-[var(--highlight)] text-2xl">
                           ⚠️
                         </span>{" "}
-                        Ingredientes a evitar:
+                        {t("culinarium.form.sections.restrictions.avoidTitle")}
                       </h3>
                       <p className="text-[var(--foreground)] mb-2 text-sm">
                         {user?.isSubscribed
-                          ? "Escribe un ingrediente y presiona **Enter** para añadirlo."
-                          : "Con Premium puedes especificar ingredientes que prefieres evitar."}
+                          ? t("culinarium.form.sections.restrictions.avoidInstructions")
+                          : t("culinarium.form.sections.restrictions.premiumAvoid")}
                       </p>
                       <input
                         type="text"
@@ -1332,15 +1337,15 @@ const CulinariumForm: React.FC = () => {
                         }
                         placeholder={
                           user?.isSubscribed
-                            ? "Ej: Cacahuetes, cilantro, champiñones..."
-                            : "Función Premium - Suscríbete para usar"
+                            ? t("culinarium.form.sections.restrictions.avoidPlaceholder")
+                          : t("culinarium.form.sections.restrictions.premiumAvoid")
                         }
                         disabled={!user?.isSubscribed}
                         className={`w-full p-3 border rounded-xl text-lg ${!user?.isSubscribed
                           ? "opacity-50 cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                           : "border-[var(--primary)] focus:ring-2 focus:ring-[var(--highlight)] focus:border-transparent"
                           }`}
-                        aria-label="Añadir ingrediente a evitar"
+                        aria-label={t("culinarium.form.sections.restrictions.avoidTitle")}
                       />
                       <div className="mt-4 flex flex-wrap min-h-[60px] max-h-[200px] overflow-y-auto custom-scrollbar">
                         <AnimatePresence>
@@ -1355,7 +1360,7 @@ const CulinariumForm: React.FC = () => {
                       </div>
                       {excludedIngredients.length === 0 && (
                         <p className="text-[var(--muted)] text-sm mt-2">
-                          ¡Añade ingredientes que quieras evitar!
+                          {t("culinarium.form.sections.restrictions.empty")}
                         </p>
                       )}
                     </motion.div>
@@ -1391,7 +1396,7 @@ const CulinariumForm: React.FC = () => {
                     <span className="mr-2 text-[var(--highlight)] text-3xl">
                       🌍
                     </span>
-                    <span>¿Qué estilo te apetece?</span>
+                    <span>{t("culinarium.form.sections.cuisine.title")}</span>
                   </div>
                 </button>
 
@@ -1406,8 +1411,7 @@ const CulinariumForm: React.FC = () => {
                     >
                       {!user?.isSubscribed && (
                         <p className="text-[var(--foreground)] mb-4 text-sm">
-                          Con Premium puedes elegir entre estos estilos de
-                          cocina:
+                          {t("culinarium.form.sections.cuisine.premiumDescription")}
                         </p>
                       )}
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 m-1">
@@ -1452,7 +1456,7 @@ const CulinariumForm: React.FC = () => {
                 initialBasicGoal={null}
                 onChange={handleMacrosChange}
                 isSubscribed={user?.isSubscribed}
-                onRequestUpgrade={() => setShowTokens(true)}
+                onRequestUpgrade={() => {}}
               />
 
             </div>
@@ -1476,29 +1480,29 @@ const CulinariumForm: React.FC = () => {
             {loadingUser ? (
               <>
                 <FaUserClock className="text-2xl mb-1" />
-                <span>Cargando usuario...</span>
+                <span>{t("culinarium.form.buttons.generate.loadingUser")}</span>
               </>
             ) : status === "loading" ? (
               <>
                 <FaSpinner className="text-2xl animate-spin mb-1" />
-                <span>Generando Receta...</span>
+                <span>{t("culinarium.form.buttons.generate.generating")}</span>
               </>
             ) : (
               <>
                 <span className="flex items-center gap-2">
                   <FaUtensils className="text-2xl" />
-                  ¡Genera mi Receta!
+                  {t("culinarium.form.buttons.generate.ready")}
                 </span>
                 <span className="text-sm font-light mt-1 flex items-center gap-1">
                   <FaCoins className="text-yellow-300" />
-                  Costo: {calculateTokenCost()} tokens
+                  {t("culinarium.form.buttons.generate.cost", { cost: calculateTokenCost() })}
                 </span>
               </>
             )}
           </motion.button>
           {status === "error" && (
             <p className="text-[var(--highlight)] text-center">
-              Error: {error}. Intenta de nuevo.
+              Error: {error}.
             </p>
           )}
         </form>
@@ -1535,10 +1539,10 @@ const CulinariumForm: React.FC = () => {
                 className="w-16 h-16 border-4 border-t-4 border-[var(--highlight)] border-t-transparent rounded-full"
               ></motion.div>
               <p className="text-xl font-semibold text-[var(--foreground)]">
-                Generando tu Receta...
+                {t("culinarium.form.loading.title")}
               </p>
               <p className="text-sm text-[var(--muted)]">
-                La imagen se generará en segundo plano.
+                {t("culinarium.form.messages.generatingImage")}
               </p>
             </motion.div>
           </motion.div>
@@ -1563,10 +1567,10 @@ const CulinariumForm: React.FC = () => {
               className="relative w-full md:max-w-xl bg-[var(--background)] rounded-2xl shadow-2xl p-6 z-50"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold">Utensilios disponibles</h3>
+                <h3 className="text-lg font-bold">{t("culinarium.form.sections.utensils.title")}</h3>
               </div>
 
-              <p className="text-sm text-[var(--muted)] mb-4">Haz clic para activar/desactivar los utensilios que tienes.</p>
+              <p className="text-sm text-[var(--muted)] mb-4">{t("culinarium.form.sections.utensils.description")}</p>
 
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {utensilsList.map((u) => {
@@ -1577,7 +1581,7 @@ const CulinariumForm: React.FC = () => {
                       type="button"
                       onClick={() => toggleUtensil(u.key)}
                       aria-pressed={active}
-                      title={active ? `Tienes: ${u.label}` : `No tienes: ${u.label}`}
+                      title={active ? `${t("common.youHave")}: ${u.label}` : `${t("common.youDontHave")}: ${u.label}`}
                       className={`flex flex-col items-center justify-center gap-1 p-3 rounded-full transition-all border 
             ${active ? "border-[var(--highlight)] bg-[var(--highlight)]/20 text-[var(--foreground)]" : "opacity-60 border border-[var(--primary)] bg-[var(--background)] text-[var(--muted)]"}`}
                     >
@@ -1594,7 +1598,7 @@ const CulinariumForm: React.FC = () => {
                   onClick={() => setShowUtensilsModal(false)}
                   className="px-4 py-2 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)] hover:bg-[var(--primary)]/20"
                 >
-                  Hecho
+                  {t("culinarium.form.sections.utensils.done")}
                 </button>
               </div>
             </motion.div>

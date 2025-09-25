@@ -5,8 +5,10 @@ import { useState, useEffect } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import { initializeApp } from "firebase/app";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
+import { useTranslation } from "react-i18next";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,19 +28,19 @@ export default function ResetPasswordPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+      setError(t("auth.resetPassword.errors.mismatch"));
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-        setError("La contraseña debe tener al menos 6 caracteres.");
-        setLoading(false);
-        return;
+      setError(t("auth.resetPassword.errors.minLength"));
+      setLoading(false);
+      return;
     }
 
     if (!oobCode) {
-      setError("Código de restablecimiento no válido. Por favor, intenta de nuevo.");
+      setError(t("auth.resetPassword.errors.invalidCode"));
       setLoading(false);
       return;
     }
@@ -61,7 +63,7 @@ export default function ResetPasswordPage() {
       setSuccess(true);
     } catch (err: any) {
       console.error("Error resetting password:", err);
-      setError("No se pudo cambiar la contraseña. El enlace puede haber expirado o ya fue usado.");
+      setError(t("auth.resetPassword.errors.default"));
     } finally {
       setLoading(false);
     }
@@ -72,13 +74,13 @@ export default function ResetPasswordPage() {
       <div className="h-full w-full bg-[#FDF5E6] flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border border-[#4A2C2A] text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-[#E67E22] mb-4">
-            ¡Contraseña Restablecida!
+            {t("auth.resetPassword.successTitle")}
           </h1>
           <p className="text-[#4A2C2A] mb-8">
-            Tu contraseña ha sido cambiada con éxito.
+            {t("auth.resetPassword.successSubtitle")}
           </p>
           <a href="/auth/login" className="text-[#E67E22] hover:text-[#C2651A] font-medium transition-colors">
-            Volver a Iniciar Sesión
+            {t("auth.resetPassword.backToLogin")}
           </a>
         </div>
       </div>
@@ -89,15 +91,15 @@ export default function ResetPasswordPage() {
     <div className="h-full w-full bg-[#FDF5E6] flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border border-[#4A2C2A] text-center">
         <h1 className="text-2xl md:text-3xl font-bold text-[#2C3E50] mb-2">
-          Establece una nueva contraseña
+          {t("auth.resetPassword.title")}
         </h1>
         <p className="text-[#4A2C2A] mb-8">
-          Introduce y confirma tu nueva contraseña.
+          {t("auth.resetPassword.subtitle")}
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-[#4A2C2A] mb-2 text-left">
-              Nueva contraseña
+              {t("auth.resetPassword.newPasswordLabel")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -107,14 +109,14 @@ export default function ResetPasswordPage() {
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Introduce tu nueva contraseña"
+                placeholder={t("auth.resetPassword.newPasswordPlaceholder")}
                 className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent"
               />
             </div>
           </div>
           <div>
             <label htmlFor="confirm-password" className="block text-sm font-medium text-[#4A2C2A] mb-2 text-left">
-              Confirmar contraseña
+              {t("auth.resetPassword.confirmPasswordLabel")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -124,7 +126,7 @@ export default function ResetPasswordPage() {
                 required
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Confirma tu nueva contraseña"
+                placeholder={t("auth.resetPassword.confirmPasswordPlaceholder")}
                 className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent"
               />
             </div>
@@ -136,12 +138,12 @@ export default function ResetPasswordPage() {
             disabled={loading}
           >
             {loading && <Loader2 size={20} className="animate-spin" />}
-            Cambiar Contraseña
+            {t("auth.resetPassword.submitButton")}
           </button>
         </form>
         <div className="mt-8">
           <a href="/auth/login" className="text-[#E67E22] hover:text-[#C2651A] font-medium transition-colors">
-            Volver a Iniciar Sesión
+            {t("auth.resetPassword.backToLogin")}
           </a>
         </div>
       </div>

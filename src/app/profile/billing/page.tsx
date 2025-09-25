@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import AddCardComponent from "@/components/AddCardComponent";
+import { useTranslation } from "react-i18next";
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ interface SuccessModalProps {
 }
 
 const SuccessModal = ({ isOpen, onClose, message }: SuccessModalProps) => {
+    const { t } = useTranslation();
+
   return (
     <>
       {isOpen && (
@@ -32,12 +35,12 @@ const SuccessModal = ({ isOpen, onClose, message }: SuccessModalProps) => {
           <div className="modal-box">
             <h3 className="font-bold text-lg text-green-600 flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
-              Éxito
+              {t("billing.modals.success.title")}
             </h3>
             <p className="py-4">{message}</p>
             <div className="modal-action">
               <button className="btn btn-primary" onClick={onClose}>
-                Cerrar
+                {t("billing.modals.success.close")}
               </button>
             </div>
           </div>
@@ -60,6 +63,7 @@ const ConfirmModal = ({
   onConfirm,
   loading,
 }: ConfirmModalProps) => {
+  const { t } = useTranslation();
   return (
     <>
       {isOpen && (
@@ -67,25 +71,25 @@ const ConfirmModal = ({
           <div className="modal-box">
             <h3 className="font-bold text-lg text-red-600 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
-              Confirmar acción
+              {t("billing.modals.confirm.title")}
             </h3>
             <p className="py-4">
-              ¿Estás seguro de que quieres eliminar esta tarjeta?
+              {t("billing.modals.confirm.message")}
               <span className="font-semibold">
                 {" "}
-                Esta acción no se puede deshacer.
+                {t("billing.modals.confirm.warning")}
               </span>
             </p>
             <div className="modal-action">
               <button className="btn" onClick={onClose} disabled={loading}>
-                Cancelar
+                {t("billing.modals.confirm.cancel")}
               </button>
               <button
                 className="btn btn-error"
                 onClick={onConfirm}
                 disabled={loading}
               >
-                {loading ? "Eliminando..." : "Eliminar"}
+                {loading ? t("billing.modals.confirm.deleting") : t("billing.modals.confirm.delete")}
               </button>
             </div>
           </div>
@@ -96,6 +100,7 @@ const ConfirmModal = ({
 };
 
 const BillingContent = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("invoices");
 
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -153,13 +158,13 @@ const BillingContent = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "paid":
-        return "Pagado";
+        return  t("billing.invoices.status.paid");
       case "open":
-        return "Pendiente";
+        return  t("billing.invoices.status.open");
       case "void":
-        return "Anulado";
+        return t("billing.invoices.status.void");
       default:
-        return "Desconocido";
+        return t("billing.invoices.status.unknown");
     }
   };
 
@@ -168,7 +173,7 @@ const BillingContent = () => {
     if (invoice && invoice.invoice_pdf) {
       window.open(invoice.invoice_pdf, "_blank");
     } else {
-      alert("URL de la factura no encontrada.");
+      alert(t("billing.modals.errors.invoiceUrl"));
     }
   };
 
@@ -229,7 +234,7 @@ const BillingContent = () => {
       );
     } catch (error) {
       console.error("Error setting default payment method:", error);
-      alert("Error al establecer la tarjeta predeterminada.");
+      alert(t("billing.modals.errors.setDefault"));
     } finally {
       setLoading(false);
     }
@@ -241,10 +246,10 @@ const BillingContent = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Portal de Facturación
+              {t("billing.portal.title")}
             </h1>
             <p className="text-gray-600">
-              Gestiona tus facturas y métodos de pago
+              {t("billing.portal.description")}
             </p>
           </div>
 
@@ -259,7 +264,7 @@ const BillingContent = () => {
                 }`}
               >
                 <FileText className="w-4 h-4 inline mr-2" />
-                Facturas
+                {t("billing.tabs.invoices.label")}
               </button>
               {user?.stripeCustomerId && (
                 <button
@@ -271,7 +276,7 @@ const BillingContent = () => {
                   }`}
                 >
                   <CreditCard className="w-4 h-4 inline mr-2" />
-                  Métodos de pago
+                  {t("billing.tabs.paymentMethods.label")}
                 </button>
               )}
             </nav>
@@ -282,17 +287,17 @@ const BillingContent = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900">
-                Historial de facturas
+                {t("billing.tabs.invoices.title")}
               </h2>
               <p className="text-gray-600 mt-1">
-                Todas tus facturas y pagos realizados
+                {t("billing.tabs.invoices.description")}
               </p>
             </div>
 
             {loading ? (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Cargando facturas...</p>
+                <p className="text-gray-600">{t("billing.invoices.loading")}</p>
               </div>
             ) : invoices.length > 0 ? (
               <div className="overflow-x-auto">
@@ -300,19 +305,19 @@ const BillingContent = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Fecha
+                        {t("billing.invoices.headers.date")}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Concepto
+                        {t("billing.invoices.headers.description")}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Importe
+                        {t("billing.invoices.headers.amount")}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Estado
+                        {t("billing.invoices.headers.status")}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Factura
+                        {t("billing.invoices.headers.invoice")}
                       </th>
                     </tr>
                   </thead>
@@ -335,7 +340,7 @@ const BillingContent = () => {
                             {invoice.lines?.data?.[0]?.price?.type ===
                               "recurring" && (
                               <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-2">
-                                Suscripción
+                                {t("billing.invoices.types.subscription")}
                               </span>
                             )}
                           </div>
@@ -377,10 +382,10 @@ const BillingContent = () => {
               <div className="bg-white rounded-lg shadow-sm p-12 text-center border-t border-gray-200">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No tienes facturas disponibles
+                  {t("billing.invoices.empty.title")}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Las facturas aparecerán aquí después de tu primer pago.
+                  {t("billing.invoices.empty.description")}
                 </p>
               </div>
             )}
@@ -393,10 +398,10 @@ const BillingContent = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
-                    Métodos de pago
+                    {t("billing.tabs.paymentMethods.title")}
                   </h2>
                   <p className="text-gray-600 mt-1">
-                    Gestiona tus tarjetas de crédito y débito
+                    {t("billing.tabs.paymentMethods.description")}
                   </p>
                 </div>
                 <button
@@ -404,7 +409,7 @@ const BillingContent = () => {
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Añadir tarjeta
+                  {t("billing.paymentMethods.addCard")}
                 </button>
               </div>
             </div>
@@ -447,12 +452,12 @@ const BillingContent = () => {
                             </span>
                             {pm.is_default && (
                               <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                Predeterminada
+                                {t("billing.paymentMethods.card.default")}
                               </span>
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Caduca{" "}
+                            {t("billing.paymentMethods.card.expires")}{" "}
                             {pm.card.exp_month.toString().padStart(2, "0")}/
                             {pm.card.exp_year}
                           </div>
@@ -466,7 +471,7 @@ const BillingContent = () => {
                             disabled={loading}
                             className="px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                           >
-                            Establecer como predeterminada
+                            {t("billing.paymentMethods.card.setAsDefault")}
                           </button>
                         )}
 
@@ -480,8 +485,8 @@ const BillingContent = () => {
                           }`}
                           title={
                             pm.is_default
-                              ? "No puedes eliminar la tarjeta predeterminada"
-                              : "Eliminar tarjeta"
+                              ? t("billing.paymentMethods.card.cannotDeleteDefault")
+                              : t("billing.paymentMethods.card.delete")
                           }
                         >
                           <Trash2 className="w-4 h-4" />
@@ -494,17 +499,17 @@ const BillingContent = () => {
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
                   <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No tienes métodos de pago
+                    {t("billing.paymentMethods.empty.title")}
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Añade una tarjeta para continuar con tus pagos
+                    {t("billing.paymentMethods.empty.description")}
                   </p>
                   <button
                     onClick={() => setShowAddCard(true)}
                     className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Añadir primera tarjeta
+                    {t("billing.paymentMethods.addFirstCard")}
                   </button>
                 </div>
               )}
@@ -516,7 +521,7 @@ const BillingContent = () => {
           <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span className="text-gray-700">Procesando...</span>
+              <span className="text-gray-700">{t("billing.loading.processing")}</span>
             </div>
           </div>
         )}
@@ -532,7 +537,7 @@ const BillingContent = () => {
       <SuccessModal
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
-        message="La tarjeta se eliminó correctamente ✅"
+        message={t("billing.modals.success.cardDeleted")}
       />
     </div>
   );

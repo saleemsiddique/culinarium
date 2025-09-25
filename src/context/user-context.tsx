@@ -81,7 +81,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     const now = Timestamp.now();
-    const resetDate = userData.tokens_reset_date;
+    const resetDate = userData.lastRenewal;
 
     // 30 días en milisegundos
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
@@ -94,7 +94,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         await updateDoc(userDocRef, {
           monthly_tokens: 50,
-          tokens_reset_date: newResetDate,
+          lastRenewal: newResetDate,
         });
 
 
@@ -102,7 +102,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return {
           ...userData,
           monthly_tokens: 50,
-          tokens_reset_date: newResetDate,
+          lastRenewal: newResetDate,
         };
 
       } catch (error) {

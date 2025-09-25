@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
+import { useTranslation } from "react-i18next";
 
 const CONSENT_TYPES = ["terms_of_service", "privacy_policy", "cookies_policy"] as const;
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.0";
@@ -24,6 +25,8 @@ const itemVariants = {
 };
 
 export default function GestionConsentimientosPage() {
+  const { t } = useTranslation();
+  
   const { firebaseUser, user, loading: userLoading } = useUser();
   const isAnonymous = !firebaseUser;
 
@@ -273,23 +276,22 @@ export default function GestionConsentimientosPage() {
         animate="visible"
       >
         <div className="max-w-xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-xl text-center">
-          <h1 className="text-2xl font-bold mb-4">Gestionar consentimientos</h1>
+          <h1 className="text-2xl font-bold mb-4">{t("consentManagement.unauthenticated.title")}</h1>
           <p className="text-sm text-gray-400 mb-6">
-            Esta página solo está disponible para usuarios autenticados. Si quieres gestionar tus preferencias o conservarlas entre dispositivos,
-            por favor inicia sesión.
+            {t("consentManagement.unauthenticated.description")}
           </p>
           <div className="flex justify-center gap-3">
             <a
-              href="/login"
+              href="/auth/login"
               className="px-6 py-3 rounded-full bg-orange-600 text-white hover:bg-orange-700"
             >
-              Iniciar sesión
+              {t("consentManagement.unauthenticated.loginButton")}
             </a>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 rounded-full border border-gray-700 text-gray-300 hover:bg-gray-800"
             >
-              Volver
+              {t("consentManagement.unauthenticated.backButton")}
             </button>
           </div>
         </div>
@@ -310,34 +312,35 @@ export default function GestionConsentimientosPage() {
         className="max-w-3xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-6 lg:p-8 shadow-xl"
       >
         <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text mb-2">
-          Gestión de consentimientos
+          {t("consentManagement.title")}
         </h1>
         <p className="text-sm text-gray-400 mb-6">
-          Aquí puedes ver y modificar las preferencias guardadas en tu cuenta.
+          {t("consentManagement.subtitle")}
         </p>
 
         {loading ? (
-          <p className="text-center py-8 text-gray-500">Cargando estado...</p>
+          <p className="text-center py-8 text-gray-500">{t("consentManagement.loading")}</p>
         ) : (
           <div className="space-y-6">
-            {CONSENT_TYPES.map((t) => (
-              <div key={t} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
+            {CONSENT_TYPES.map((tr) => (
+              <div key={tr} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
                 <div>
                   <p className="font-semibold text-gray-200">
-                    {t === "terms_of_service" ? "Términos y Condiciones" : t === "privacy_policy" ? "Política de Privacidad" : "Política de Cookies"}
+                    {tr === "terms_of_service" ? t(`consentManagement.types.${tr}.title`) : tr === "privacy_policy" ? t(`consentManagement.types.${tr}.title`) : t(`consentManagement.types.${tr}.title`)}
                   </p>
-                  <p className="text-sm text-gray-500">Versión: {POLICY_VERSION}</p>
+                  <p className="text-sm text-gray-500">{t("consentManagement.version")}: {POLICY_VERSION}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <button
-                    onClick={() => toggle(t)}
-                    className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 ${status[t]
+                    onClick={() => toggle(tr)}
+                    className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 ${status[tr]
                       ? "bg-orange-600 text-white hover:bg-orange-700"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                     }`}
-                    aria-pressed={status[t]}
+                    aria-pressed={status[tr]}
                   >
-                    {status[t] ? "Aceptado" : "Rechazado"}
+                    {status[tr] ? t("consentManagement.accepted") 
+                      : t("consentManagement.rejected")}
                   </button>
                 </div>
               </div>
@@ -349,14 +352,16 @@ export default function GestionConsentimientosPage() {
                 disabled={saving}
                 className={`px-6 py-3 rounded-full font-medium transition ${saving ? "bg-orange-800 text-gray-500 cursor-not-allowed" : "bg-orange-600 text-white hover:bg-orange-700"}`}
               >
-                {saving ? "Guardando..." : "Guardar cambios"}
+                {saving ? t("consentManagement.saving") 
+                  : t("consentManagement.saveButton")}
               </button>
               <button
                 onClick={handleRevokeAll}
                 disabled={saving}
                 className={`px-6 py-3 rounded-full font-medium transition ${saving ? "bg-red-800 text-gray-500 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-700"}`}
               >
-                {saving ? "Procesando..." : "Revocar todo"}
+                {saving ? t("consentManagement.processing") 
+                  : t("consentManagement.revokeAllButton")}
               </button>
             </div>
 
@@ -365,7 +370,7 @@ export default function GestionConsentimientosPage() {
 
             <div className="mt-4 text-sm text-gray-500">
               <p>
-                Derechos: puedes revocar el consentimiento en cualquier momento. La revocación no afecta al tratamiento previo realizado de forma legítima.
+                {t("consentManagement.rightsNotice")}
               </p>
             </div>
           </div>

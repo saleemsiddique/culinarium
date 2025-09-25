@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation'; // Importamos useS
 import Image from "next/image";
 import { auth } from '@/lib/firebase'; // Necesitamos el auth del cliente para obtener el token
 import { ChefHat } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 // Define el tipo para un ingrediente individual
 type Ingredient = {
@@ -54,6 +55,19 @@ const RecipePage: React.FC = () => {
     []
   );
   const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
+  const { t } = useTranslation();
+
+  // Función para mapear la dificultad a las claves de traducción
+const getDifficultyKey = (dificultad: string) => {
+  const difficultyMap: { [key: string]: string } = {
+    "Principiante": "beginner",
+    "Intermedio": "intermediate",
+    "Chef": "advanced",
+    "Beginner": "beginner",
+    "Intermediate": "intermediate",
+    };
+  return difficultyMap[dificultad] || "beginner";
+};
 
   // Helper to get cuisine style icon
   const getCuisineIcon = (style: string | null) => {
@@ -211,7 +225,7 @@ const RecipePage: React.FC = () => {
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
           className="w-16 h-16 border-4 border-t-4 border-[var(--primary)] border-t-transparent rounded-full"
         ></motion.div>
-        <p className="ml-4 text-xl font-semibold text-[var(--foreground)]">Cargando receta...</p>
+        <p className="ml-4 text-xl font-semibold text-[var(--foreground)]">{t("recipeDetail.loadingRecipe")}</p>
       </div>
     );
   }
@@ -223,7 +237,7 @@ const RecipePage: React.FC = () => {
     <div className="min-h-screen bg-[var(--background)] py-[5%] flex items-center justify-center font-sans">
       <Head>
         <title>Culinarium - {recipe.titulo}</title>
-        <meta name="description" content={`Receta para ${recipe.titulo} generada por Culinarium.`} />
+        <meta name="description" content={t("recipeDetail.description", { title: recipe.titulo })} />
       </Head>
 
       <motion.div
@@ -240,10 +254,10 @@ const RecipePage: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center self-start px-6 py-3 bg-[var(--primary)] text-[var(--text2)] rounded-full shadow-md hover:bg-[var(--primary)]/80 transition-colors text-lg font-semibold"
-            aria-label="Volver"
+            aria-label={t("recipeDetail.backButton.toRecipes")}
           >
             <IoArrowBackCircleOutline className="w-6 h-6 mr-2" />
-            {searchParams.get('id') ? 'Volver a Mis Recetas' : 'Volver al Formulario'}
+            {searchParams.get('id') ? t("recipeDetail.backButton.toRecipes") : t("recipeDetail.backButton.toForm")}
           </motion.button>
 
           {/* Recipe Header */}
@@ -295,7 +309,7 @@ const RecipePage: React.FC = () => {
                       className="w-8 h-8 border-2 border-t-2 border-[var(--primary)] border-t-transparent rounded-full"
                     ></motion.div>
                     <p className="text-sm font-medium text-[var(--foreground)] text-center">
-                      Generando imagen...
+                      {t("recipeDetail.loading.generatingImage")}
                     </p>
                   </div>
                 </motion.div>
@@ -309,7 +323,7 @@ const RecipePage: React.FC = () => {
               <div className="bg-[var(--primary)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                 <IoTimeOutline className="w-8 h-8 text-[var(--primary)]" />
                 <div>
-                  <h3 className="text-md font-semibold text-[var(--foreground)]">Tiempo Total</h3>
+                  <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.metadata.totalTime")}</h3>
                   <p className="text-lg font-bold text-[var(--primary)]">{recipe.tiempo_total_min} min</p>
                 </div>
               </div>
@@ -317,7 +331,7 @@ const RecipePage: React.FC = () => {
               <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                 <IoPeopleOutline className="w-8 h-8 text-[var(--highlight)]" />
                 <div>
-                  <h3 className="text-md font-semibold text-[var(--foreground)]">Porciones</h3>
+                  <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.metadata.portions")}</h3>
                   <p className="text-lg font-bold text-[var(--highlight)]">{recipe.porciones}</p>
                 </div>
               </div>
@@ -326,7 +340,7 @@ const RecipePage: React.FC = () => {
                 <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                   {getCuisineIcon(recipe.estilo)}
                   <div>
-                    <h3 className="text-md font-semibold text-[var(--foreground)]">Estilo</h3>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.metadata.style")}</h3>
                     <p className="text-lg font-bold text-[var(--highlight)] capitalize">{recipe.estilo}</p>
                   </div>
                 </div>
@@ -336,7 +350,7 @@ const RecipePage: React.FC = () => {
                 <div className="bg-[var(--highlight)]/10 p-4 rounded-xl shadow-sm flex items-center space-x-3">
                   <GiFruitBowl className="w-8 h-8 text-[var(--highlight)]" />
                   <div>
-                    <h3 className="text-md font-semibold text-[var(--foreground)]">Restricciones</h3>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.metadata.restrictions")}</h3>
                     <div className="flex flex-wrap gap-1">
                       {recipe.restricciones.map((r, i) => (
                         <span key={i} className="text-sm font-bold text-[var(--highlight)] bg-[var(--highlight)]/20 px-2 py-0.5 rounded-full">
@@ -348,40 +362,53 @@ const RecipePage: React.FC = () => {
                 </div>
               )}
 
-              {/* Dificultad */}
+              {/* Dificultad */} 
               {recipe.dificultad && (
                 <div className="p-4 rounded-xl shadow-sm flex items-center space-x-3"
                   // background color depending on difficulty
                   style={{
                     background:
-                      recipe.dificultad === "Principiante"
-                        ? "rgba(16,185,129,0.08)" // green-ish
-                        : recipe.dificultad === "Intermedio"
-                          ? "rgba(250,204,21,0.08)" // yellow-ish
-                          : "rgba(139,92,246,0.06)" // purple-ish
+                        recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                        recipe.dificultad === "Principiante" || 
+                        recipe.dificultad === "Beginner"
+                          ? "rgba(16,185,129,0.08)" // green-ish
+                          : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                            recipe.dificultad === "Intermedio" || 
+                            recipe.dificultad === "Intermediate"
+                            ? "rgba(250,204,21,0.08)" // yellow-ish
+                            : "rgba(139,92,246,0.06)" // purple-ish
                   }}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center
-            ${recipe.dificultad === "Principiante" ? "bg-green-100 text-green-600" :
-                      recipe.dificultad === "Intermedio" ? "bg-yellow-100 text-yellow-600" :
-                        "bg-purple-100 text-purple-600"}`}>
+                    ${recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                      recipe.dificultad === "Principiante" || 
+                      recipe.dificultad === "Beginner"
+                        ? "bg-green-100 text-green-600"
+                        : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                          recipe.dificultad === "Intermedio" || 
+                          recipe.dificultad === "Intermediate"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-purple-100 text-purple-600"
+                    }`}>
                     <GiChefToque className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-md font-semibold text-[var(--foreground)]">Nivel</h3>
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">{t("recipeDetail.difficulty.title")}</h3>
                     <p className="text-lg font-bold" style={{
                       color:
-                        recipe.dificultad === "Principiante"
-                          ? "var(--success)" // if you have CSS vars, otherwise fallback below
-                          : recipe.dificultad === "Intermedio"
+                        recipe.dificultad === t("recipeDetail.difficulty.levels.beginner") ||
+                        recipe.dificultad === "Principiante" || 
+                        recipe.dificultad === "Beginner"
+                          ? "var(--success)"
+                          : recipe.dificultad === t("recipeDetail.difficulty.levels.intermediate") ||
+                            recipe.dificultad === "Intermedio" || 
+                            recipe.dificultad === "Intermediate"
                             ? "var(--highlight)"
                             : "var(--primary)"
                     }}>
-                      {recipe.dificultad}
+                      {t(`recipeDetail.difficulty.levels.${getDifficultyKey(recipe.dificultad)}`)}
                     </p>
                     <p className="text-xs text-[var(--muted)] mt-1">
-                      {recipe.dificultad === "Principiante" ? "Técnicas simples · Tiempos cortos" :
-                        recipe.dificultad === "Intermedio" ? "Pasos moderados · Algo de técnica" :
-                          "Técnicas avanzadas · Precisión y tiempo"}
+                      {t(`recipeDetail.difficulty.descriptions.${getDifficultyKey(recipe.dificultad)}`)}
                     </p>
                   </div>
                 </div>
@@ -392,25 +419,25 @@ const RecipePage: React.FC = () => {
                 <div className="bg-[var(--primary)]/10 p-4 rounded-xl shadow-sm flex flex-col space-y-2">
                   <h3 className="text-md font-semibold text-[var(--foreground)] flex items-center">
                     <MdOutlineFastfood className="w-6 h-6 mr-2 text-[var(--primary)]" />
-                    Macronutrientes
+                    {t("recipeDetail.macronutrients.title")}
                   </h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <span className="text-[var(--foreground)]">Calorías:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.calories")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.calorias ?? '-'} kcal
                     </span>
 
-                    <span className="text-[var(--foreground)]">Proteínas:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.protein")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.proteinas_g ?? '-'} g
                     </span>
 
-                    <span className="text-[var(--foreground)]">Carbohidratos:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.carbs")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.carbohidratos_g ?? '-'} g
                     </span>
 
-                    <span className="text-[var(--foreground)]">Grasas:</span>
+                    <span className="text-[var(--foreground)]">{t("recipeDetail.macronutrients.fats")}:</span>
                     <span className="font-bold text-[var(--primary)]">
                       {recipe.macronutrientes.grasas_g ?? '-'} g
                     </span>
@@ -426,7 +453,7 @@ const RecipePage: React.FC = () => {
               {/* Ingredients List */}
               <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
                 <h2 className="text-3xl font-bold text-[var(--foreground)] mb-6 flex items-center">
-                  <span className="mr-3 text-[var(--highlight)] text-4xl">🥕</span> Ingredientes
+                  <span className="mr-3 text-[var(--highlight)] text-4xl">🥕</span> {t("recipeDetail.sections.ingredients.title")}
                 </h2>
                 <ul className="list-none space-y-3">
                   {recipe.ingredientes.map((ingredient, index) => (
@@ -438,7 +465,7 @@ const RecipePage: React.FC = () => {
                       className="flex items-start text-lg text-[var(--foreground)] border-b border-[var(--foreground)]/20 pb-2 last:border-b-0"
                     >
                       <span className="text-[var(--primary)] mr-3 mt-1">●</span>
-                      {`${ingredient.cantidad ?? ''}${ingredient.cantidad && ingredient.unidad ? ` ${ingredient.unidad}` : ''} de ${ingredient.nombre}`}
+                      {`${ingredient.cantidad ?? ''}${ingredient.cantidad && ingredient.unidad ? ` ${ingredient.unidad}` : ''}: ${ingredient.nombre}`}
                     </motion.li>
                   ))}
                 </ul>
@@ -447,7 +474,7 @@ const RecipePage: React.FC = () => {
               {/* Instructions List */}
               <section className="bg-[var(--background)] p-6 rounded-2xl shadow-inner">
                 <h2 className="text-3xl font-bold text-[var(--foreground)] mb-6 flex items-center">
-                  <span className="mr-3 text-[var(--highlight)] text-4xl">👨‍🍳</span> Instrucciones
+                  <span className="mr-3 text-[var(--highlight)] text-4xl">👨‍🍳</span> {t("recipeDetail.sections.instructions.title")}
                 </h2>
                 <ol className="list-decimal list-inside space-y-4 list-none">
                   {recipe.instrucciones.map((instruction, index) => (
@@ -458,7 +485,7 @@ const RecipePage: React.FC = () => {
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                       className="text-lg text-[var(--foreground)] leading-relaxed"
                     >
-                      <span className="font-semibold text-[var(--primary)]">Paso {instruction.paso}:</span> {instruction.texto}
+                      <span className="font-semibold text-[var(--primary)]">{t("recipeDetail.sections.instructions.step", { number: instruction.paso })}:</span> {instruction.texto}
                     </motion.li>
                   ))}
                 </ol>
@@ -470,7 +497,7 @@ const RecipePage: React.FC = () => {
           {!isErrorRecipe && recipe.excluidos && recipe.excluidos.length > 0 && (
             <section className="bg-red-50 p-6 rounded-2xl shadow-inner mt-8">
               <h2 className="text-2xl font-bold text-red-800 mb-4 flex items-center">
-                <MdOutlineNoFood className="w-8 h-8 mr-3" /> Ingredientes Evitados
+                <MdOutlineNoFood className="w-8 h-8 mr-3" /> {t("recipeDetail.sections.excluded.title")}
               </h2>
               <div className="flex flex-wrap gap-2">
                 {recipe.excluidos.map((excluded, index) => (
@@ -495,25 +522,26 @@ const RecipePage: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full text-[var(--text2)] font-bold py-4 rounded-xl text-2xl shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 flex flex-col items-center gap-1 bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] hover:shadow-xl focus:ring-[var(--highlight)]"
-            aria-label={searchParams.get('id') ? "Ir a la cocina" : "Generar otra receta"}
+            aria-label={searchParams.get('id') ? t("recipeDetail.actions.goToKitchen") 
+              : t("recipeDetail.actions.generateAnother")}
           >
             <span className="flex items-center gap-2">
               {searchParams.get('id') ? (
                 <>
                   <ChefHat className="text-2xl" />
-                  Ir a la Cocina
+                  {t("recipeDetail.actions.goToKitchen")}
                 </>
               ) : (
                 <>
                   <IoReloadOutline className="text-2xl" />
-                  ¡Quiero otra Receta!
+                  {t("recipeDetail.actions.generateAnother")}
                 </>
               )}
             </span>
             {!searchParams.get('id') && (
               <span className="text-sm font-light mt-1 flex items-center gap-1">
                 <FaCoins className="text-yellow-300" />
-                Costo: 5 tokens
+                {t("recipeDetail.actions.cost", { tokens: 5 })}
               </span>
             )}
           </motion.button>

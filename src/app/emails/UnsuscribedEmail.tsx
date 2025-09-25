@@ -1,4 +1,5 @@
 // Este no es un componente de React, es una función que genera una cadena de texto HTML.
+import { useTranslation } from "react-i18next";
 
 interface UnsubscribeEmailProps {
   name: string;
@@ -6,6 +7,8 @@ interface UnsubscribeEmailProps {
 }
 
 export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
+      const { t } = useTranslation();
+  
   return `
     <!DOCTYPE html>
     <html lang="es">
@@ -113,14 +116,14 @@ export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
             <h1>Culinarium</h1>
           </div>
           <div class="content">
-            <h2>¡Te extrañaremos, ${name}!</h2>
+            <h2>${t("emails.unsubscribe.title", { name })}</h2>
             <p>
-              Hemos recibido tu solicitud para cancelar tu suscripción. Queremos agradecerte por haber formado parte de nuestra comunidad culinaria y esperamos que vuelvas a unirte pronto. Tu cuenta y acceso a todas nuestras recetas permanecerán activos hasta el <strong>${endDate}</strong>.
+              ${t("emails.unsubscribe.message1", { endDate })}
             </p>
             <p>
-              Si cambias de opinión, solo tienes que volver a iniciar sesión y desde Mi Perfil podras reactivar tu suscripcion antes de que se acabe.
+              ${t("emails.unsubscribe.message2")}
             </p>
-            <a href="https://www.culinarium.io/kitchen" class="button">Regresar a Culinarium</a>
+            <a href="https://www.culinarium.io/kitchen" class="button">${t("emails.unsubscribe.button")}</a>
           </div>
           <div class="footer">
             <ul class="footer-links" style="display:flex; align-items:center; justify-content:center; text-align:center">
@@ -128,7 +131,7 @@ export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
               <li><a href="https://www.culinarium.io/consent/terms">Términos de Servicio</a></li>
               <li><a href="https://www.culinarium.io/consent/cookies">Política de Cookies</a></li>
             </ul>
-            <p>Culinarium &copy; 2025. Todos los derechos reservados.</p>
+            <p>Culinarium &copy; 2025. ${t("emails.common.copyright")}</p>
           </div>
         </div>
       </body>

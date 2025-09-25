@@ -9,6 +9,7 @@ import NextLink from 'next/link';
 import { useUser } from '@/context/user-context';
 import { auth } from '@/lib/firebase';
 import { IoFunnel, IoClose, IoSearch } from 'react-icons/io5';
+import { useTranslation } from "react-i18next";
 
 // Define the Recipe type based on your provided structure
 type Recipe = {
@@ -42,6 +43,7 @@ const RecipeListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const { user, loading: userLoading } = useUser();
+  const { t } = useTranslation();
 
   const [filters, setFilters] = useState<Filters>({
     searchTerm: '',
@@ -54,43 +56,43 @@ const RecipeListPage: React.FC = () => {
 
   // Define mealTimes directly within this component
   const mealTimes = [
-    { label: 'Desayuno', value: 'breakfast' },
-    { label: 'Comida', value: 'lunch' },
-    { label: 'Cena', value: 'dinner' },
-    { label: 'Snack', value: 'snack' },
+    { label: t("recipes.filters.mealTimeOptions.breakfast"), value: 'breakfast' },
+    { label: t("recipes.filters.mealTimeOptions.lunch"), value: 'lunch' },
+    { label: t("recipes.filters.mealTimeOptions.dinner"), value: 'dinner' },
+    { label: t("recipes.filters.mealTimeOptions.snack"), value: 'snack' },
   ];
 
   const timeRanges = [
-    { label: 'Menos de 15 min', value: '0-15' },
-    { label: '15-30 min', value: '15-30' },
-    { label: '30-60 min', value: '30-60' },
-    { label: 'Más de 1 hora', value: '60+' },
+    { label: t("recipes.filters.timeRangeOptions.0-15"), value: '0-15' },
+    { label: t("recipes.filters.timeRangeOptions.15-30"), value: '15-30' },
+    { label: t("recipes.filters.timeRangeOptions.30-60"), value: '30-60' },
+    { label: t("recipes.filters.timeRangeOptions.60+"), value: '60+' },
   ];
 
   const portionRanges = [
-    { label: '1-2 personas', value: '1-2' },
-    { label: '3-4 personas', value: '3-4' },
-    { label: '5+ personas', value: '5+' },
+    { label: t("recipes.filters.portionOptions.1-2"), value: '1-2' },
+    { label: t("recipes.filters.portionOptions.3-4"), value: '3-4' },
+    { label: t("recipes.filters.portionOptions.5+"), value: '5+' },
   ];
 
   const cuisineStyles = [
-    { label: 'Italiana', value: 'italian' },
-    { label: 'Mexicana', value: 'mexican' },
-    { label: 'Japonesa', value: 'japanese' },
-    { label: 'Americana', value: 'american' },
-    { label: 'Española', value: 'spanish' },
-    { label: 'India', value: 'indian' },
-    { label: 'Jamaicana', value: 'jamaican' },
+    { label: t("recipes.filters.cuisineStyleOptions.italian"), value: 'italian' },
+    { label: t("recipes.filters.cuisineStyleOptions.mexican"), value: 'mexican' },
+    { label: t("recipes.filters.cuisineStyleOptions.japanese"), value: 'japanese' },
+    { label: t("recipes.filters.cuisineStyleOptions.american"), value: 'american' },
+    { label: t("recipes.filters.cuisineStyleOptions.spanish"), value: 'spanish' },
+    { label: t("recipes.filters.cuisineStyleOptions.indian"), value: 'indian' },
+    { label: t("recipes.filters.cuisineStyleOptions.jamaican"), value: 'jamaican' },
   ];
 
   const dietaryRestrictions = [
-    { label: 'Vegetariano', value: 'vegetarian' },
-    { label: 'Vegano', value: 'vegan' },
-    { label: 'Sin Gluten', value: 'gluten-free' },
-    { label: 'Sin Lactosa', value: 'lactose-free' },
-    { label: 'Keto', value: 'keto' },
+    { label: t("recipes.filters.dietaryRestrictionOptions.vegetarian"), value: 'vegetarian' },
+    { label: t("recipes.filters.dietaryRestrictionOptions.vegan"), value: 'vegan' },
+    { label: t("recipes.filters.dietaryRestrictionOptions.gluten-free"), value: 'gluten-free' },
+    { label: t("recipes.filters.dietaryRestrictionOptions.lactose-free"), value: 'lactose-free' },
+    { label: t("recipes.filters.dietaryRestrictionOptions.keto"), value: 'keto' },
   ];
-
+  
   useEffect(() => {
     const fetchRecipes = async () => {
       if (userLoading) return;
@@ -219,7 +221,7 @@ const RecipeListPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--background)] py-24 px-4 sm:px-6 lg:px-8 font-sans">
       <Head>
-        <title>Mis Recetas - Culinarium</title>
+        <title>{t("recipes.title")} - Culinarium</title>
         <meta name="description" content="Tus recetas generadas y guardadas en Culinarium." />
       </Head>
 
@@ -230,7 +232,7 @@ const RecipeListPage: React.FC = () => {
         className="max-w-7xl mx-auto"
       >
         <h1 className="text-4xl md:text-5xl font-extrabold text-[var(--foreground)] text-center mb-8">
-          <span className="text-[var(--highlight)]">Mis</span> Recetas
+          <span className="text-[var(--highlight)]">{t("recipes.title").split(" ")[0]}</span> {t("recipes.title").split(" ")[1]}
         </h1>
 
         {/* Search and Filter Controls */}
@@ -240,7 +242,7 @@ const RecipeListPage: React.FC = () => {
             <IoSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--muted)] w-5 h-5" />
             <input
               type="text"
-              placeholder="Buscar recetas, ingredientes..."
+              placeholder={t("recipes.searchPlaceholder")}
               value={filters.searchTerm}
               onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--primary)]/20 
@@ -262,7 +264,7 @@ const RecipeListPage: React.FC = () => {
                          }`}
             >
               <IoFunnel className="w-4 h-4" />
-              Filtros
+              {t("recipes.filters.button")}
               {hasActiveFilters && (
                 <span className="bg-white text-[var(--highlight)] rounded-full px-2 py-0.5 text-xs font-bold">
                   {Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : Boolean(v)).length}
@@ -283,13 +285,13 @@ const RecipeListPage: React.FC = () => {
                 <div className="p-6 space-y-6">
                   {/* Filter Header */}
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-[var(--foreground)]">Filtrar Recetas</h3>
+                    <h3 className="text-xl font-bold text-[var(--foreground)]">{t("recipes.filters.title")}</h3>
                     {hasActiveFilters && (
                       <button
                         onClick={clearFilters}
                         className="text-[var(--highlight)] hover:text-[var(--highlight)]/80 text-sm font-medium"
                       >
-                        Limpiar filtros
+                        {t("recipes.filters.clear")}
                       </button>
                     )}
                   </div>
@@ -298,7 +300,7 @@ const RecipeListPage: React.FC = () => {
                     {/* Meal Time Filter */}
                     <div>
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                        Momento del día
+                        {t("recipes.filters.mealTime.label")}
                       </label>
                       <select
                         value={filters.mealTime}
@@ -306,7 +308,7 @@ const RecipeListPage: React.FC = () => {
                         className="w-full p-2 rounded-lg border border-[var(--primary)]/20 bg-white text-[var(--foreground)]
                                    focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]"
                       >
-                        <option value="">Todos</option>
+                        <option value="">{t("recipes.filters.mealTime.all")}</option>
                         {mealTimes.map(time => (
                           <option key={time.value} value={time.value}>{time.label}</option>
                         ))}
@@ -316,7 +318,7 @@ const RecipeListPage: React.FC = () => {
                     {/* Time Range Filter */}
                     <div>
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                        Tiempo de preparación
+                        {t("recipes.filters.timeRange.label")}
                       </label>
                       <select
                         value={filters.timeRange}
@@ -324,7 +326,7 @@ const RecipeListPage: React.FC = () => {
                         className="w-full p-2 rounded-lg border border-[var(--primary)]/20 bg-white text-[var(--foreground)]
                                    focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]"
                       >
-                        <option value="">Cualquier tiempo</option>
+                        <option value="">{t("recipes.filters.timeRange.any")}</option>
                         {timeRanges.map(range => (
                           <option key={range.value} value={range.value}>{range.label}</option>
                         ))}
@@ -334,7 +336,7 @@ const RecipeListPage: React.FC = () => {
                     {/* Portions Filter */}
                     <div>
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                        Número de porciones
+                        {t("recipes.filters.portions.label")}
                       </label>
                       <select
                         value={filters.portions}
@@ -342,7 +344,7 @@ const RecipeListPage: React.FC = () => {
                         className="w-full p-2 rounded-lg border border-[var(--primary)]/20 bg-white text-[var(--foreground)]
                                    focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]"
                       >
-                        <option value="">Cualquier cantidad</option>
+                        <option value="">{t("recipes.filters.portions.any")}</option>
                         {portionRanges.map(range => (
                           <option key={range.value} value={range.value}>{range.label}</option>
                         ))}
@@ -352,7 +354,7 @@ const RecipeListPage: React.FC = () => {
                     {/* Style Filter */}
                     <div>
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                        Estilo de cocina
+                        {t("recipes.filters.style.label")}
                       </label>
                       <select
                         value={filters.style}
@@ -360,7 +362,7 @@ const RecipeListPage: React.FC = () => {
                         className="w-full p-2 rounded-lg border border-[var(--primary)]/20 bg-white text-[var(--foreground)]
                                    focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]"
                       >
-                        <option value="">Todos los estilos</option>
+                        <option value="">{t("recipes.filters.style.all")}</option>
                         {cuisineStyles.map(style => (
                           <option key={style.value} value={style.value}>{style.label}</option>
                         ))}
@@ -370,7 +372,7 @@ const RecipeListPage: React.FC = () => {
                     {/* Dietary Restrictions Filter */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                        Restricciones dietéticas
+                        {t("recipes.filters.restrictions.label")}
                       </label>
                       <div className="flex flex-wrap gap-2">
                         {dietaryRestrictions.map(restriction => (
@@ -399,7 +401,7 @@ const RecipeListPage: React.FC = () => {
             <div className="flex flex-wrap gap-2 justify-center">
               {filters.searchTerm && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--highlight)] text-white rounded-full text-sm">
-                  Búsqueda: {filters.searchTerm}
+                  {t("recipes.activeFilters.search", { term: filters.searchTerm })}
                   <button onClick={() => setFilters(prev => ({ ...prev, searchTerm: '' }))}>
                     <IoClose className="w-3 h-3" />
                   </button>
@@ -425,7 +427,7 @@ const RecipeListPage: React.FC = () => {
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
               className="w-16 h-16 border-4 border-t-4 border-[var(--highlight)] border-t-transparent rounded-full"
             ></motion.div>
-            <p className="ml-4 text-[var(--foreground)] text-lg">Cargando tus deliciosas recetas...</p>
+            <p className="ml-4 text-[var(--foreground)] text-lg">{t("recipes.loading")}</p>
           </div>
         )}
 
@@ -442,12 +444,12 @@ const RecipeListPage: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="text-center text-[var(--muted)] text-xl mt-16 p-8 bg-white rounded-2xl shadow-lg"
           >
-            <p className="mb-4">No se encontraron recetas con los filtros seleccionados.</p>
+            <p className="mb-4">{t("recipes.noResults.title")}</p>
             <button
               onClick={clearFilters}
               className="px-6 py-2 bg-[var(--highlight)] text-white rounded-lg hover:bg-[var(--highlight)]/90 transition-colors"
             >
-              Limpiar filtros
+              {t("recipes.noResults.clear")}
             </button>
           </motion.div>
         )}
@@ -459,8 +461,8 @@ const RecipeListPage: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="text-center text-[var(--muted)] text-xl mt-16 p-8 bg-[var(--background)] rounded-2xl shadow-lg"
           >
-            <p className="mb-4">¡Ups! Parece que aún no has generado ninguna receta.</p>
-            <p className="mb-6">¡Es el momento perfecto para crear tu primera obra maestra culinaria!</p>
+            <p className="mb-4">{t("recipes.empty.title")}</p>
+            <p className="mb-6">{t("recipes.empty.description")}</p>
             <NextLink href="/kitchen" passHref>
               <motion.button
                 className="mt-6 px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition-all duration-300 cursor-pointer
@@ -469,7 +471,7 @@ const RecipeListPage: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                ¡Empezar a Cocinar Ahora! 🍳
+                {t("recipes.empty.button")}
               </motion.button>
             </NextLink>
           </motion.div>
@@ -513,10 +515,10 @@ const RecipeListPage: React.FC = () => {
                   </p>
                   <div className="flex flex-wrap items-center text-sm text-[var(--primary)] mb-4">
                     <span className="mr-4 flex items-center">
-                      <span className="text-[var(--highlight)] mr-1">⏱️</span> {recipe.tiempo_total_min} min
+                      <span className="text-[var(--highlight)] mr-1">⏱️</span> {recipe.tiempo_total_min} {t("recipes.recipeCard.time")}
                     </span>
                     <span className="mr-4 flex items-center">
-                      <span className="text-[var(--highlight)] mr-1">🍽️</span> {recipe.porciones} porciones
+                      <span className="text-[var(--highlight)] mr-1">🍽️</span> {recipe.porciones} {t("recipes.recipeCard.portions")}
                     </span>
                     {recipe.momento_del_dia && (
                       <span className="flex items-center">
@@ -554,7 +556,7 @@ const RecipeListPage: React.FC = () => {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                     >
-                      Ver Receta
+                      {t("recipes.recipeCard.viewRecipe")}
                     </motion.button>
                   </NextLink>
                 </div>
@@ -566,7 +568,7 @@ const RecipeListPage: React.FC = () => {
         {/* Results counter */}
         {!loading && !error && recipes.length > 0 && (
           <div className="text-center mt-8 text-[var(--muted)] text-sm">
-            Mostrando {filteredRecipes.length} de {recipes.length} recetas
+            {t("recipes.results", { current: filteredRecipes.length, total: recipes.length })}
           </div>
         )}
       </motion.div>

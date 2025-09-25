@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, BookOpen, Menu, X, User } from 'lucide-react';
 import { TokensModal } from "./SideMenu/TokensModal";
 import { PremiumModal } from "./SideMenu/PremiumModal";
+import { useTranslation } from "react-i18next";
 
 // Definición de las props para los iconos de Lucide-React
 interface LucideIconProps extends React.SVGProps<SVGSVGElement> {
@@ -47,6 +48,7 @@ export default function Header() {
   const pathname = usePathname();
   const { user } = useUser() || {};
   const isLoggedIn = !!user;
+  const { t } = useTranslation();
 
   // Estados para el menú móvil y la responsividad
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -108,7 +110,7 @@ export default function Header() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   className="fixed top-4 left-4 z-50 bg-[var(--highlight)] text-[var(--text2)] rounded-full p-3 shadow-lg transition"
                   onClick={() => setDrawerOpen(true)}
-                  aria-label="Abrir menú"
+                  aria-label={t("header.menu.open")}
                 >
                   <Menu className="w-6 h-6" />
                 </motion.button>
@@ -157,17 +159,17 @@ export default function Header() {
                         transition={{ delay: 0.2, duration: 0.4 }}
                         className="mt-8 p-6 bg-[var(--primary)] rounded-xl shadow-xl text-[var(--text2)] text-center w-full max-w-sm border-2 border-[var(--highlight)]"
                       >
-                        <h3 className="text-xl font-bold mb-3">Tus Tokens</h3>
+                        <h3 className="text-xl font-bold mb-3">{t("header.tokens.popup.title")}</h3>
                         <div className="space-y-2 mb-4">
                           <p className="flex justify-between items-center text-lg">
-                            <span>Mensuales:</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
                           </p>
                           <p className="flex justify-between items-center text-lg">
-                            <span>Extras:</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
                           </p>
                         </div>
                         <p className="text-sm italic mb-4">
-                          Total: <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
+                          {t("header.tokens.popup.total")}: <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
                         </p>
                         <button onClick={() => { setDrawerOpen(false); setShowTokens(true); }} className="w-full">
                           <motion.div
@@ -179,7 +181,7 @@ export default function Header() {
                             role="button"
                             tabIndex={0}
                           >
-                            ¡Comprar Más Tokens!
+                            {t("header.tokens.buy")}
                           </motion.div>
                         </button>
                         {/* Nuevo botón para el modal de Premium en móvil */}
@@ -196,7 +198,7 @@ export default function Header() {
                           role="button"
                           tabIndex={0}
                         >
-                          {user?.isSubscribed ? 'Tu Plan Premium' : '¡Hacerme Premium!'}
+                          {user?.isSubscribed ? t("header.tokens.premium.currentPlan") : t("header.tokens.premium.subscribeButton")}
                         </motion.button>
                       </motion.div>
                     )}
@@ -232,7 +234,7 @@ export default function Header() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        Inicio
+                        {t("header.menu.home")}
                       </motion.span>
                     </Link>
                   </li>
@@ -246,7 +248,7 @@ export default function Header() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Mi Perfil
+                          {t("header.menu.myProfile")}
                         </motion.span>
                       </Link>
                     </li>
@@ -260,7 +262,7 @@ export default function Header() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      Empezar
+                      {t("header.auth.getStarted")}
                     </motion.button>
                   </Link>
                 )}
@@ -287,18 +289,18 @@ export default function Header() {
                                    bg-white rounded-lg shadow-xl border border-gray-200
                                    text-[var(--foreground)] z-50"
                       >
-                        <h3 className="text-lg font-bold mb-2 text-center">Tus Tokens</h3>
+                        <h3 className="text-lg font-bold mb-2 text-center">{t("header.tokens.popup.title")}</h3>
                         <div className="space-y-2">
                           <p className="flex justify-between items-center text-sm">
-                            <span>Mensuales:</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
                           </p>
                           <p className="flex justify-between items-center text-sm">
-                            <span>Extras:</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
                           </p>
                         </div>
                         <div className="h-px bg-gray-200 my-3" />
                         <p className="flex justify-between items-center text-base font-semibold">
-                          <span>Total:</span> <span className="text-[var(--highlight)] font-bold">{totalTokens}</span>
+                          <span>{t("header.tokens.popup.total")}</span> <span className="text-[var(--highlight)] font-bold">{totalTokens}</span>
                         </p>
                         <motion.button
                           onClick={() => {
@@ -311,7 +313,7 @@ export default function Header() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Comprar más tokens
+                          {t("header.tokens.buyMore")}
                         </motion.button>
 
                         {/* Botón de suscripción Premium (sólo si no está suscrito) */}
@@ -327,7 +329,7 @@ export default function Header() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            Suscribirse a Premium
+                            {t("header.tokens.premium.subscribeButton")}
                           </motion.button>
                         )}
                       </motion.div>

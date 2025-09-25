@@ -2,59 +2,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import ButtonPrimary from "./buttonPrimary";
-
-const faqData = [
-  {
-    question: "¿Cómo funciona la generación de recetas con IA?",
-    answer:
-      "Nuestra plataforma utiliza inteligencia artificial de última generación, impulsada por la tecnología de OpenAI, para analizar tus ingredientes y generar recetas personalizadas adaptadas a tus gustos y necesidades."
-  },
-  {
-    question: "¿Hay opciones para dietas especiales?",
-    answer:
-      "Absolutamente. Culinarium soporta múltiples tipos de dietas, incluyendo vegetariana, vegana, keto, sin gluten y más.",
-  },
-  {
-    question: "¿Hay recetas en varios idiomas?",
-    answer:
-      "Actualmente solo están disponibles en español. Próximamente añadiremos soporte para inglés.",
-  },
-  {
-    question: "¿Qué pasa si se me acaban los tokens?",
-    answer:
-      "Podrás comprar paquetes adicionales desde tu cuenta en cualquier momento para seguir generando recetas. O también puedes esperar a la siguiente vez que se reinicien los tokens de tu plan actual, aunque sea el gratuito. Puedes revisar la fecha de renovación de tokens en tu perfil.",
-  },
-  {
-    question: "¿Tienen una versión gratuita?",
-    answer:
-      "Sí, ofrecemos un plan gratuito que incluye 50 tokens mensuales para que puedas probar nuestro servicio.",
-  },
-  {
-  question: "¿Los tokens de la suscripción son permanentes?",
-  answer:
-    "No, los tokens que recibes con tu suscripción no son acumulables de un periodo a otro. Al finalizar el periodo de la suscripción, el saldo de tokens se restablece y recibes la cantidad correspondiente al nuevo periodo. Ten en cuenta que los tokens no utilizados no se reembolsan.",
-  },
-  { 
-    question: "¿Cómo puedo cancelar mi suscripción?", 
-    answer: "Puedes cancelar tu suscripción en cualquier momento desde la pagina de perfil. La cancelación será efectiva al final del período de facturación actual.",
-  },
-  {
-    question: "¿Ofrecen reembolsos?",
-    answer:
-      "No ofrecemos reembolsos. Una vez compras tokens, se quedan en la pagina para consumo.",
-  },
-  {
-    question: "¿Ofrecen soporte técnico?",
-    answer:
-      "Sí, puedes contactarnos por email enviandonos un mensaje a culinariumofficial@gmail.com.",
-  },
-  {
-    question: "¿Puedo sugerir nuevas funcionalidades o mejoras?",
-    answer:
-      "Sí, nos encanta recibir sugerencias. Puedes enviarlas a través de nuestro correo culinariumofficial@gmail.com.",
-  },
-];
 
 const staggerVariants = {
   initial: {
@@ -76,7 +25,14 @@ const itemVariants = {
 };
 
 export default function FAQ() {
+    const { t } = useTranslation();
+
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+   const faqData = t("faq.questions", { returnObjects: true }) as Array<{
+    question: string;
+    answer: string;
+  }>;
 
   const toggleFAQ = (faqIndex: number) => {
     setOpenIndex(openIndex === faqIndex ? null : faqIndex);
@@ -93,13 +49,13 @@ export default function FAQ() {
           className="text-center mb-16"
         >
           <h2 className="text-base md:text-xl font-semibold text-orange-600">
-            Preguntas frecuentes
+            {t("faq.section.title")}
           </h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
-            Todo lo que necesitas saber sobre Culinarium
+            {t("faq.section.subtitle")}
           </p>
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-            Resolvemos las dudas más comunes sobre nuestra plataforma y servicios.
+             {t("faq.section.description")}
           </p>
         </motion.div>
 
@@ -155,17 +111,17 @@ export default function FAQ() {
         </motion.div>
 
         <div className=" mt-12 justify-center w-full text-center">
-          <ButtonPrimary route={"/auth/login"} description={"Empieza Ahora"} />
+          <ButtonPrimary route={"/auth/login"} description={t("faq.buttons.startNow")} />
         </div>
 
         <div className="mt-16 text-center">
           <p className="text-gray-600">
-            ¿No encuentras la respuesta que buscas?{" "}
+            {t("faq.contact.message")}{" "}
             <a
               href="#"
               className="text-orange-600 hover:text-indigo-700 font-medium"
             >
-              Contáctanos
+              {t("faq.contact.linkText")}
             </a>
           </p>
         </div>
