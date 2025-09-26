@@ -24,7 +24,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const { firebaseUser } = useUser();
   const { t, i18n } = useTranslation();
-  
+
   // Una vez montado y con traducciones listas, renderizar el contenido completo
   return (
     <>
@@ -127,19 +127,27 @@ export default function Footer() {
               </div>
 
               <div className="mt-4">
-                <button 
+                <button
                   onClick={() => i18n.changeLanguage("en")}
-                  className="mr-2 px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+                  className={`mr-2 px-3 py-1 text-sm rounded-xl transition-colors ${i18n.language === "en"
+                      ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
                 >
                   English
                 </button>
-                <button 
+
+                <button
                   onClick={() => i18n.changeLanguage("es")}
-                  className="px-3 py-1 text-sm bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+                  className={`px-3 py-1 text-sm rounded-xl transition-colors ${i18n.language === "es"
+                      ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
                 >
                   Español
                 </button>
               </div>
+
             </div>
           </div>
         </div>

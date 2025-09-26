@@ -480,33 +480,25 @@ function ProfileContent() {
               </div>
               {/* Language Switcher */}
               <div className="mt-4 flex space-x-3">
-  <button
-    onClick={() => i18n.changeLanguage("en")}
-    className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${
-      i18n.language === "en"
-        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 text-white ring-2 ring-[var(--primary)]/50 ring-offset-2"
-        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-    }`}
-  >
-    English
-    {i18n.language === "en" && (
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-    )}
-  </button>
-  <button
-    onClick={() => i18n.changeLanguage("es")}
-    className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${
-      i18n.language === "es"
-        ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white ring-2 ring-[var(--highlight)]/50 ring-offset-2"
-        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-    }`}
-  >
-    Español
-    {i18n.language === "es" && (
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-    )}
-  </button>
-</div>
+                <button
+                  onClick={() => i18n.changeLanguage("en")}
+                  className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${i18n.language === "en"
+                      ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white ring-2 ring-[var(--highlight)]/50 ring-offset-2"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => i18n.changeLanguage("es")}
+                  className={`flex-1 py-3 rounded-xl font-semibold shadow-lg transition-all relative ${i18n.language === "es"
+                      ? "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white ring-2 ring-[var(--highlight)]/50 ring-offset-2"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                >
+                  Español
+                </button>
+              </div>
             </div>
           </div>
 
@@ -532,18 +524,16 @@ function ProfileContent() {
                     </div>
                     <div className="text-right">
                       <div
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          subscriptionStatus.text === t("profile.subscription.premium.status.active")
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${subscriptionStatus.text === t("profile.subscription.premium.status.active")
                             ? "bg-emerald-500/20 text-emerald-300"
                             : "bg-[var(--highlight)]/20 text-orange-300"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`w-2 h-2 rounded-full mr-2 ${
-                            subscriptionStatus.text === t("profile.subscription.premium.status.active")
+                          className={`w-2 h-2 rounded-full mr-2 ${subscriptionStatus.text === t("profile.subscription.premium.status.active")
                               ? "bg-emerald-300"
                               : "bg-orange-300"
-                          }`}
+                            }`}
                         ></div>
                         {subscriptionStatus.text}
                       </div>
@@ -613,7 +603,7 @@ function ProfileContent() {
                       <div className="flex items-center justify-center mb-4">
                         <AlertTriangle className="h-6 w-6 text-red-300 mr-3" />
                         <p className="text-red-200 font-medium text-center">
-                          {t("profile.subscription.premium.cancelledNotice", { 
+                          {t("profile.subscription.premium.cancelledNotice", {
                             date: subscription?.endsAt
                               ? formatDate(subscription.endsAt.toDate())
                               : ("final del período")
@@ -647,7 +637,7 @@ function ProfileContent() {
                 <p className="text-[var(--foreground)]/70 mb-6 text-lg">
                   {t("profile.subscription.free.description")}
                 </p>
-                <div className="max-w-md mx-auto" onClick={() => {setShowPremium(true);}}>
+                <div className="max-w-md mx-auto" onClick={() => { setShowPremium(true); }}>
                   <div className="w-full flex flex-col items-center gap-4">
                     <button
                       className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out"
@@ -773,7 +763,7 @@ function ProfileContent() {
                   className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-100 rounded-xl py-3"
                   disabled={isLoading}
                 >
-                   {t("profile.modals.reactivate.cancel")}
+                  {t("profile.modals.reactivate.cancel")}
                 </Button>
                 <Button
                   onClick={handleReactivateSubscription}
@@ -794,9 +784,8 @@ function ProfileContent() {
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
             <div className="text-center text-[var(--foreground)]">
               <div
-                className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 ${
-                  messageModal.isError ? "bg-red-100" : "bg-green-100"
-                }`}
+                className={`rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 ${messageModal.isError ? "bg-red-100" : "bg-green-100"
+                  }`}
               >
                 {messageModal.isError ? (
                   <AlertCircle className="h-8 w-8 text-red-500" />
