@@ -1256,5 +1256,10 @@
       "message": "Can't find the answer you're looking for?",
       "linkText": "Contact us"
     }
+  },
+  "inAppBrowser": {
+    "title": "⚠️ Unsupported browser",
+    "description": "You're opening this page from an in-app browser (for example TikTok, Instagram or Facebook). To sign in you need to open this page in a real browser (Safari, Chrome, etc.).",
+    "instruction": "👉 Tap the <strong>⋮ (three dots)</strong> icon in the top-right corner and select <strong>Open in browser</strong>."
   }
 }

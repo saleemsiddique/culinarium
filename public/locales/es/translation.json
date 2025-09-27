@@ -1256,5 +1256,10 @@
       "message": "¿No encuentras la respuesta que buscas?",
       "linkText": "Contáctanos"
     }
+  },
+  "inAppBrowser": {
+    "title": "⚠️ Navegador no compatible",
+    "description": "Estás abriendo esta página desde un navegador interno (por ejemplo TikTok, Instagram o Facebook). Para iniciar sesión necesitas abrir esta página en tu navegador real (Safari, Chrome, etc.).",
+    "instruction": "👉 Pulsa en <strong>⋮ (los tres puntos)</strong> en la parte superior derecha y selecciona <strong>Abrir en el navegador</strong>."
   }
 }

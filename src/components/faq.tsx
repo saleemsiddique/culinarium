@@ -25,7 +25,7 @@ const itemVariants = {
 };
 
 export default function FAQ() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
