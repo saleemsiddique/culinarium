@@ -157,7 +157,7 @@ export function AuthForm({
           </div>
         */}
           <Link
-            href="/auth/forgot-password"
+            href="/auth/forgot-password-culinarium"
             className="text-blue-500 hover:underline"
           >
             {t("auth.login.forgotPassword")}
