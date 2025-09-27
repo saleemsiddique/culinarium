@@ -14,11 +14,7 @@ export function SocialAuth() {
   const { loginWithGoogle } = useUser();
   const router = useRouter();
 
-    // Función auxiliar para extraer el nombre de pila
-  const getFirstName = (displayName: string | null) => {
-    if (!displayName) return "Usuario";
-    return displayName.split(" ")[0];
-  };
+
 
   const handleGoogleLogin = async () => {
     setLoading("google");
