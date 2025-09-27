@@ -1,40 +1,14 @@
-"use client";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import { useState } from "react";
+import Link from "next/link";
 import { Mail, Loader2 } from "lucide-react";
+import { useUser } from "@/context/user-context";
+import { useTranslation } from "react-i18next";
 
-// Mock implementation for useUser and useTranslation,
-// replace with your actual context/library imports.
-// This makes the component self-contained for demonstration.
-const useUser = () => ({
-  sendPasswordResetEmail: async (email: string) => {
-    console.log(`Sending password reset to: ${email}`);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    // Simulate a potential error for testing
-    if (email.includes("error")) {
-      throw new Error("Failed to send email.");
-    }
-    return Promise.resolve();
-  },
-});
-
-const useTranslation = () => ({
-  t: (key: string, options?: { email: string }) => {
-    const translations: { [key: string]: string } = {
-        "auth.forgotPassword.title": "Forgot Your Password?",
-        "auth.forgotPassword.subtitle": "No problem! Enter your email below and we'll send you a reset link.",
-        "auth.forgotPassword.submitted": `If an account with ${options?.email} exists, you will receive a password reset link. Please check your inbox.`,
-        "auth.forgotPassword.emailLabel": "Email Address",
-        "auth.forgotPassword.emailPlaceholder": "you@example.com",
-        "auth.forgotPassword.submitButton": "Send Reset Link",
-        "auth.forgotPassword.backToLogin": "← Back to Login",
-        "auth.forgotPassword.error": "There was an issue sending the reset email. Please try again."
-    };
-    return translations[key] || key;
-  },
-});
-
+export const dynamic = 'force-dynamic';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -54,6 +28,7 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err: any) {
       console.error("Error sending password reset email:", err);
+      // El mensaje es genérico por seguridad.
       setError(t("auth.forgotPassword.error"));
     } finally {
       setLoading(false);
@@ -61,7 +36,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FDF5E6] flex items-center justify-center p-4 font-sans">
+    <div className="h-full w-full bg-[#FDF5E6] flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border border-[#4A2C2A] text-center">
         <h1 className="text-2xl md:text-3xl font-bold text-[#2C3E50] mb-2">
           {t("auth.forgotPassword.title")}
@@ -70,7 +45,7 @@ export default function ForgotPasswordPage() {
           {t("auth.forgotPassword.subtitle")}
         </p>
         {submitted ? (
-          <div className="text-center text-green-700 font-semibold bg-green-50 p-4 rounded-lg">
+          <div className="text-center text-[#E67E22] font-semibold">
             {t("auth.forgotPassword.submitted", { email })}
           </div>
         ) : (
@@ -88,15 +63,15 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder={t("auth.forgotPassword.emailPlaceholder") || ""}
-                  className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent transition"
+                  placeholder={t("auth.forgotPassword.emailPlaceholder")}
+                  className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent"
                 />
               </div>
             </div>
-            {error && <div className="text-red-600 bg-red-50 p-3 rounded-lg text-sm">{error}</div>}
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <button
               type="submit"
-              className="w-full bg-[#E67E22] hover:bg-[#D35400] text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-[#E67E22] hover:bg-[#C2651A] text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
               disabled={loading}
             >
               {loading && <Loader2 size={20} className="animate-spin" />}
@@ -105,12 +80,11 @@ export default function ForgotPasswordPage() {
           </form>
         )}
         <div className="mt-8">
-          <a href="/auth/login" className="text-[#E67E22] hover:text-[#D35400] font-medium transition-colors">
+          <Link href="/auth/login" className="text-[#E67E22] hover:text-[#C2651A] font-medium transition-colors">
             {t("auth.forgotPassword.backToLogin")}
-          </a>
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-
