@@ -1,4 +1,4 @@
-// page.tsx (server component - pequeño wrapper)
+// page.tsx (Server component wrapper)
 import dynamic from "next/dynamic";
 
 const ForgotPasswordClient = dynamic(
