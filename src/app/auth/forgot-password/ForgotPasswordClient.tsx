@@ -1,7 +1,5 @@
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, Loader2 } from "lucide-react";
@@ -26,7 +24,7 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err: any) {
       console.error("Error sending password reset email:", err);
-      // El mensaje es genérico por seguridad.
+      // Mensaje genérico por seguridad.
       setError(t("auth.forgotPassword.error"));
     } finally {
       setLoading(false);
@@ -61,7 +59,7 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder={t("auth.forgotPassword.emailPlaceholder")}
+                  placeholder={t("auth.forgotPassword.emailPlaceholder") || ""}
                   className="w-full pl-10 pr-4 py-3 border border-[#4A2C2A] rounded-lg bg-[#FDF5E6] text-[#4A2C2A] focus:ring-2 focus:ring-[#E67E22] focus:border-transparent"
                 />
               </div>
