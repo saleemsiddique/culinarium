@@ -79,7 +79,7 @@ export default function RootLayout({
               <StripeProvider>
                 <I18nProvider>
                   <AppReadyProvider>
-                    <InAppBrowserGuard authStartPath="/" />
+                    <InAppBrowserGuard/>
 
                     <Header />
 
