@@ -6,6 +6,7 @@ import { SocialAuth } from "@/components/SocialAuth";
 import { AuthRedirect } from "@/components/AuthRedirect";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const { t } = useTranslation();
