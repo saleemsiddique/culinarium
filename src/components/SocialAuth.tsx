@@ -28,7 +28,7 @@ export function SocialAuth() {
       if (result?.isNewUser) {
 
         // ✅ Nueva línea: Enviar el correo de bienvenida a los nuevos usuarios
-        await fetch("/api/send-email", {
+        /*await fetch("/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -36,7 +36,7 @@ export function SocialAuth() {
             type: "welcome",
             data: { firstName: getFirstName(result.user!.firstName) },
           }),
-        });
+        });*/
 
         router.push("/kitchen?onboarding=1"); 
       } else {
