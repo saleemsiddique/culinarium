@@ -421,7 +421,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(userCredential.user);
       setLoading(false);
 
-      /*await fetch("/api/send-email", {
+      await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -429,7 +429,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           type: "welcome",
           data: { firstName },
         }),
-      });*/
+      });
 
       return id;
     } catch (error) {

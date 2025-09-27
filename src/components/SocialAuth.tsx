@@ -14,17 +14,21 @@ export function SocialAuth() {
   const { loginWithGoogle } = useUser();
   const router = useRouter();
 
-
+  // Función auxiliar para extraer el nombre de pila
+  const getFirstName = (displayName: string | null) => {
+    if (!displayName) return "Usuario";
+    return displayName.split(" ")[0];
+  };
 
   const handleGoogleLogin = async () => {
     setLoading("google");
     try {
-      const result = await loginWithGoogle(); 
-      
+      const result = await loginWithGoogle();
+
       if (result?.isNewUser) {
 
         // ✅ Nueva línea: Enviar el correo de bienvenida a los nuevos usuarios
-        /*await fetch("/api/send-email", {
+        await fetch("/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -32,9 +36,9 @@ export function SocialAuth() {
             type: "welcome",
             data: { firstName: getFirstName(result.user!.firstName) },
           }),
-        });*/
+        });
 
-        router.push("/kitchen?onboarding=1"); 
+        router.push("/kitchen?onboarding=1");
       } else {
         router.push("/kitchen");
       }
