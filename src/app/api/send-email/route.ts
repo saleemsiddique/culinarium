@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation(); 
   
   try {
     const { type, to, data } = await req.json();
