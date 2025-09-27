@@ -9,6 +9,8 @@ import ConsentModal from "@/components/ConsentModal";
 import AnalyticsGate from "@/components/AnalyticsGate"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import I18nProvider from "@/context/i18n-context";
 import AppReadyProvider from "@/context/appready-context";
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Culinarium – Generador de recetas con IA",
   description:
