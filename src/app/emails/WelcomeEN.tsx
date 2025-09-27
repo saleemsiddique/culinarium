@@ -1,14 +1,10 @@
 // Este no es un componente de React, es una función que genera una cadena de texto HTML.
-import { useTranslation } from "react-i18next";
-
-interface UnsubscribeEmailProps {
+interface WelcomeEmailProps {
   name: string;
-  endDate: string;
 }
 
-export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
-      const { t } = useTranslation();
-  
+export function WelcomeEmailHtmlEN({ name }: WelcomeEmailProps) {
+
   return `
     <!DOCTYPE html>
     <html lang="es">
@@ -35,7 +31,7 @@ export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
             overflow: hidden;
           }
           .header {
-            background-color: #C2651A; /* Naranja oscuro, tono más serio */
+            background-color: #E67E22; /* Naranja vibrante */
             padding: 40px;
             text-align: center;
           }
@@ -108,33 +104,33 @@ export function UnsubscribeEmailHtml({ name, endDate }: UnsubscribeEmailProps) {
             opacity: 0.6;
             margin: 0;
           }
+          .footer-logo {
+            width: 80px;
+            margin-bottom: 15px;
+            filter: brightness(0) invert(1); /* Hace que el logo sea blanco para el fondo oscuro */
+          }
         </style>
       </head>
-      <body>
-        <div class="main-wrapper">
-          <div class="header">
-            <h1>Culinarium</h1>
+        <body>
+          <div class="main-wrapper">
+            <div class="header">
+              <h1>Culinarium</h1>
+            </div>
+            <div class="content">
+              <h2>Welcome to the community, ${name}!</h2>
+              <p>We are excited to have you on board. Get ready for a unique culinary adventure, where artificial intelligence helps you create spectacular dishes. Your kitchen is about to be transformed!</p>
+              <a href="https://www.culinarium.io/kitchen" class="button">Start Cooking</a>
+            </div>
+            <div class="footer">
+              <ul class="footer-links" style="display:flex; align-items:center; justify-center:center; text-align-center">
+                <li><a href="https://www.culinarium.io/consent/privacy">Privacy Policy</a></li>
+                <li><a href="https://www.culinarium.io/consent/terms">Terms of Service</a></li>
+                <li><a href="https://www.culinarium.io/consent/cookies">Cookie Policy</a></li>
+              </ul>
+              <p>Culinarium &copy; 2025. All rights reserved.</p>
+            </div>
           </div>
-          <div class="content">
-            <h2>${t("emails.unsubscribe.title", { name })}</h2>
-            <p>
-              ${t("emails.unsubscribe.message1", { endDate })}
-            </p>
-            <p>
-              ${t("emails.unsubscribe.message2")}
-            </p>
-            <a href="https://www.culinarium.io/kitchen" class="button">${t("emails.unsubscribe.button")}</a>
-          </div>
-          <div class="footer">
-            <ul class="footer-links" style="display:flex; align-items:center; justify-content:center; text-align:center">
-              <li><a href="https://www.culinarium.io/consent/privacy">Política de Privacidad</a></li>
-              <li><a href="https://www.culinarium.io/consent/terms">Términos de Servicio</a></li>
-              <li><a href="https://www.culinarium.io/consent/cookies">Política de Cookies</a></li>
-            </ul>
-            <p>Culinarium &copy; 2025. ${t("emails.common.copyright")}</p>
-          </div>
-        </div>
-      </body>
+        </body>
     </html>
   `;
 }

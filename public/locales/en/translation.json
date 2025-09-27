@@ -1122,28 +1122,6 @@
     "description": "Sorry, we couldn't find the page you're looking for.",
     "button": "Return to home"
   },
-  "emails": {
-    "welcome": {
-      "title": "Welcome to the community, {{name}}!",
-      "message": "We're thrilled to have you on board. Get ready for a unique culinary adventure where artificial intelligence helps you create spectacular dishes. Your kitchen is about to transform!",
-      "button": "Start Cooking"
-    },
-    "unsubscribe": {
-      "title": "We'll miss you, {{name}}!",
-      "message1": "We have received your request to cancel your subscription. We want to thank you for being part of our culinary community and hope you'll join us again soon. Your account and access to all our recipes will remain active until {{endDate}}.",
-      "message2": "If you change your mind, you just need to log back in and from My Profile you can reactivate your subscription before it ends.",
-      "button": "Return to Culinarium"
-    },
-    "common": {
-      "company": "Culinarium",
-      "copyright": "All rights reserved.",
-      "links": {
-        "privacy": "Privacy Policy",
-        "terms": "Terms of Service",
-        "cookies": "Cookie Policy"
-      }
-    }
-  },
   "consent": {
     "modal": {
       "title": "Policy and Terms",

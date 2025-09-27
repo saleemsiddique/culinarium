@@ -1,13 +1,9 @@
 // Este no es un componente de React, es una función que genera una cadena de texto HTML.
-
-import { useTranslation } from "react-i18next";
-
 interface WelcomeEmailProps {
   name: string;
 }
 
-export function WelcomeEmailHtml({ name }: WelcomeEmailProps) {
-  const { t } = useTranslation();
+export function WelcomeEmailHtmlES({ name }: WelcomeEmailProps) {
 
   return `
     <!DOCTYPE html>
@@ -121,17 +117,17 @@ export function WelcomeEmailHtml({ name }: WelcomeEmailProps) {
             <h1>Culinarium</h1>
           </div>
           <div class="content">
-            <h2>${t("emails.welcome.title", { name })}</h2>
-            <p>${t("emails.welcome.message")}</p>
-            <a href="https://www.culinarium.io/kitchen" class="button">${t("emails.welcome.button")}</a>
+            <h2>¡Bienvenido a la comunidad, ${name}!</h2>
+            <p>Estamos encantados de tenerte a bordo. Prepárate para una aventura culinaria única, donde la inteligencia artificial te ayuda a crear platos espectaculares. ¡Tu cocina está a punto de transformarse!</p>
+            <a href="https://www.culinarium.io/kitchen" class="button">Empieza a cocinar</a>
           </div>
           <div class="footer">
             <ul class="footer-links" style="display:flex; align-items:center; justify-center:center; text-align-center">
-              <li><a href="https://www.culinarium.io/consent/privacy">${t("emails.common.links.privacy")}</a></li>
-              <li><a href="https://www.culinarium.io/consent/terms">${t("emails.common.links.terms")}</a></li>
-              <li><a href="https://www.culinarium.io/consent/cookies">${t("emails.common.links.cookies")}</a></li>
+              <li><a href="https://www.culinarium.io/consent/privacy">Política de Privacidad</a></li>
+              <li><a href="https://www.culinarium.io/consent/terms">Términos de Servicio</a></li>
+              <li><a href="https://www.culinarium.io/consent/cookies">Política de Cookies</a></li>
             </ul>
-            <p>Culinarium &copy; 2025. ${t("emails.common.copyright")}</p>
+            <p>Culinarium &copy; 2025. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
