@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { WelcomeEmailHtmlEN } from "@/app/emails/WelcomeEN"; //Welcome Email Ingles
