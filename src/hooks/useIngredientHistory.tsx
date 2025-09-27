@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useState, useEffect } from 'react';
+import { TFunction } from 'i18next';
 
 const STORAGE_KEY = 'ingredient_history';
 
@@ -23,11 +26,11 @@ const COMMON_INGREDIENTS: string[] = [
 
 interface UseIngredientHistoryReturn {
   ingredientHistory: string[];
- /* addToHistory: (ingredient: string) => void;*/
+  /* addToHistory: (ingredient: string) => void;*/
   getSuggestions: (query: string, currentIngredients?: string[]) => string[];
 }
 
-export const useIngredientHistory = (): UseIngredientHistoryReturn => {
+export const useIngredientHistory = (t: TFunction): UseIngredientHistoryReturn => {
   const [ingredientHistory, setIngredientHistory] = useState<string[]>(COMMON_INGREDIENTS);
 
   useEffect(() => {
@@ -63,12 +66,12 @@ export const useIngredientHistory = (): UseIngredientHistoryReturn => {
 
   const getSuggestions = (query: string, currentIngredients: string[] = []): string[] => {
     if (!query || query.length < 2) return [];
-    
+
     const normalizedQuery = query.toLowerCase();
     const normalizedCurrent = currentIngredients.map(ing => ing.toLowerCase());
-    
+
     return ingredientHistory
-      .filter(ingredient => 
+      .filter(ingredient =>
         ingredient.toLowerCase().includes(normalizedQuery) &&
         !normalizedCurrent.includes(ingredient.toLowerCase())
       )
