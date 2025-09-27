@@ -17,7 +17,7 @@ export default function InAppBrowserGuard() {
         );
     }, []);
 
-    if (isInAppBrowser) return null;
+    if (!isInAppBrowser) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50 p-6">
