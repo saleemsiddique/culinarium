@@ -9,6 +9,7 @@ import ConsentModal from "@/components/ConsentModal";
 import AnalyticsGate from "@/components/AnalyticsGate"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import I18nProvider from "@/context/i18n-context";
 import AppReadyProvider from "@/context/appready-context";
+import InAppBrowserGuard from "@/components/InAppBrowserGuard";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
@@ -78,15 +79,17 @@ export default function RootLayout({
               <StripeProvider>
                 <I18nProvider>
                   <AppReadyProvider>
-                  <Header />
+                    <InAppBrowserGuard authStartPath="/auth/start?provider=google" />
 
-                  {/* Modal que solo aparece si es necesario */}
-                  {<ConsentModal />}
+                    <Header />
 
-                  {/* Contenedor que crece */}
-                  <div className="flex-1 flex">{children}</div>
+                    {/* Modal que solo aparece si es necesario */}
+                    {<ConsentModal />}
 
-                  <Footer />
+                    {/* Contenedor que crece */}
+                    <div className="flex-1 flex">{children}</div>
+
+                    <Footer />
                   </AppReadyProvider>
                 </I18nProvider>
               </StripeProvider>
