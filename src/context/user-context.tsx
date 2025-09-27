@@ -27,7 +27,9 @@ import {
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   confirmPasswordReset as firebaseConfirmPasswordReset,
   User as FirebaseUser,
+  getRedirectResult,
 } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export interface CustomUser {
   uid: string;
@@ -73,6 +75,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // ✅ Función para verificar y resetear tokens mensuales
   const checkAndResetMonthlyTokens = async (userData: CustomUser): Promise<CustomUser> => {
@@ -193,6 +196,75 @@ export function UserProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [firebaseUser?.email, refreshUser]);
+
+  // ✅ Nuevo efecto: procesa el resultado de Google Redirect (solo tras volver del proveedor)
+  useEffect(() => {
+    let processed = false;
+    console.log("Procesando getRedirectResult...");
+    (async () => {
+      console.log("Dentro de la función asíncrona de getRedirectResult");
+      if (processed) return;
+      console.log("Llamando a getRedirectResult");
+      try {
+        const result = await getRedirectResult(auth);
+        console.log("Resultado de getRedirectResult 1:", result);
+        if (!result) return; // No hubo redirect pendiente
+        processed = true;
+        console.log("Resultado de getRedirectResult:", result);
+        const userInfo = result.user;
+        if (!userInfo?.email) return;
+
+        const userDocRef = doc(db, "user", userInfo.uid);
+        const snapshot = await getDoc(userDocRef);
+        console.log("Llegando aquí después de getRedirectResult");
+        const now = new Date();
+        now.setMonth(now.getMonth() + 1);
+        const tokens_reset_date = Timestamp.fromDate(now);
+
+        let finalUser: CustomUser;
+        //let isNew = false;
+        console.log("Usuario from Google:", userInfo);
+        if (!snapshot.exists()) {
+          // Crear nuevo usuario
+          //const stripeCustomerId = await createStripeCustomer(userInfo.email, userInfo.uid);
+          //isNew = true;
+          finalUser = {
+            uid: userInfo.uid,
+            email: userInfo.email,
+            firstName: userInfo.displayName?.split(" ")[0] || "",
+            lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
+            created_at: Timestamp.now(),
+            extra_tokens: 0,
+            isSubscribed: false,
+            lastRenewal: Timestamp.now(),
+            monthly_tokens: 50,
+            stripeCustomerId: "",
+            subscriptionId: "",
+            subscriptionStatus: "cancelled",
+            subscriptionCanceled: false,
+            tokens_reset_date,
+          };
+          await setDoc(userDocRef, finalUser);
+        } else {
+          finalUser = snapshot.data() as CustomUser;
+          finalUser.uid = snapshot.id;
+          finalUser = await checkAndResetMonthlyTokens(finalUser);
+        }
+
+        setUser(finalUser);
+        setFirebaseUser(userInfo);
+        console.log("Usuario autenticado con Google Redirect:", finalUser);
+        // Redirigir a /kitchen
+        router.replace("/kitchen");
+      } catch (e: unknown) {
+        console.error("Error en getRedirectResult:", e);
+        // Ignorar si no hay evento de auth
+        if (typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code !== "auth/no-auth-event") {
+          console.error("Error procesando getRedirectResult:", e);
+        }
+      }
+    })();
+  }, [router, checkAndResetMonthlyTokens]);
 
   // Función helper para crear customer en Stripe
   const createStripeCustomer = async (email: string, userId: string) => {
@@ -378,7 +450,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // Usa redirect si es InAppBrowser, si no usa popup
     let result;
-    if (isInAppBrowser()) {
+    if (!isInAppBrowser()) {
       await signInWithRedirect(auth, provider);
       // El flujo con redirect requiere que el usuario vuelva a la app y se procese en onAuthStateChanged
       // Aquí puedes retornar un estado especial si lo necesitas
