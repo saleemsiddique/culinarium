@@ -28,7 +28,7 @@ interface UseIngredientHistoryReturn {
   getSuggestions: (query: string, currentIngredients?: string[]) => string[];
 }
 
-export const useIngredientHistory = (t: TFunction): UseIngredientHistoryReturn => {
+export const useIngredientHistory = (): UseIngredientHistoryReturn => {
   const [ingredientHistory, setIngredientHistory] = useState<string[]>(COMMON_INGREDIENTS);
 
   useEffect(() => {

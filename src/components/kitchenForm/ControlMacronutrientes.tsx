@@ -184,7 +184,6 @@ export default function ControlMacronutrientes({
     const getBasicGoalText = () => {
         if (!basicGoal) return t("macronutrients.basic.freeMode");
         
-        const preset = t(`macronutrients.basic.presets.${basicGoal}`);
         return `${t(`macronutrients.basic.presets.${basicGoal}.emoji`)} ${t(`macronutrients.basic.presets.${basicGoal}.label`)}`;
     };
 

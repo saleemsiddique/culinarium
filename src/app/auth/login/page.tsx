@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <AuthRedirect>

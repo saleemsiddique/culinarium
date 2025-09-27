@@ -28,7 +28,7 @@ export function AuthForm({
     acceptTerms: false,
   });
   
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
 
   const { login, register } = useUser();
