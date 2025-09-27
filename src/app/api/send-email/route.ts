@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { WelcomeEmailHtml } from "@/app/emails/Welcome";
-import { UnsubscribeEmailHtml } from "@/app/emails/UnsuscribedEmail";
+import { WelcomeEmailHtml } from "@/lib/emails/Welcome";
+import { UnsubscribeEmailHtml } from "@/lib/emails/UnsuscribedEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
