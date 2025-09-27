@@ -6,6 +6,7 @@ import { Lock, Loader2 } from "lucide-react";
 import { initializeApp } from "firebase/app";
 import { getAuth, confirmPasswordReset } from "firebase/auth";
 import { useTranslation } from "react-i18next";
+export const dynamic = 'force-dynamic';
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation();
