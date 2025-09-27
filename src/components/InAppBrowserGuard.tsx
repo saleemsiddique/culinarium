@@ -7,23 +7,16 @@ interface Props {
 }
 
 export default function InAppBrowserGuard({ authStartPath }: Props) {
-  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
 
-  useEffect(() => {
-    const ua = navigator.userAgent
-    const isApp =
-      ua.includes("fban") ||
-      ua.includes("fbav") ||
-      ua.includes("instagram") ||
-      ua.includes("line") ||
-      ua.includes("twitter") ||
-      ua.includes("tiktok");
+  // Detecta si está en un InAppBrowser problemático
+  const isInAppBrowser = function isInAppBrowser() {
+    if (typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes("tiktok") || ua.includes("instagram") || ua.includes("fbav") || ua.includes("fb_iab");
+  }
 
-    setIsInAppBrowser(isApp);
-  }, []);
+  if (!isInAppBrowser()) return null;
 
-  if (isInAppBrowser) return null;
-  else
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white z-50 p-6">
       <div className="max-w-md text-center">
