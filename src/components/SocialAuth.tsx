@@ -32,9 +32,9 @@ export function SocialAuth() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: result.user.email,
+            to: result.user!.email,
             type: "welcome",
-            data: { firstName: getFirstName(result.user.firstName) },
+            data: { firstName: getFirstName(result.user!.firstName) },
           }),
         });
 
