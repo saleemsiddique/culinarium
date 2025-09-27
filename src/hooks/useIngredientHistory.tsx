@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { TFunction } from 'i18next';
 
 const STORAGE_KEY = 'ingredient_history';
 
