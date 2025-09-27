@@ -200,6 +200,7 @@ function ProfileContent() {
             name: user?.firstName || user?.email,
             endDate: formattedEndDate,
           },
+          lang: i18n.language
         }),
       });
 

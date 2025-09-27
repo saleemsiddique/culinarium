@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/context/user-context";
+import i18n from "@/lib/i18n";
 
 export function SocialAuth() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export function SocialAuth() {
             to: result.user!.email,
             type: "welcome",
             data: { firstName: getFirstName(result.user!.firstName) },
+            lang: i18n.language
           }),
         });
 

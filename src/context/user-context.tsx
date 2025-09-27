@@ -30,6 +30,7 @@ import {
   getRedirectResult,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import i18n from "@/lib/i18n";
 
 export interface CustomUser {
   uid: string;
@@ -428,6 +429,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           to: email,
           type: "welcome",
           data: { firstName },
+          lang: i18n.language
         }),
       });
 
@@ -450,7 +452,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // Usa redirect si es InAppBrowser, si no usa popup
     let result;
-    if (!isInAppBrowser()) {
+    if (isInAppBrowser()) {
       await signInWithRedirect(auth, provider);
       // El flujo con redirect requiere que el usuario vuelva a la app y se procese en onAuthStateChanged
       // Aquí puedes retornar un estado especial si lo necesitas
