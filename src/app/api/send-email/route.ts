@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+
+// ✅ Usa las plantillas puras desde /lib
 import { WelcomeEmailHtml } from "@/lib/emails/Welcome";
 import { UnsubscribeEmailHtml } from "@/lib/emails/UnsuscribedEmail";
+
+// Fuerza runtime Node (Resend no funciona en Edge)
+export const runtime = "nodejs";
+// Si prefieres evitar caching en build:
+export const dynamic = "force-dynamic";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -9,36 +16,50 @@ export async function POST(req: Request) {
   try {
     const { type, to, data } = await req.json();
 
-    let emailContent: string;
-    let subject;
+    if (!to) {
+      return NextResponse.json({ error: "Falta 'to'" }, { status: 400 });
+    }
+
+    let subject = "";
+    let html = "";
 
     switch (type) {
-      case "welcome":
+      case "welcome": {
+        const firstName = data?.firstName ?? "Cocinillas";
         subject = "Bienvenido a Culinarium";
-        // Ahora llamamos a la función que devuelve el HTML en forma de string
-        emailContent = WelcomeEmailHtml({ name: data.firstName });
+        html = WelcomeEmailHtml({ name: firstName });
         break;
-      case "unsubscribe":
-        if (!data || !data.name || !data.endDate) {
-          return NextResponse.json({ error: "Faltan datos para el correo de desuscripción" }, { status: 400 });
+      }
+      case "unsubscribe": {
+        const name = data?.name;
+        const endDate = data?.endDate;
+        if (!name || !endDate) {
+          return NextResponse.json(
+            { error: "Faltan datos para el correo de desuscripción" },
+            { status: 400 }
+          );
         }
         subject = "Confirmación de Cancelación de Suscripción";
-        emailContent = UnsubscribeEmailHtml({ name: data.name, endDate: data.endDate });
+        html = UnsubscribeEmailHtml({ name, endDate });
         break;
+      }
       default:
-        return NextResponse.json({ error: "Tipo de email no válido" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Tipo de email no válido" },
+          { status: 400 }
+        );
     }
 
     const result = await resend.emails.send({
       from: "Culinarium <noreply@culinarium.io>",
       to,
       subject,
-      html: emailContent, // Usamos la propiedad 'html'
+      html,
     });
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error(error);
+    console.error("[API][send-email] ERROR:", error);
     return NextResponse.json({ error: "Error enviando email" }, { status: 500 });
   }
 }
