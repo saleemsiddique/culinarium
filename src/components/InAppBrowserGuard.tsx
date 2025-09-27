@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function InAppBrowserGuard() {
     const { t, i18n } = useTranslation();
@@ -21,13 +21,6 @@ export default function InAppBrowserGuard() {
     }, []);
 
     if (!isInAppBrowser) return null;
-
-    const currentLang = (i18n?.language || "en").startsWith("es") ? "es" : "en";
-
-    const changeLang = (lng: string | undefined) => {
-        if (!i18n) return;
-        i18n.changeLanguage(lng);
-    };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50 p-6">
