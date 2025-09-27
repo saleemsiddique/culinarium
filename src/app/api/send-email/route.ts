@@ -1,51 +1,78 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-
+// app/api/send-email/route.ts
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { Resend } from "resend";
+// Asegúrate de que estas funciones devuelvan string y NO usen hooks ni "use client"
 import { WelcomeEmailHtmlEN } from "@/app/emails/WelcomeEN"; //Welcome Email Ingles
 import { WelcomeEmailHtmlES } from "@/app/emails/WelcomeES"; //Welcome Email Español
 import { UnsubscribeEmailHtmlES } from "@/app/emails/UnsuscribedEmailES"; //Unsuscribed Email Español
 import { UnsubscribeEmailHtmlEN } from "@/app/emails/UnsuscribedEmailEN"; //Unsuscribed Email Ingles
-import { useTranslation } from "react-i18next";
+
+export const runtime = 'nodejs';       // ⚠️ fuerza Node
+export const dynamic = 'force-dynamic'; // evita cualquier intento de static
+export const revalidate = 0;
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+type Body =
+  | { type: "welcome"; to: string | string[]; data: { firstName: string }; lang?: "en" | "es" }
+  | { type: "unsubscribe"; to: string | string[]; data: { name: string; endDate: string }; lang?: "en" | "es" };
+
 export async function POST(req: Request) {
-  const { i18n } = useTranslation(); 
-  
   try {
-    const { type, to, data } = await req.json();
+    const body = (await req.json()) as Body;
 
-    let emailContent: string;
-    let subject;
+    // Detecta idioma dentro del handler (no en top-level)
+    const accept = (await headers()).get("accept-language") ?? "";
+    const lang: "en" | "es" =
+      body.lang ?? (accept.toLowerCase().startsWith("en") ? "en" : "es");
 
-    switch (type) {
-      case "welcome":
-        subject = i18n.language == 'en' ? "Welcome to Culinarium" : "Bienvenido a Culinarium";
-        // Ahora llamamos a la función que devuelve el HTML en forma de string
-        emailContent = i18n.language == 'en' ? WelcomeEmailHtmlEN({ name: data.firstName }) : WelcomeEmailHtmlES({ name: data.firstName });
+    let subject: string;
+    let html: string;
+
+    switch (body.type) {
+      case "welcome": {
+        const name = body.data.firstName;
+        subject = lang === "en" ? "Welcome to Culinarium" : "Bienvenido a Culinarium";
+        html = lang === "en"
+          ? WelcomeEmailHtmlEN({ name })
+          : WelcomeEmailHtmlES({ name });
         break;
-      case "unsubscribe":
-        if (!data || !data.name || !data.endDate) {
-          return NextResponse.json({ error: "Faltan datos para el correo de desuscripción" }, { status: 400 });
+      }
+      case "unsubscribe": {
+        const { name, endDate } = body.data || ({} as any);
+        if (!name || !endDate) {
+          return NextResponse.json(
+            { error: "Faltan datos para el correo de desuscripción" },
+            { status: 400 }
+          );
         }
-        subject = i18n.language == 'en' ? "Unsubscribe Confirmation" : "Confirmación de Cancelación de Suscripción";
-        emailContent = i18n.language == 'en' ? UnsubscribeEmailHtmlEN({ name: data.name, endDate: data.endDate }) : UnsubscribeEmailHtmlES({ name: data.name, endDate: data.endDate });
+        subject = lang === "en"
+          ? "Unsubscribe Confirmation"
+          : "Confirmación de Cancelación de Suscripción";
+        html = lang === "en"
+          ? UnsubscribeEmailHtmlEN({ name, endDate })
+          : UnsubscribeEmailHtmlES({ name, endDate });
         break;
+      }
       default:
         return NextResponse.json({ error: "Tipo de email no válido" }, { status: 400 });
     }
 
-    const result = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Culinarium <noreply@culinarium.io>",
-      to,
+      to: body.to,
       subject,
-      html: emailContent, // Usamos la propiedad 'html'
+      html,
     });
 
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error enviando email" }, { status: 500 });
+    if (error) return NextResponse.json({ error }, { status: 400 });
+    return NextResponse.json({ ok: true, data });
+  } catch (e: any) {
+    console.error(e);
+    return NextResponse.json(
+      { error: e?.message ?? "Error enviando email" },
+      { status: 500 }
+    );
   }
 }
