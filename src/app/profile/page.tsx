@@ -63,17 +63,6 @@ function ProfileContent() {
     setNewsletterChecked(!!user?.newsletterConsent);
   }, [user?.newsletterConsent]);
 
-  const formatDateTime = (d?: Date) =>
-    d
-      ? d.toLocaleString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      : "";
-
   const handleToggleNewsletter = async (checked: boolean) => {
     if (!setNewsletterConsent) return;
     setNewsletterSaving(true);

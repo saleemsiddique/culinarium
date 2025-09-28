@@ -59,9 +59,8 @@ export default function UnsubscribeNewsletterPage() {
         // 3) Obtener fecha desde Firestore si está disponible (preferible)
         const serverTS =
           user?.lastNewsletterConsentCanceledAt &&
-          // @ts-ignore (puede ser Timestamp de Firestore)
           (typeof user.lastNewsletterConsentCanceledAt.toDate === "function"
-            ? // @ts-ignore
+            ?
               user.lastNewsletterConsentCanceledAt.toDate()
             : null);
 

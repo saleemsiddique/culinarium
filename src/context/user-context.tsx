@@ -20,7 +20,6 @@ import { db, auth } from "@/lib/firebase";
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
@@ -28,9 +27,7 @@ import {
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   confirmPasswordReset as firebaseConfirmPasswordReset,
   User as FirebaseUser,
-  getRedirectResult,
 } from "firebase/auth";
-import { useRouter } from "next/navigation";
 import i18n from "@/lib/i18n";
 
 export interface CustomUser {
@@ -81,7 +78,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // ✅ Función para verificar y resetear tokens mensuales
   const checkAndResetMonthlyTokens = async (userData: CustomUser): Promise<CustomUser> => {
@@ -376,13 +372,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Detecta si está en un InAppBrowser problemático
-  const isInAppBrowser = function isInAppBrowser() {
-    if (typeof navigator === "undefined") return false;
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes("tiktok") || ua.includes("instagram") || ua.includes("fbav") || ua.includes("fb_iab");
-  }
-
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
@@ -552,7 +541,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         // Actualizamos estado local inmediatamente (mejor UX)
         setUser(prev => prev ? ({
           ...prev,
-          // @ts-ignore opcionales si tu tipo CustomUser no tiene estas props
           newsletterConsent: true,
           lastNewsletterConsentAt: Timestamp.now(), // local approx (opcional)
           lastNewsletterConsentCanceledAt: null,
