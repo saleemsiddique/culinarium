@@ -700,6 +700,16 @@
       "logout": "Error logging out",
       "paymentHistory": "Error accessing payment history",
       "billing": "Error accessing billing"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "helper": "Receive news and tips by email.",
+      "aria": "Newsletter subscription",
+      "subscribed": "You have subscribed to the newsletter.",
+      "unsubscribed": "You have unsubscribed from the newsletter.",
+      "error": "Could not update your newsletter preference.",
+      "subscribedAt": "Subscribed on {{date}}",
+      "unsubscribedAt": "Unsubscribed on {{date}}"
     }
   },
   "onboarding": {
@@ -1135,7 +1145,8 @@
         "checkConsent": "Error checking consent:",
         "saveConsent": "Error saving consent:",
         "requestError": "Error in consent request:"
-      }
+      },
+      "newsletterLabel": "I want to receive the newsletter"
     }
   },
   "and":" and ",
@@ -1261,5 +1272,22 @@
     "title": "⚠️ Unsupported browser",
     "description": "You're opening this page from an in-app browser (for example TikTok, Instagram or Facebook). To sign in you need to open this page in a real browser (Safari, Chrome, etc.).",
     "instruction": "👉 Tap the <strong>⋮ (three dots)</strong> icon in the top-right corner and select <strong>Open in browser</strong>."
+  },
+  "newsletter": {
+    "unsubscribe": {
+      "processingTitle": "Processing your request",
+      "processingMsg": "Please wait a moment…",
+      "signInRequiredTitle": "Sign in required",
+      "signInRequiredMsg": "To manage your newsletter preferences, please sign in to your account.",
+      "signInButton": "Sign in",
+      "backHome": "Back to home",
+      "successTitle": "You have been unsubscribed",
+      "successMsg": "You will no longer receive our newsletter.",
+      "unsubscribedAt": "Unsubscribed on {{date}}",
+      "managePrefs": "Manage preferences",
+      "errorTitle": "Something went wrong",
+      "errorMsg": "We couldn't update your newsletter preference. Please try again.",
+      "tryAgain": "Try again"
+    }
   }
 }

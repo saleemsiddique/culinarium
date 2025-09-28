@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export:newsletter": "tsx scripts/export-newsletter-subscribers.ts",
+    "bulk:newsletter:force": "tsx scripts/bulk-force-newsletter-consent.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
@@ -53,9 +55,11 @@
     "@types/react": "19",
     "@types/react-dom": "19",
     "depcheck": "1.4.7",
+    "dotenv": "^17.2.2",
     "eslint": "9",
     "eslint-config-next": "15.3.4",
     "tailwindcss": "4",
+    "tsx": "^4.20.6",
     "tw-animate-css": "1.3.5",
     "typescript": "5"
   }

@@ -11,107 +11,169 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { useTranslation } from "react-i18next";
 
 const POLICY_VERSION = process.env.NEXT_PUBLIC_POLICY_VERSION || "1.0.5";
-const url_base = ""; // pon aquí tu url_base si tienes uno, por ejemplo '/mi_base'
+const url_base = ""; // '/mi_base' si aplica
+
+type ConsentType = "terms_of_service" | "privacy_policy" | "cookies_policy";
+type AcceptedItem = { type: ConsentType; version?: string; granted?: boolean; details?: Record<string, unknown> };
+type ConsentDoc = {
+  accepted?: AcceptedItem[];
+  accepted_types?: ConsentType[];
+  client_timestamp?: string;
+  timestamp?: string;
+  user_id?: string;
+  [k: string]: any;
+};
 
 export default function ConsentModal() {
   const { t } = useTranslation();
+  const pathname = usePathname() || "";
 
-  const pathname = usePathname();
+  // ✅ en vez de return temprano, usamos un flag:
+  const skipModalRoute = pathname.startsWith(`${url_base}/consent`);
 
-  // Si la ruta comienza por `${url_base}/consent`, NO mostrar el modal:
-  if (pathname.startsWith(`${url_base}/consent`)) {
-    return null;
-  }
+  const { firebaseUser, loading: userLoading, user, setNewsletterConsent } = useUser();
 
-  const { firebaseUser, loading: userLoading } = useUser();
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [show, setShow] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [newsletterChecked, setNewsletterChecked] = useState<boolean>(false);
 
-  const CONSENT_TYPES = [
-    "terms_of_service",
-    "privacy_policy",
-    "cookies_policy",
-  ];
+  const CONSENT_TYPES: ConsentType[] = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
   const LOCAL_KEY = "consent_versions";
   const LEGACY_KEY = "consent_version";
   const FULL_KEY = "culinarium_cookie_consent";
   const LAST_UPDATE_KEY = "culinarium_cookie_consent_last_update";
 
+  const toMillis = (d?: string) => {
+    if (!d) return 0;
+    const iso = Date.parse(d);
+    if (!Number.isNaN(iso)) return iso;
+    const ms = new Date(d).getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  };
+
+  function normalizeConsents(input: unknown) {
+    let docs: ConsentDoc[] = [];
+    if (Array.isArray(input)) {
+      docs = input as ConsentDoc[];
+    } else if (input && typeof input === "object") {
+      const obj = input as any;
+      if (Array.isArray(obj.accepted)) {
+        docs = [obj as ConsentDoc];
+      } else {
+        const accepted: AcceptedItem[] = CONSENT_TYPES.map((type) => ({
+          type,
+          version: typeof obj[type] === "string" ? obj[type] : undefined,
+          granted: typeof obj[type] === "string" ? true : undefined,
+        }));
+        docs = [{ accepted, accepted_types: CONSENT_TYPES, client_timestamp: obj.updatedAt || obj.timestamp }];
+      }
+    }
+
+    if (!docs.length) {
+      return {
+        hasAnyRecord: false,
+        byType: { terms_of_service: {}, privacy_policy: {}, cookies_policy: {} } as Record<
+          ConsentType,
+          { version?: string; granted?: boolean }
+        >,
+        hasAnyRejected: false,
+        missingTypes: CONSENT_TYPES.slice(),
+        allVersionsOk: false,
+      };
+    }
+
+    const latest =
+      docs
+        .map((d) => ({ doc: d, ms: Math.max(toMillis(d.client_timestamp), toMillis(d.timestamp)) }))
+        .sort((a, b) => b.ms - a.ms)?.[0]?.doc || docs[0];
+
+    const byType: Record<ConsentType, { version?: string; granted?: boolean }> = {
+      terms_of_service: {},
+      privacy_policy: {},
+      cookies_policy: {},
+    };
+
+    (latest.accepted || []).forEach((a) => {
+      if (a?.type && CONSENT_TYPES.includes(a.type)) {
+        byType[a.type as ConsentType] = { version: a.version, granted: a.granted };
+      }
+    });
+
+    const missingTypes = CONSENT_TYPES.filter((t) => byType[t].version === undefined);
+    const hasAnyRejected = CONSENT_TYPES.some((t) => byType[t].granted === false);
+    const allVersionsOk = CONSENT_TYPES.every((t) => byType[t].version === POLICY_VERSION);
+
+    return { hasAnyRecord: true, latest, byType, hasAnyRejected, missingTypes, allVersionsOk };
+  }
+
+  function writeLocalStorageSnapshot(granted = true) {
+    try {
+      const saveObj: Record<string, string> = {};
+      CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
+      localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
+
+      const full = {
+        accepted: CONSENT_TYPES.map((type) => ({ type, version: POLICY_VERSION, granted, details: {} })),
+        accepted_types: CONSENT_TYPES,
+        client_timestamp: new Date().toISOString(),
+        created_by_authenticated: !!firebaseUser,
+        details: { ip_masked: "" },
+        meta: {
+          origin: typeof window !== "undefined" ? window.location.origin : "",
+          path: typeof window !== "undefined" ? window.location.pathname : "",
+          ref: typeof document !== "undefined" ? document.referrer || "" : "",
+        },
+        timestamp: new Date().toLocaleString(),
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        user_id: firebaseUser ? firebaseUser.uid : undefined,
+      };
+      localStorage.setItem(FULL_KEY, JSON.stringify(full));
+      localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+    } catch {}
+  }
+
+  // Estado inicial checkbox newsletter
   useEffect(() => {
-    // Listener para actualizaciones desde la misma pestaña (CustomEvent)
+    if (user && typeof (user as any).newsletterConsent !== "undefined") {
+      setNewsletterChecked(Boolean((user as any).newsletterConsent));
+    }
+  }, [user]);
+
+  // Sincronización por evento
+  useEffect(() => {
     const onConsentUpdated = (ev: Event) => {
       try {
         const custom = ev as CustomEvent;
-
-        // Si recibimos un detail concreto, podemos sincronizar localStorage si hace falta
-        if (custom?.detail) {
-          // Construye y guarda versiones si vienen accepted_types o analytics
-          const saveObj: Record<string, string> = {};
-          CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-
-          if (typeof window !== "undefined") {
-            // Guardamos consent_versions + legacy
-            localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
-            localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
-
-            // Si no existe el objeto full, construimos uno mínimo para mantener compatibilidad
-            const full = {
-              accepted: CONSENT_TYPES.map((type) => ({
-                type,
-                version: POLICY_VERSION,
-                granted: true,
-                details: {},
-              })),
-              accepted_types: CONSENT_TYPES,
-              client_timestamp: new Date().toISOString(),
-              created_by_authenticated: !!firebaseUser,
-              details: {
-                ip_masked: "",
-              },
-              meta: {
-                origin: typeof window !== "undefined" ? window.location.origin : "",
-                path: typeof window !== "undefined" ? window.location.pathname : "",
-                ref: typeof document !== "undefined" ? document.referrer || "" : "",
-              },
-              timestamp: new Date().toLocaleString(),
-              user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
-              user_id: firebaseUser ? firebaseUser.uid : undefined,
-            };
-            localStorage.setItem(FULL_KEY, JSON.stringify(full));
-            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
-          }
-        }
-      } catch {
-        // ignore
+        if (custom?.detail) writeLocalStorageSnapshot(true);
+      } catch (err) {
+        console.warn("ConsentModal: onConsentUpdated error", err);
       }
-
-      // Cerrar modal y quitar loading
       setShow(false);
       setLoading(false);
     };
 
     if (typeof window !== "undefined") {
-      // Nota: usamos el nombre 'consent:updated' (coincide con AnalyticsGate)
       window.addEventListener("consent:updated", onConsentUpdated as EventListener);
     }
-
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("consent:updated", onConsentUpdated as EventListener);
       }
     };
-  }, [firebaseUser]); // dependemos de firebaseUser para incluir user_id en el objeto full si hace falta
+    // no dependas de show/flags para no reordenar hooks
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firebaseUser]);
 
+  // Chequeo principal
   useEffect(() => {
     if (userLoading) return;
 
     const checkConsent = async () => {
       setLoading(true);
-
       try {
         if (firebaseUser) {
-          // Usuario logueado: consultamos backend
           localStorage.removeItem("anonymous_user_id");
           localStorage.setItem("user_id", firebaseUser.uid);
 
@@ -120,81 +182,42 @@ export default function ConsentModal() {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          if (!res.ok) {
-            console.warn("GET /api/consent respondió con status:", res.status);
+          if (res.status === 404) {
             setShow(true);
-            setLoading(false);
+            return;
+          }
+          if (!res.ok) {
+            setShow(true);
             return;
           }
 
           const data = await res.json();
+          const norm = normalizeConsents(data);
 
-          // Lógica Corregida: Verifica si la versión de cada tipo de consentimiento
-          // en la base de datos coincide con la versión de la política actual.
-          // Asumimos que el endpoint devuelve un objeto tipo { terms_of_service: "1.0.0", ... }
-          const allConsentsAccepted = CONSENT_TYPES.every(
-            (type) => data[type] === POLICY_VERSION
-          );
-
-          if (allConsentsAccepted) {
-            // Guardar en localStorage (consistencia)
-            const saveObj: Record<string, string> = {};
-            CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-            localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
-            localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
-
-            // Guardar objeto completo compatible con tu estructura en BBDD
-            const full = {
-              accepted: CONSENT_TYPES.map((type) => ({
-                type,
-                version: POLICY_VERSION,
-                granted: true,
-                details: {},
-              })),
-              accepted_types: CONSENT_TYPES,
-              client_timestamp: new Date().toISOString(),
-              created_by_authenticated: true,
-              details: {
-                ip_masked: "",
-              },
-              meta: {
-                origin: window.location.origin,
-                path: window.location.pathname,
-                ref: document.referrer || "",
-              },
-              timestamp: new Date().toLocaleString(),
-              user_agent: navigator.userAgent,
-              user_id: firebaseUser.uid,
-            };
-            localStorage.setItem(FULL_KEY, JSON.stringify(full));
-            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
-
-            setShow(false);
-          } else {
+          if (!norm.hasAnyRecord || norm.hasAnyRejected || !norm.allVersionsOk || norm.missingTypes.length > 0) {
             setShow(true);
+            return;
           }
+
+          writeLocalStorageSnapshot(true);
+          setShow(false);
         } else {
-          // Usuario anónimo: mirar localStorage
           localStorage.removeItem("user_id");
           localStorage.removeItem("anonymous_user_id");
 
           const localRaw = localStorage.getItem(LOCAL_KEY);
           if (localRaw) {
             try {
-              const localObj = JSON.parse(localRaw);
-              const allOk = CONSENT_TYPES.every(
-                (type) => localObj && localObj[type] === POLICY_VERSION
-              );
+              const localObj = JSON.parse(localRaw) as Record<string, string>;
+              const allOk = CONSENT_TYPES.every((type) => localObj && localObj[type] === POLICY_VERSION);
               if (allOk) {
                 setShow(false);
-                setLoading(false);
                 return;
               }
-            } catch {
-              console.error(t("consent.modal.errors.checkConsent"));
+            } catch (err) {
+              console.error(t("consent.modal.errors.checkConsent"), err);
             }
           }
-
           setShow(true);
         }
       } catch (error) {
@@ -202,16 +225,19 @@ export default function ConsentModal() {
         setShow(true);
       } finally {
         setLoading(false);
+        try {
+          localStorage.setItem("consent_debug_last_check", new Date().toISOString());
+        } catch {}
       }
     };
 
     checkConsent();
-  }, [firebaseUser, userLoading]);
+  }, [firebaseUser, userLoading, t]);
 
+  // Aceptar
   const handleAccept = async () => {
     setLoading(true);
 
-    // Construimos accepted array para backend y para localStorage/full object
     const accepted = CONSENT_TYPES.map((type) => ({
       type,
       version: POLICY_VERSION,
@@ -219,73 +245,34 @@ export default function ConsentModal() {
       details: {},
     }));
 
-    // Objeto completo que guardaremos en localStorage para compatibilidad
-    const fullConsent = {
-      accepted,
-      accepted_types: CONSENT_TYPES,
-      client_timestamp: new Date().toISOString(),
-      created_by_authenticated: !!firebaseUser,
-      details: {
-        ip_masked: "",
-      },
-      meta: {
-        origin: typeof window !== "undefined" ? window.location.origin : "",
-        path: typeof window !== "undefined" ? window.location.pathname : "",
-        ref: typeof document !== "undefined" ? document.referrer || "" : "",
-      },
-      timestamp: new Date().toLocaleString(),
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
-      user_id: firebaseUser ? firebaseUser.uid : undefined,
-    };
-
     if (!firebaseUser) {
-      // Usuario anónimo: no guardamos nada en backend, solo localStorage
-      const saveObj: Record<string, string> = {};
-      CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-      localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
-      localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
-      localStorage.setItem(FULL_KEY, JSON.stringify(fullConsent));
-      localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
-
-      // Emitir evento para que otras partes reaccionen (usamos emitConsentUpdated centralizado)
       try {
-        emitConsentUpdated(true, { accepted_types: CONSENT_TYPES });
+        writeLocalStorageSnapshot(true);
+        emitConsentUpdated?.(true, { accepted_types: CONSENT_TYPES });
       } catch {
-        // Fallback dispatch
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: true, accepted_types: CONSENT_TYPES } }));
-          localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+          try { localStorage.setItem(LAST_UPDATE_KEY, String(Date.now())); } catch {}
         }
       }
-
       setShow(false);
       setLoading(false);
       return;
     }
 
-    // Usuario logueado: hacemos POST para guardar consentimiento en backend
     try {
       const token = await firebaseUser.getIdToken();
-
-      const clientOrigin = window.location.origin;
-      const clientRef = document.referrer || "";
-      const clientPath = window.location.pathname;
-      const clientTimestamp = new Date().toISOString();
-
       const res = await fetch("/api/consent", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           accepted,
           user_id: firebaseUser.uid,
-          details: {}, // si tienes detalles, añádelos
-          origin: clientOrigin,
-          ref: clientRef,
-          path: clientPath,
-          client_timestamp: clientTimestamp,
+          details: {},
+          origin: window.location.origin,
+          ref: document.referrer || "",
+          path: window.location.pathname,
+          client_timestamp: new Date().toISOString(),
         }),
       });
 
@@ -293,22 +280,26 @@ export default function ConsentModal() {
         console.error(t("consent.modal.errors.saveConsent"), await res.text());
         setShow(true);
       } else {
-        // Guardamos en localStorage igual que en anónimo (consistencia)
-        const saveObj: Record<string, string> = {};
-        CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
-        localStorage.setItem(LOCAL_KEY, JSON.stringify(saveObj));
-        localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
-        localStorage.setItem(FULL_KEY, JSON.stringify(fullConsent));
-        localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+        writeLocalStorageSnapshot(true);
 
-        // Emitir evento para que otras partes reaccionen
         try {
-          emitConsentUpdated(true, { accepted_types: CONSENT_TYPES });
+          emitConsentUpdated?.(true, { accepted_types: CONSENT_TYPES });
         } catch {
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: true, accepted_types: CONSENT_TYPES } }));
-            localStorage.setItem(LAST_UPDATE_KEY, String(Date.now()));
+          window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: true, accepted_types: CONSENT_TYPES } }));
+          try { localStorage.setItem(LAST_UPDATE_KEY, String(Date.now())); } catch {}
+        }
+
+        // newsletter independiente de consents
+        try {
+          if (typeof setNewsletterConsent === "function") {
+            if (newsletterChecked) {
+              await setNewsletterConsent(true);
+            } else if (user && (user as any).newsletterConsent === true) {
+              await setNewsletterConsent(false);
+            }
           }
+        } catch (e) {
+          console.error("No se pudo actualizar newsletter en Firestore:", e);
         }
 
         setShow(false);
@@ -321,10 +312,11 @@ export default function ConsentModal() {
     }
   };
 
-  // 🐛 FIX: Always call the hook, but pass a condition to it
-  useBodyScrollLock(show && !loading); 
+  // ✅ llama SIEMPRE al hook; sólo condiciona su efecto
+  useBodyScrollLock(show && !loading && !skipModalRoute);
 
-  if (!show) return null;
+  // ✅ único return, sin cortar hooks antes
+  if (skipModalRoute || !show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
@@ -332,22 +324,36 @@ export default function ConsentModal() {
         <h2 className="text-xl font-bold mb-4">{t("consent.modal.title")}</h2>
         <p className="mb-4">
           {t("consent.modal.message")}{" "}
-          <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline">
+          <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
             {t("consent.modal.terms")}
           </a>
           ,{" "}
-          <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline">
+          <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
             {t("consent.modal.privacy")}
           </a>{" "}
           {t("and")}{" "}
-          <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline">
-           {t("consent.modal.cookies")}
+          <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
+            {t("consent.modal.cookies")}
           </a>
           .
         </p>
+
+        {firebaseUser && (
+          <label className="flex items-center gap-2 mb-4 text-sm">
+            <input
+              type="checkbox"
+              checked={newsletterChecked}
+              onChange={(e) => setNewsletterChecked(e.target.checked)}
+              className="w-4 h-4"
+              aria-label={t("consent.modal.newsletterLabel") || "Suscribirme al newsletter"}
+            />
+            <span>{t("consent.modal.newsletterLabel") || "Quiero recibir el newsletter"}</span>
+          </label>
+        )}
+
         <button
           onClick={handleAccept}
-          className="bg-[var(--highlight)] text-[var(--text2)] px-4 py-2 rounded hover:bg-[var(--highlight-dark)]"
+          className="bg-[var(--highlight)] text-[var(--text2)] px-4 py-2 rounded hover:bg-[var(--highlight-dark)] disabled:opacity-60"
           disabled={loading}
         >
           {loading ? t("consent.modal.acceptingButton") : t("consent.modal.acceptButton")}

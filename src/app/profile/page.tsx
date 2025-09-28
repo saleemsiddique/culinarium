@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CustomUser, useUser } from "@/context/user-context";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CreditCard,
   Calendar,
@@ -24,6 +24,7 @@ import {
   History,
   BookOpen,
   Zap,
+  ChevronRight, // ⬅️ flecha para el final
 } from "lucide-react";
 import { useSubscription } from "@/context/subscription-context";
 import Onboarding from "@/components/onboarding";
@@ -40,7 +41,7 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const { user, logout, updateUserName } = useUser();
+  const { user, logout, updateUserName, setNewsletterConsent } = useUser();
   const { subscription } = useSubscription();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +50,8 @@ function ProfileContent() {
   const [showReactivateDialog, setShowReactivateDialog] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
+  const [newsletterChecked, setNewsletterChecked] = useState<boolean>(!!user?.newsletterConsent);
+  const [newsletterSaving, setNewsletterSaving] = useState(false);
   const { t } = useTranslation();
 
   // Estados para editar nombre
@@ -56,7 +59,52 @@ function ProfileContent() {
   const [newName, setNewName] = useState(user?.firstName || "");
   const [isSavingName, setIsSavingName] = useState(false);
 
-  // Estado para el modal de mensaje
+  useEffect(() => {
+    setNewsletterChecked(!!user?.newsletterConsent);
+  }, [user?.newsletterConsent]);
+
+  const formatDateTime = (d?: Date) =>
+    d
+      ? d.toLocaleString("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      : "";
+
+  const handleToggleNewsletter = async (checked: boolean) => {
+    if (!setNewsletterConsent) return;
+    setNewsletterSaving(true);
+    try {
+      await setNewsletterConsent(checked);
+
+      setMessageModal({
+        visible: true,
+        title: t("profile.modals.message.success"),
+        text: checked
+          ? t("profile.newsletter.subscribed")
+          : t("profile.newsletter.unsubscribed"),
+        isError: false,
+      });
+
+      setNewsletterChecked(checked);
+    } catch (e) {
+      console.error("Newsletter toggle error:", e);
+      setMessageModal({
+        visible: true,
+        title: t("profile.modals.message.error"),
+        text: t("profile.newsletter.error"),
+        isError: true,
+      });
+      setNewsletterChecked((prev) => !prev);
+    } finally {
+      setNewsletterSaving(false);
+    }
+  };
+
+  // Modal de mensaje
   const [messageModal, setMessageModal] = useState({
     visible: false,
     title: "",
@@ -75,23 +123,15 @@ function ProfileContent() {
     }
   };
 
-  const handlePaymentHistory = async () => {
-    try {
-      router.push("/profile/payment_history");
-    } catch (error) {
-      console.error(t("profile.errors.paymentHistory"), error);
-    }
+  const handlePaymentHistory = () => {
+    router.push("/profile/payment_history");
   };
 
-  const handleCustomerPortal = async () => {
-    try {
-      router.push("/profile/billing");
-    } catch (error) {
-      console.error(t("profile.errors.billing"), error);
-    }
+  const handleCustomerPortal = () => {
+    router.push("/profile/billing");
   };
 
-  // Función para guardar el nuevo nombre
+  // Guardar nombre
   const handleSaveName = async () => {
     if (!newName.trim()) {
       setMessageModal({
@@ -105,25 +145,15 @@ function ProfileContent() {
 
     setIsSavingName(true);
     try {
-      // Si tienes una función updateUserName en tu contexto de usuario
       if (updateUserName) {
         await updateUserName(newName.trim());
       } else {
-        // Alternativa: hacer la llamada directa a la API
         const response = await fetch("/api/user/update-name", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: user?.uid,
-            firstName: newName.trim(),
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user?.uid, firstName: newName.trim() }),
         });
-
-        if (!response.ok) {
-          throw new Error("Error al actualizar el nombre");
-        }
+        if (!response.ok) throw new Error("Error al actualizar el nombre");
       }
 
       setIsEditingName(false);
@@ -134,10 +164,7 @@ function ProfileContent() {
         isError: false,
       });
 
-      // Si no tienes la función updateUserName en el contexto, puedes recargar
-      if (!updateUserName) {
-        window.location.reload();
-      }
+      if (!updateUserName) window.location.reload();
     } catch (error) {
       console.error("Error:", error);
       setMessageModal({
@@ -151,63 +178,39 @@ function ProfileContent() {
     }
   };
 
-  // Función para cancelar la edición
   const handleCancelEdit = () => {
     setNewName(user?.firstName || "");
     setIsEditingName(false);
   };
 
+  // Suscripción
   const handleCancelSubscription = async () => {
     setIsLoading(true);
     try {
-      // Paso 1: Llamar a la API para cancelar la suscripción
       const response = await fetch("/api/subscription/cancel", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid }),
       });
+      if (!response.ok) throw new Error("Error al cancelar la suscripción");
 
-      if (!response.ok) {
-        throw new Error("Error al cancelar la suscripción");
-      }
-
-      // Usamos el `tokens_reset_date` del usuario como la fecha de finalización
       const subscriptionEndDate = user?.tokens_reset_date;
-
-      // Convertimos la marca de tiempo a una cadena de fecha legible
       const formattedEndDate = subscriptionEndDate
         ?.toDate()
-        .toLocaleDateString("es-ES", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
+        .toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
 
-      // Paso 2: Llamar a la API para enviar el correo de desuscripción
       const emailResponse = await fetch("/api/send-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "unsubscribe",
-          to: user?.email, // o la dirección de correo del usuario
-          data: {
-            name: user?.firstName || user?.email,
-            endDate: formattedEndDate,
-          },
-          lang: i18n.language
+          to: user?.email,
+          data: { name: user?.firstName || user?.email, endDate: formattedEndDate },
+          lang: i18n.language,
         }),
       });
 
-      if (!emailResponse.ok) {
-        console.error("Error al enviar el correo de confirmación");
-        // No lanzamos un error aquí para que el modal de éxito se muestre de todas formas
-      }
+      if (!emailResponse.ok) console.error("Error al enviar el correo de confirmación");
 
       setMessageModal({
         visible: true,
@@ -237,17 +240,10 @@ function ProfileContent() {
     try {
       const response = await fetch("/api/subscription/cancel-now", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid }),
       });
-
-      if (!response.ok) {
-        throw new Error("Error al cancelar la suscripción");
-      }
+      if (!response.ok) throw new Error("Error al cancelar la suscripción");
 
       setMessageModal({
         visible: true,
@@ -277,17 +273,10 @@ function ProfileContent() {
     try {
       const response = await fetch("/api/subscription/reactivate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.uid }),
       });
-
-      if (!response.ok) {
-        throw new Error("Error al reactivar la suscripción");
-      }
+      if (!response.ok) throw new Error("Error al reactivar la suscripción");
 
       setMessageModal({
         visible: true,
@@ -314,26 +303,16 @@ function ProfileContent() {
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return d.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
   };
 
   const getSubscriptionStatus = () => {
     if (!user?.isSubscribed)
       return { text: t("profile.subscription.premium.status.noSubscription"), color: "text-gray-600" };
     if (user?.subscriptionCanceled)
-      return {
-        text: t("profile.subscription.premium.status.cancelled"),
-        color: "text-[var(--highlight)]",
-      };
+      return { text: t("profile.subscription.premium.status.cancelled"), color: "text-[var(--highlight)]" };
     if (user?.subscriptionStatus === "payment_failed") {
-      return {
-        text: t("profile.subscription.premium.status.paymentFailed"),
-        color: "text-[var(--highlight)]",
-      };
+      return { text: t("profile.subscription.premium.status.paymentFailed"), color: "text-[var(--highlight)]" };
     }
     return { text: t("profile.subscription.premium.status.active"), color: "text-emerald-600" };
   };
@@ -342,13 +321,10 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[var(--background)] via-[var(--background)] to-orange-50 py-18 px-4">
-      {/* Showing OnBoarding al hacer cliq al boton */}
-      {showOnboarding && (
-        <Onboarding onClose={() => setShowOnboarding(false)} />
-      )}
+      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
 
       <div className="max-w-6xl mx-auto">
-        {/* Header with Profile Picture Placeholder */}
+        {/* Header */}
         <div className="text-center mb-12">
           <div className="relative inline-block">
             <div className="w-26 h-26 bg-gradient-to-br from-[var(--highlight)] to-[var(--highlight-dark)] rounded-full flex items-center justify-center shadow-2xl mb-6 border-4 border-white">
@@ -358,16 +334,14 @@ function ProfileContent() {
           <h1 className="text-4xl font-bold text-[var(--foreground)] mb-2">
             {t("profile.greeting", { name: user?.firstName })}<br />
           </h1>
-          <p className="text-[var(--foreground)] opacity-70 text-lg">
-            {t("profile.subtitle")}
-          </p>
+          <p className="text-[var(--foreground)] opacity-70 text-lg">{t("profile.subtitle")}</p>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Personal Info */}
+          {/* Left Column */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Personal Information Card */}
+            {/* Personal Info */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-orange-100 shadow-xl p-6">
               <div className="flex items-center mb-6">
                 <div className="bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] rounded-lg p-2 mr-3">
@@ -378,7 +352,7 @@ function ProfileContent() {
                 </h2>
               </div>
 
-              {/* Name Section */}
+              {/* Name */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-[var(--foreground)] opacity-70 block mb-2">
                   {t("profile.personalInfo.name")}
@@ -436,16 +410,14 @@ function ProfileContent() {
                 )}
               </div>
 
-              {/* Email Section */}
+              {/* Email */}
               <div>
                 <label className="text-sm font-medium text-[var(--foreground)] opacity-70 block mb-2">
                   {t("profile.personalInfo.email")}
                 </label>
                 <div className="flex items-center bg-gray-50/80 rounded-xl p-3 border border-gray-100">
                   <Mail className="h-4 w-4 text-[var(--highlight)] mr-2" />
-                  <span className="text-[var(--foreground)]">
-                    {user?.email}
-                  </span>
+                  <span className="text-[var(--foreground)]">{user?.email}</span>
                 </div>
               </div>
             </div>
@@ -456,29 +428,57 @@ function ProfileContent() {
                 <Settings className="h-5 w-5 mr-2 text-[var(--highlight)]" />
                 {t("profile.quickActions.title")}
               </h3>
-              <div className="space-y-3">
-                <Button
-                  onClick={handleCustomerPortal}
-                  className="w-full justify-start bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 text-white hover:from-[var(--primary)]/90 hover:to-[var(--primary)]/80 rounded-xl py-3 shadow-lg"
-                >
-                  <CreditCard className="h-4 w-4 mr-3" />
-                  {t("profile.quickActions.billing")}
-                </Button>
-                <Button
-                  onClick={handlePaymentHistory}
-                  className="w-full justify-start bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white hover:from-[var(--highlight)]/90 hover:to-[var(--highlight-dark)]/90 rounded-xl py-3 shadow-lg"
-                >
-                  <History className="h-4 w-4 mr-3" />
-                  {t("profile.quickActions.paymentHistory")}
-                </Button>
-                <Button
-                  onClick={() => setShowOnboarding(true)}
-                  className="w-full justify-start bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 rounded-xl py-3 shadow-lg"
-                >
-                  <BookOpen className="h-4 w-4 mr-3" />
-                  {t("profile.quickActions.howItWorks")}
-                </Button>
+              {/* How it works */}
+              <Button
+                onClick={() => setShowOnboarding(true)}
+                className="w-full justify-start bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 rounded-xl py-3 shadow-lg"
+              >
+                <BookOpen className="h-4 w-4 mr-3" />
+                {t("profile.quickActions.howItWorks")}
+              </Button>
+
+              {/* Newsletter quick action */}
+              <div className="mt-5 p-4 rounded-xl border border-orange-200/70 bg-orange-50/60">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-5 w-5 text-[var(--highlight)]" />
+                    <div>
+                      <p className="font-medium text-[var(--foreground)]">
+                        {t("profile.newsletter.title")}
+                      </p>
+                      <p className="text-sm text-[var(--foreground)]/70">
+                        {t("profile.newsletter.helper")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="inline-flex items-center cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={newsletterChecked}
+                      onChange={(e) => handleToggleNewsletter(e.target.checked)}
+                      disabled={newsletterSaving}
+                      aria-label={t("profile.newsletter.aria") || "Suscripción al newsletter"}
+                    />
+                    <div
+                      className={`
+                        w-11 h-6 rounded-full transition
+                        ${newsletterChecked ? "bg-[var(--highlight)]" : "bg-gray-300"}
+                        relative
+                      `}
+                    >
+                      <span
+                        className={`
+                          absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition
+                          ${newsletterChecked ? "translate-x-5" : ""}
+                        `}
+                      />
+                    </div>
+                  </label>
+                </div>
               </div>
+
               {/* Language Switcher */}
               <div className="mt-4 flex space-x-3">
                 <button
@@ -503,7 +503,7 @@ function ProfileContent() {
             </div>
           </div>
 
-          {/* Right Column - Subscription Info */}
+          {/* Right Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Premium Subscription Card */}
             {user?.isSubscribed && (
@@ -515,12 +515,8 @@ function ProfileContent() {
                         <Crown className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold">
-                          {t("profile.subscription.premium.title")}
-                        </h2>
-                        <p className="text-white/80">
-                          {t("profile.subscription.premium.description")}
-                        </p>
+                        <h2 className="text-2xl font-bold">{t("profile.subscription.premium.title")}</h2>
+                        <p className="text-white/80">{t("profile.subscription.premium.description")}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -535,7 +531,7 @@ function ProfileContent() {
                               ? "bg-emerald-300"
                               : "bg-orange-300"
                             }`}
-                        ></div>
+                        />
                         {subscriptionStatus.text}
                       </div>
                     </div>
@@ -545,23 +541,17 @@ function ProfileContent() {
                     <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
                       <div className="flex items-center mb-2">
                         <Calendar className="h-5 w-5 text-[var(--highlight)] mr-2" />
-                        <span className="text-sm text-white/80">
-                          {t("profile.subscription.premium.nextBilling")}
-                        </span>
+                        <span className="text-sm text-white/80">{t("profile.subscription.premium.nextBilling")}</span>
                       </div>
                       <p className="text-xl font-semibold">
-                        {subscription?.endsAt
-                          ? formatDate(subscription.endsAt.toDate())
-                          : "N/A"}
+                        {subscription?.endsAt ? formatDate(subscription.endsAt.toDate()) : "N/A"}
                       </p>
                     </div>
 
                     <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
                       <div className="flex items-center mb-2">
                         <Coins className="h-5 w-5 text-[var(--highlight)] mr-2" />
-                        <span className="text-sm text-white/80">
-                          {t("profile.subscription.premium.availableTokens")}
-                        </span>
+                        <span className="text-sm text-white/80">{t("profile.subscription.premium.availableTokens")}</span>
                       </div>
                       <p className="text-xl font-semibold text-[var(--highlight)]">
                         {totalOfTokens.toLocaleString()}
@@ -598,16 +588,14 @@ function ProfileContent() {
                     </div>
                   )}
 
-                  {/* Cancelled Subscription Notice */}
+                  {/* Cancelled Notice */}
                   {user?.isSubscribed && user?.subscriptionCanceled && (
                     <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6 backdrop-blur-sm">
                       <div className="flex items-center justify-center mb-4">
                         <AlertTriangle className="h-6 w-6 text-red-300 mr-3" />
                         <p className="text-red-200 font-medium text-center">
                           {t("profile.subscription.premium.cancelledNotice", {
-                            date: subscription?.endsAt
-                              ? formatDate(subscription.endsAt.toDate())
-                              : ("final del período")
+                            date: subscription?.endsAt ? formatDate(subscription.endsAt.toDate()) : "final del período",
                           })}
                         </p>
                       </div>
@@ -626,7 +614,7 @@ function ProfileContent() {
               </div>
             )}
 
-            {/* Free Account Upgrade Card */}
+            {/* Free Account Upgrade */}
             {!user?.isSubscribed && (
               <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 rounded-2xl border-2 border-dashed border-[var(--highlight)]/30 p-8 text-center">
                 <div className="bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
@@ -638,17 +626,61 @@ function ProfileContent() {
                 <p className="text-[var(--foreground)]/70 mb-6 text-lg">
                   {t("profile.subscription.free.description")}
                 </p>
-                <div className="max-w-md mx-auto" onClick={() => { setShowPremium(true); }}>
+                <div className="max-w-md mx-auto" onClick={() => setShowPremium(true)}>
                   <div className="w-full flex flex-col items-center gap-4">
-                    <button
-                      className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out"
-                    >
+                    <button className="w-full cursor-pointer px-5 flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 ease-in-out">
                       {t("profile.subscription.free.subscribe")}
                     </button>
                   </div>
                 </div>
               </div>
             )}
+
+
+            {/* Billing (card completa clicable) */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleCustomerPortal}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleCustomerPortal()}
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-orange-100 shadow-xl p-6 mb-3 cursor-pointer hover:bg-white transition"
+              aria-label={t("profile.quickActions.billing")}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]/90 rounded-lg p-2">
+                    <CreditCard className="h-5 w-5 text-white" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-[var(--foreground)]">
+                    {t("profile.quickActions.billing")}
+                  </h4>
+                </div>
+                <ChevronRight className="h-5 w-5 text-[var(--foreground)]/50 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </div>
+
+            {/* Payment History (card completa clicable) */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handlePaymentHistory}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handlePaymentHistory()}
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-orange-100 shadow-xl p-6 mb-3 cursor-pointer hover:bg-white transition"
+              aria-label={t("profile.quickActions.paymentHistory")}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] rounded-lg p-2">
+                    <History className="h-5 w-5 text-white" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-[var(--foreground)]">
+                    {t("profile.quickActions.paymentHistory")}
+                  </h4>
+                </div>
+                <ChevronRight className="h-5 w-5 text-[var(--foreground)]/50 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </div>
+
 
             {/* Logout Section */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-orange-100 shadow-xl p-6">
@@ -674,8 +706,7 @@ function ProfileContent() {
         </div>
       </div>
 
-      {/* All Modals (unchanged functionality) */}
-      {/* Modal de confirmación de cancelación */}
+      {/* Modals */}
       {showCancelDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
@@ -709,7 +740,6 @@ function ProfileContent() {
         </div>
       )}
 
-      {/* Modal de confirmación de cancelación inmediata */}
       {showCancelNowDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
@@ -743,7 +773,6 @@ function ProfileContent() {
         </div>
       )}
 
-      {/* Modal de confirmación de reactivación */}
       {showReactivateDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
@@ -751,9 +780,7 @@ function ProfileContent() {
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
                 <Zap className="h-8 w-8 text-green-500" />
               </div>
-              <h3 className="text-xl font-bold mb-3">
-                {t("profile.modals.reactivate.title")}
-              </h3>
+              <h3 className="text-xl font-bold mb-3">{t("profile.modals.reactivate.title")}</h3>
               <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">
                 {t("profile.modals.reactivate.message")}
               </p>
@@ -779,7 +806,6 @@ function ProfileContent() {
         </div>
       )}
 
-      {/* Modal de mensaje personalizado */}
       {messageModal.visible && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-orange-100">
@@ -795,13 +821,9 @@ function ProfileContent() {
                 )}
               </div>
               <h3 className="text-xl font-bold mb-3">{messageModal.title}</h3>
-              <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">
-                {messageModal.text}
-              </p>
+              <p className="text-[var(--foreground)]/70 mb-8 leading-relaxed">{messageModal.text}</p>
               <Button
-                onClick={() =>
-                  setMessageModal({ ...messageModal, visible: false })
-                }
+                onClick={() => setMessageModal({ ...messageModal, visible: false })}
                 className="bg-[var(--highlight)] hover:bg-[var(--highlight-dark)] text-white rounded-xl px-8 py-3"
               >
                 {t("profile.modals.message.close")}

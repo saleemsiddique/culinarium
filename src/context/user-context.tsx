@@ -14,6 +14,7 @@ import {
   updateDoc,
   Timestamp,
   getDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -47,6 +48,9 @@ export interface CustomUser {
   subscriptionStatus: string;
   subscriptionCanceled: boolean;
   tokens_reset_date: Timestamp;
+  newsletterConsent?: boolean;
+  lastNewsletterConsentAt?: Timestamp | null;
+  lastNewsletterConsentCanceledAt?: Timestamp | null;
 }
 
 interface UserContextType {
@@ -68,6 +72,7 @@ interface UserContextType {
   refreshUser: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   confirmPasswordReset: (oobCode: string, newPassword: string) => Promise<void>;
+  setNewsletterConsent: (subscribe: boolean) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -197,75 +202,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [firebaseUser?.email, refreshUser]);
-
-  // ✅ Nuevo efecto: procesa el resultado de Google Redirect (solo tras volver del proveedor)
-  useEffect(() => {
-    let processed = false;
-    console.log("Procesando getRedirectResult...");
-    (async () => {
-      console.log("Dentro de la función asíncrona de getRedirectResult");
-      if (processed) return;
-      console.log("Llamando a getRedirectResult");
-      try {
-        const result = await getRedirectResult(auth);
-        console.log("Resultado de getRedirectResult 1:", result);
-        if (!result) return; // No hubo redirect pendiente
-        processed = true;
-        console.log("Resultado de getRedirectResult:", result);
-        const userInfo = result.user;
-        if (!userInfo?.email) return;
-
-        const userDocRef = doc(db, "user", userInfo.uid);
-        const snapshot = await getDoc(userDocRef);
-        console.log("Llegando aquí después de getRedirectResult");
-        const now = new Date();
-        now.setMonth(now.getMonth() + 1);
-        const tokens_reset_date = Timestamp.fromDate(now);
-
-        let finalUser: CustomUser;
-        //let isNew = false;
-        console.log("Usuario from Google:", userInfo);
-        if (!snapshot.exists()) {
-          // Crear nuevo usuario
-          //const stripeCustomerId = await createStripeCustomer(userInfo.email, userInfo.uid);
-          //isNew = true;
-          finalUser = {
-            uid: userInfo.uid,
-            email: userInfo.email,
-            firstName: userInfo.displayName?.split(" ")[0] || "",
-            lastName: userInfo.displayName?.split(" ").slice(1).join(" ") || "",
-            created_at: Timestamp.now(),
-            extra_tokens: 0,
-            isSubscribed: false,
-            lastRenewal: Timestamp.now(),
-            monthly_tokens: 50,
-            stripeCustomerId: "",
-            subscriptionId: "",
-            subscriptionStatus: "cancelled",
-            subscriptionCanceled: false,
-            tokens_reset_date,
-          };
-          await setDoc(userDocRef, finalUser);
-        } else {
-          finalUser = snapshot.data() as CustomUser;
-          finalUser.uid = snapshot.id;
-          finalUser = await checkAndResetMonthlyTokens(finalUser);
-        }
-
-        setUser(finalUser);
-        setFirebaseUser(userInfo);
-        console.log("Usuario autenticado con Google Redirect:", finalUser);
-        // Redirigir a /kitchen
-        router.replace("/kitchen");
-      } catch (e: unknown) {
-        console.error("Error en getRedirectResult:", e);
-        // Ignorar si no hay evento de auth
-        if (typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code !== "auth/no-auth-event") {
-          console.error("Error procesando getRedirectResult:", e);
-        }
-      }
-    })();
-  }, [router, checkAndResetMonthlyTokens]);
 
   // Función helper para crear customer en Stripe
   const createStripeCustomer = async (email: string, userId: string) => {
@@ -449,19 +385,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-
-    // Usa redirect si es InAppBrowser, si no usa popup
-    let result;
-    if (isInAppBrowser()) {
-      await signInWithRedirect(auth, provider);
-      // El flujo con redirect requiere que el usuario vuelva a la app y se procese en onAuthStateChanged
-      // Aquí puedes retornar un estado especial si lo necesitas
-      return { user: null, isNewUser: false };
-    } else {
-      result = await signInWithPopup(auth, provider);
-    }
-
+    const result = await signInWithPopup(auth, provider);
     const userInfo = result.user;
+
     const email = userInfo.email;
     if (!email) throw new Error("No se pudo obtener el email");
 
@@ -606,6 +532,51 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
 
+  const setNewsletterConsent = async (subscribe: boolean) => {
+    if (!firebaseUser) {
+      console.warn("No hay firebaseUser para actualizar newsletter");
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, "user", firebaseUser.uid);
+
+      if (subscribe) {
+        // Suscribir: marcamos true y ponemos timestamp server-side
+        await updateDoc(userDocRef, {
+          newsletterConsent: true,
+          lastNewsletterConsentAt: serverTimestamp(),
+          lastNewsletterConsentCanceledAt: null,
+        });
+
+        // Actualizamos estado local inmediatamente (mejor UX)
+        setUser(prev => prev ? ({
+          ...prev,
+          // @ts-ignore opcionales si tu tipo CustomUser no tiene estas props
+          newsletterConsent: true,
+          lastNewsletterConsentAt: Timestamp.now(), // local approx (opcional)
+          lastNewsletterConsentCanceledAt: null,
+        }) : prev);
+      } else {
+        // Desuscribir: ponemos campo a false y registramos timestamp de cancelación
+        await updateDoc(userDocRef, {
+          newsletterConsent: false,
+          lastNewsletterConsentCanceledAt: serverTimestamp(),
+        });
+
+        setUser(prev => prev ? ({
+          ...prev,
+          newsletterConsent: false,
+          lastNewsletterConsentCanceledAt: Timestamp.now(),
+        }) : prev);
+      }
+    } catch (err) {
+      console.error("Error actualizando newsletterConsent:", err);
+      throw err;
+    }
+  };
+
+
   // 🆕 Nueva función para enviar el correo de restablecimiento
   const sendPasswordResetEmail = async (email: string) => {
     try {
@@ -640,6 +611,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     refreshUser,
     sendPasswordResetEmail,
     confirmPasswordReset,
+    setNewsletterConsent
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

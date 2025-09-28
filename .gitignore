@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/scripts
+/scripts-exports
+culinarium-cd1f5-firebase-adminsdk-fbsvc-632bd011cd.json

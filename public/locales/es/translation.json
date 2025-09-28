@@ -700,6 +700,16 @@
       "logout": "Error al cerrar sesión",
       "paymentHistory": "Error al entrar en payment history",
       "billing": "Error al entrar en billing"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "helper": "Recibe novedades y consejos por email.",
+      "aria": "Suscripción al newsletter",
+      "subscribed": "Te has suscrito al newsletter.",
+      "unsubscribed": "Has cancelado la suscripción al newsletter.",
+      "error": "No se pudo actualizar tu preferencia de newsletter.",
+      "subscribedAt": "Suscrito el {{date}}",
+      "unsubscribedAt": "Cancelado el {{date}}"
     }
   },
   "onboarding": {
@@ -1135,7 +1145,8 @@
         "checkConsent": "Error al verificar el consentimiento:",
         "saveConsent": "Error al guardar el consentimiento:",
         "requestError": "Error en la petición de consentimiento:"
-      }
+      },
+      "newsletterLabel": "Quiero recibir el newsletter"
     }
   },
   "and":" y ",
@@ -1261,5 +1272,22 @@
     "title": "⚠️ Navegador no compatible",
     "description": "Estás abriendo esta página desde un navegador interno (por ejemplo TikTok, Instagram o Facebook). Para iniciar sesión necesitas abrir esta página en tu navegador real (Safari, Chrome, etc.).",
     "instruction": "👉 Pulsa en <strong>⋮ (los tres puntos)</strong> en la parte superior derecha y selecciona <strong>Abrir en el navegador</strong>."
+  },
+  "newsletter": {
+    "unsubscribe": {
+      "processingTitle": "Procesando tu solicitud",
+      "processingMsg": "Espera un momento…",
+      "signInRequiredTitle": "Inicio de sesión requerido",
+      "signInRequiredMsg": "Para gestionar tus preferencias del boletín, inicia sesión en tu cuenta.",
+      "signInButton": "Iniciar sesión",
+      "backHome": "Volver al inicio",
+      "successTitle": "Te has dado de baja del boletín",
+      "successMsg": "Ya no recibirás nuestro newsletter.",
+      "unsubscribedAt": "Baja realizada el {{date}}",
+      "managePrefs": "Gestionar preferencias",
+      "errorTitle": "Algo salió mal",
+      "errorMsg": "No pudimos actualizar tu preferencia del newsletter. Inténtalo de nuevo.",
+      "tryAgain": "Reintentar"
+    }
   }
 }
