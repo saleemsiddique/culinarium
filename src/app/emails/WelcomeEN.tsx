@@ -122,7 +122,7 @@ export function WelcomeEmailHtmlEN({ name }: WelcomeEmailProps) {
               <a href="https://www.culinarium.io/kitchen" class="button">Start Cooking</a>
             </div>
             <div class="footer">
-              <ul class="footer-links" style="display:flex; align-items:center; justify-center:center; text-align-center">
+              <ul class="footer-links" style="display:flex; align-items:center; justify-content:center; text-align-center">
                 <li><a href="https://www.culinarium.io/consent/privacy">Privacy Policy</a></li>
                 <li><a href="https://www.culinarium.io/consent/terms">Terms of Service</a></li>
                 <li><a href="https://www.culinarium.io/consent/cookies">Cookie Policy</a></li>
