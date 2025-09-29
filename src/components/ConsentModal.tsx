@@ -338,7 +338,7 @@ export default function ConsentModal() {
           .
         </p>
 
-        {firebaseUser && (
+        {firebaseUser && user && (
           <label className="flex items-center gap-2 mb-4 text-sm">
             <input
               type="checkbox"
