@@ -360,17 +360,7 @@ const CulinariumForm: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setFirebaseUser(currentUser);
-      } else {
-        try {
-          const anonymousUserCredential = await signInAnonymously(auth);
-          setFirebaseUser(anonymousUserCredential.user);
-        } catch (anonError) {
-          console.error("Error signing in anonymously:", anonError);
-          setToastMessage(
-            "Error de autenticación. Intenta recargar la página."
-          );
-        }
-      }
+      } 
       setLoadingUser(false);
     });
     return () => unsubscribe();

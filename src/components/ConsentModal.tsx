@@ -33,7 +33,11 @@ export default function ConsentModal() {
 
   const { firebaseUser, loading: userLoading, user, setNewsletterConsent } = useUser();
 
-  const [show, setShow] = useState<boolean>(true);
+  // Inicialmente NO mostramos el modal para evitar el "flash"
+  const [show, setShow] = useState<boolean>(false);
+  // Flag que indica que la comprobación inicial ya terminó (ok o KO)
+  const [initialized, setInitialized] = useState<boolean>(false);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [newsletterChecked, setNewsletterChecked] = useState<boolean>(false);
 
@@ -152,6 +156,8 @@ export default function ConsentModal() {
       }
       setShow(false);
       setLoading(false);
+      // marcar que ya hemos procesado el evento / inicializado
+      setInitialized(true);
     };
 
     if (typeof window !== "undefined") {
@@ -184,10 +190,12 @@ export default function ConsentModal() {
 
           if (res.status === 404) {
             setShow(true);
+            setInitialized(true);
             return;
           }
           if (!res.ok) {
             setShow(true);
+            setInitialized(true);
             return;
           }
 
@@ -196,11 +204,13 @@ export default function ConsentModal() {
 
           if (!norm.hasAnyRecord || norm.hasAnyRejected || !norm.allVersionsOk || norm.missingTypes.length > 0) {
             setShow(true);
+            setInitialized(true);
             return;
           }
 
           writeLocalStorageSnapshot(true);
           setShow(false);
+          setInitialized(true);
         } else {
           localStorage.removeItem("user_id");
           localStorage.removeItem("anonymous_user_id");
@@ -212,6 +222,7 @@ export default function ConsentModal() {
               const allOk = CONSENT_TYPES.every((type) => localObj && localObj[type] === POLICY_VERSION);
               if (allOk) {
                 setShow(false);
+                setInitialized(true);
                 return;
               }
             } catch (err) {
@@ -219,10 +230,12 @@ export default function ConsentModal() {
             }
           }
           setShow(true);
+          setInitialized(true);
         }
       } catch (error) {
         console.error(t("consent.modal.errors.checkConsent"), error);
         setShow(true);
+        setInitialized(true);
       } finally {
         setLoading(false);
         try {
@@ -232,6 +245,7 @@ export default function ConsentModal() {
     };
 
     checkConsent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser, userLoading, t]);
 
   // Aceptar
@@ -315,8 +329,9 @@ export default function ConsentModal() {
   // ✅ llama SIEMPRE al hook; sólo condiciona su efecto
   useBodyScrollLock(show && !loading && !skipModalRoute);
 
-  // ✅ único return, sin cortar hooks antes
-  if (skipModalRoute || !show) return null;
+  // No renderices nada hasta que la comprobación inicial haya terminado.
+  // Esto evita cualquier "flash" del modal.
+  if (skipModalRoute || !initialized || !show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
