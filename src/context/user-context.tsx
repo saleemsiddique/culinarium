@@ -48,6 +48,7 @@ export interface CustomUser {
   newsletterConsent?: boolean;
   lastNewsletterConsentAt?: Timestamp | null;
   lastNewsletterConsentCanceledAt?: Timestamp | null;
+  last_active: Timestamp;
 }
 
 interface UserContextType {
@@ -120,6 +121,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     return userData;
   };
+
+  const updateLastActive = async (uid: string) => {
+    try {
+      const userDocRef = doc(db, "user", uid);
+      await updateDoc(userDocRef, {
+        last_active: Timestamp.now(),
+      });
+    } catch (err) {
+      console.error("Error updating last active:", err);
+    }
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (userAuth) => {
@@ -239,6 +251,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // ✅ Verificar y resetear tokens si es necesario
     docData = await checkAndResetMonthlyTokens(docData);
+    updateLastActive(firebaseUser.uid).catch(console.error);
 
     setUser(docData);
   };
@@ -275,6 +288,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
         tokens_reset_date: tokens_reset_date,
+        last_active: Timestamp.now(),
       };
 
       const docRef = doc(db, "user", id);
@@ -411,6 +425,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         subscriptionStatus: "cancelled",
         subscriptionCanceled: false,
         tokens_reset_date: tokens_reset_date,
+        last_active: Timestamp.now(),
       };
 
       const docRef = doc(db, "user", userInfo.uid);
@@ -419,6 +434,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       userData = userSnapshot.data() as CustomUser;
       userData.uid = userSnapshot.id;
       userData = await checkAndResetMonthlyTokens(userData);
+      updateLastActive(userData.uid).catch(console.error);
     }
 
     setUser(userData);
