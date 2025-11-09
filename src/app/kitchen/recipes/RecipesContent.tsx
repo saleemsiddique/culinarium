@@ -101,7 +101,7 @@ const waitForImage = async (url: string, maxRetries = 15): Promise<boolean> => {
     try {
       const response = await fetch(url, { method: 'HEAD' });
       if (response.ok) return true;
-    } catch (error) {
+    } catch {
       // Continuar reintentando
     }
     await new Promise(resolve => setTimeout(resolve, 2000));  // Esperar 2 segundos
