@@ -95,6 +95,20 @@ const getDifficultyKey = (dificultad: string) => {
     }
   };
 
+  // Función para verificar y esperar a que la imagen esté disponible
+const waitForImage = async (url: string, maxRetries = 15): Promise<boolean> => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) return true;
+    } catch (error) {
+      // Continuar reintentando
+    }
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos
+  }
+  return false;
+};
+
   useEffect(() => {
     const fetchRecipeById = async (id: string) => {
       try {
@@ -119,7 +133,20 @@ const getDifficultyKey = (dificultad: string) => {
 
         const data = await response.json();
         setRecipe(data.recipe);
-        setImageSrc(data.recipe.img_url || placeholderImageUrl);
+
+        if (data.recipe.img_url) {
+          setIsGeneratingImage(true); // Mostrar overlay
+          const imageReady = await waitForImage(data.recipe.img_url);
+          if (imageReady) {
+            setImageSrc(data.recipe.img_url);
+          } else {
+            setImageSrc(placeholderImageUrl);
+          }
+          setIsGeneratingImage(false); // Ocultar overlay
+        } else {
+          setImageSrc(placeholderImageUrl);
+        }
+
       } catch (error) {
         console.error('Error fetching recipe by ID:', error);
         router.push('/kitchen/recipes'); // Redirigir a la lista si falla la búsqueda
@@ -139,7 +166,20 @@ const getDifficultyKey = (dificultad: string) => {
         if (storedRecipe) {
           const parsedRecipe: Recipe = JSON.parse(storedRecipe);
           setRecipe(parsedRecipe);
-          setImageSrc(parsedRecipe.img_url || placeholderImageUrl);
+
+          if (parsedRecipe.img_url) {
+            setIsGeneratingImage(true);
+            waitForImage(parsedRecipe.img_url).then(imageReady => {
+              if (imageReady) {
+                setImageSrc(parsedRecipe.img_url);
+              } else {
+                setImageSrc(placeholderImageUrl);
+              }
+              setIsGeneratingImage(false);
+            });
+          } else {
+            setImageSrc(placeholderImageUrl);
+          }
         } else {
           router.push('/kitchen');
         }
@@ -290,7 +330,6 @@ const getDifficultyKey = (dificultad: string) => {
               fill
               className="object-cover"
               unoptimized
-              onError={() => setImageSrc(placeholderImageUrl)}
             />
 
             {/* Loading overlay for image generation */}
