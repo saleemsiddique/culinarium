@@ -48,12 +48,6 @@ const RecipePage: React.FC = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
   const [imageKey, setImageKey] = useState(0); // Para forzar re-render del Image
-
-  // Usar useMemo para que placeholderImageUrl no cambie en cada render
-  const placeholderImageUrl = useMemo(() =>
-    `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`,
-    []
-  );
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const { t } = useTranslation();
 
