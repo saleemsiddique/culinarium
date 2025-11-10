@@ -47,14 +47,14 @@ const RecipePage: React.FC = () => {
   const searchParams = useSearchParams(); // Hook para obtener los parámetros de la URL
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(true);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageKey, setImageKey] = useState(0); // Para forzar re-render del Image
 
   // Usar useMemo para que placeholderImageUrl no cambie en cada render
   const placeholderImageUrl = useMemo(() =>
     `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 1000)}`,
     []
   );
-  const [imageSrc, setImageSrc] = useState<string>(placeholderImageUrl);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const { t } = useTranslation();
 
   // Función para mapear la dificultad a las claves de traducción
@@ -95,20 +95,6 @@ const getDifficultyKey = (dificultad: string) => {
     }
   };
 
-  // Función para verificar y esperar a que la imagen esté disponible
-const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      if (response.ok) return true;
-    } catch {
-      // Continuar reintentando
-    }
-    await new Promise(resolve => setTimeout(resolve, 2000));  // Esperar 2 segundos
-  }
-  return false;
-};
-
   useEffect(() => {
     const fetchRecipeById = async (id: string) => {
       try {
@@ -135,16 +121,7 @@ const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
         setRecipe(data.recipe);
 
         if (data.recipe.img_url) {
-          setIsGeneratingImage(true); // Mostrar overlay
-          const imageReady = await waitForImage(data.recipe.img_url);
-          if (imageReady) {
-            setImageSrc(data.recipe.img_url);
-          } else {
-            setImageSrc(placeholderImageUrl);
-          }
-          setIsGeneratingImage(false); // Ocultar overlay
-        } else {
-          setImageSrc(placeholderImageUrl);
+          setImageSrc(data.recipe.img_url);
         }
 
       } catch (error) {
@@ -168,17 +145,7 @@ const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
           setRecipe(parsedRecipe);
 
           if (parsedRecipe.img_url) {
-            setIsGeneratingImage(true);
-            waitForImage(parsedRecipe.img_url).then(imageReady => {
-              if (imageReady) {
-                setImageSrc(parsedRecipe.img_url);
-              } else {
-                setImageSrc(placeholderImageUrl);
-              }
-              setIsGeneratingImage(false);
-            });
-          } else {
-            setImageSrc(placeholderImageUrl);
+            setImageSrc(parsedRecipe.img_url);
           }
         } else {
           router.push('/kitchen');
@@ -186,48 +153,68 @@ const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
         setLoadingRecipe(false);
       }
     }
-  }, [router, searchParams, placeholderImageUrl]); // Ahora placeholderImageUrl es estable
+  }, [router, searchParams]);
 
-  // Watch for image updates from background generation
+    // Watch for image updates from background generation
   useEffect(() => {
-    if (!recipe) return;
+    if (!recipe || imageSrc) return;
 
-    // If recipe doesn't have an image and it's not an error recipe
     const isError = recipe.titulo?.startsWith('ERROR:');
-    if (!recipe.img_url && !isError) {
-      setIsGeneratingImage(true);
+    if (isError) return;
 
-      // Check periodically if the image has been generated
-      const checkForImage = () => {
-        if (typeof window !== 'undefined') {
-          const storedRecipe = sessionStorage.getItem('generatedRecipe');
-          if (storedRecipe) {
-            const parsedRecipe: Recipe = JSON.parse(storedRecipe);
-            if (parsedRecipe.img_url && parsedRecipe.img_url !== recipe.img_url) {
-              setImageSrc(parsedRecipe.img_url);
-              setRecipe(parsedRecipe);
-              setIsGeneratingImage(false);
-            }
+    let retryCount = 0;
+    const maxRetries = 20; 
+
+    const checkForImage = () => {
+      retryCount++;
+      
+      if (typeof window !== 'undefined') {
+        const storedRecipe = sessionStorage.getItem('generatedRecipe');
+        if (storedRecipe) {
+          const parsedRecipe: Recipe = JSON.parse(storedRecipe);
+          if (parsedRecipe.img_url) {
+            console.log('Image URL found:', parsedRecipe.img_url);
+            setImageSrc(parsedRecipe.img_url);
+            setRecipe(parsedRecipe);
+            return true; // Imagen encontrada
           }
         }
-      };
+      }
+      
+      // Si llegamos al máximo de reintentos, seguir mostrando loading
+      if (retryCount >= maxRetries) {
+        console.log('Max retries reached, image may not be available yet');
+      }
+      
+      return false;
+    };
 
-      // Check immediately and then every 2 seconds
-      checkForImage();
-      const interval = setInterval(checkForImage, 2000);
+    // Check inmediato
+    checkForImage();
 
-      // Clean up after 30 seconds (image generation timeout)
-      const timeout = setTimeout(() => {
-        setIsGeneratingImage(false);
+    // Verificar cada 2 segundos
+    const interval = setInterval(() => {
+      const found = checkForImage();
+      if (found) {
         clearInterval(interval);
-      }, 30000);
+      }
+    }, 2000);
 
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-      };
+    return () => {
+      clearInterval(interval);
+    };
+  }, [recipe, imageSrc]);
+
+  // Handle image load error - reintentar con cache-busting
+  const handleImageError = () => {
+    console.log('Image failed to load, retrying with cache bust...');
+    if (imageSrc) {
+      // Forzar recarga con timestamp
+      setImageKey(prev => prev + 1);
+      const baseUrl = imageSrc.split('?')[0]; // Quitar cualquier query string anterior
+      setImageSrc(`${baseUrl}?retry=${Date.now()}`);
     }
-  }, [recipe]);
+  };
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
@@ -317,29 +304,35 @@ const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
             </p>
           </section>
 
-          {/* Recipe Image (or Placeholder) with Loading State */}
+          {/* Recipe Image with Loading State */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative w-full h-64 md:h-96 rounded-2xl overflow-hidden shadow-lg mb-8"
           >
+            {imageSrc &&(
             <Image
+              key={imageKey}
               src={imageSrc}
               alt={recipe.titulo}
               fill
               className="object-cover"
               unoptimized
+              onError={handleImageError}
+              onLoad={() => console.log('Image loaded successfully')}
             />
+            )}
+            
 
             {/* Loading overlay for image generation */}
             <AnimatePresence>
-              {isGeneratingImage && (
+              {(!imageSrc) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm"
+                  className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center"
                 >
                   <div className="bg-white/90 p-4 rounded-2xl flex flex-col items-center space-y-3">
                     <motion.div
