@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoArrowBackCircleOutline, IoTimeOutline, IoPeopleOutline, IoRestaurantOutline, IoWarningOutline, IoReloadOutline } from 'react-icons/io5';
