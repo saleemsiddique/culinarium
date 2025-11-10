@@ -96,7 +96,7 @@ const getDifficultyKey = (dificultad: string) => {
   };
 
   // Función para verificar y esperar a que la imagen esté disponible
-const waitForImage = async (url: string, maxRetries = 15): Promise<boolean> => {
+const waitForImage = async (url: string, maxRetries = 50): Promise<boolean> => {
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await fetch(url, { method: 'HEAD' });
