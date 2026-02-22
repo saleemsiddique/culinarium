@@ -2,11 +2,39 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { auth, db } from '@/lib/firebase-admin';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticación
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Token de autenticación requerido' }, { status: 401 });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    let uid: string;
+
+    try {
+      const decodedToken = await auth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch {
+      return NextResponse.json({ error: 'Token de autenticación inválido' }, { status: 401 });
+    }
+
+    // Verificar que el usuario tiene tokens disponibles
+    const userDoc = await db.collection('user').doc(uid).get();
+    if (!userDoc.exists) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+    const userData = userDoc.data();
+    const totalTokens = (userData?.monthly_tokens || 0) + (userData?.extra_tokens || 0);
+    if (totalTokens <= 0) {
+      return NextResponse.json({ error: 'Sin tokens disponibles' }, { status: 403 });
+    }
+
     const body = await request.json();
     const recipe = body?.recipe;
 
@@ -27,12 +55,6 @@ export async function POST(request: NextRequest) {
       .slice(0, 12)
       .join(', ');
 
-    // Prompt en español enfocado a fotografía gastronómica hiperrealista
-    /*const prompt = `Fotografía gastronómica hiperrealista de "${titulo}". ${descripcion}
-Estilo de cocina: ${estilo ?? 'internacional'}.
-Ingredientes clave visibles: ${ingredientesLista || 'presentación cuidada'}.
-Características: iluminación natural suave, profundidad de campo marcada, enfoque nítido en el plato, fondo neutro y minimalista, estilismo culinario profesional, textura apetecible, 4K, realista, sin texto, sin marca de agua, sin manos, sin utensilios cubriendo el plato.`;
-*/
     const prompt = `Fotografía gastronómica hiperrealista de "${titulo}". ${descripcion}
 Estilo de cocina: ${estilo ?? 'internacional'}.
 Ingredientes clave visibles: ${ingredientesLista || 'presentación cuidada'}.
@@ -44,7 +66,7 @@ Plato y utensilios cotidianos, mesa o encimera común; sin escenografía elabora
 Textura apetecible pero no retocada digitalmente; luz y color naturales, sin aspecto de anuncio profesional.
 
 Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando el plato.`;
-    
+
     let b64: string | undefined;
     try {
       const result = await openai.images.generate({
@@ -78,12 +100,8 @@ Restricciones: sin texto, sin marca de agua, sin manos, sin utensilios tapando e
     }
 
     const dataUrl = `data:image/png;base64,${b64}`;
-
-    // Devolvemos SIEMPRE base64 (sin usar Storage)
     return NextResponse.json({ img_url: dataUrl });
   } catch (error: any) {
-    // console.error('Error en /api/recipe-image:', error);
     return NextResponse.json({ error: 'Error interno al generar la imagen.', details: error?.message }, { status: 500 });
   }
 }
-

@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "stripe"
+  ],
+  "enableAllProjectMcpServers": true
+}

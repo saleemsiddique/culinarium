@@ -3,7 +3,7 @@
 // ConsentModal.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useUser } from "@/context/user-context";
 import { emitConsentUpdated } from "@/lib/consent-events";
 import { usePathname } from "next/navigation";
@@ -28,18 +28,18 @@ export default function ConsentModal() {
   const { t } = useTranslation();
   const pathname = usePathname() || "";
 
-  // ✅ en vez de return temprano, usamos un flag:
   const skipModalRoute = pathname.startsWith(`${url_base}/consent`);
 
   const { firebaseUser, loading: userLoading, user, setNewsletterConsent } = useUser();
 
-  // Inicialmente NO mostramos el modal para evitar el "flash"
   const [show, setShow] = useState<boolean>(false);
-  // Flag que indica que la comprobación inicial ya terminó (ok o KO)
   const [initialized, setInitialized] = useState<boolean>(false);
-
   const [loading, setLoading] = useState<boolean>(true);
+  const [analyticsChecked, setAnalyticsChecked] = useState<boolean>(false);
   const [newsletterChecked, setNewsletterChecked] = useState<boolean>(false);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  const rejectButtonRef = useRef<HTMLButtonElement>(null);
 
   const CONSENT_TYPES: ConsentType[] = ["terms_of_service", "privacy_policy", "cookies_policy"];
 
@@ -81,7 +81,6 @@ export default function ConsentModal() {
           ConsentType,
           { version?: string; granted?: boolean }
         >,
-        hasAnyRejected: false,
         missingTypes: CONSENT_TYPES.slice(),
         allVersionsOk: false,
       };
@@ -105,13 +104,13 @@ export default function ConsentModal() {
     });
 
     const missingTypes = CONSENT_TYPES.filter((t) => byType[t].version === undefined);
-    const hasAnyRejected = CONSENT_TYPES.some((t) => byType[t].granted === false);
+    // allVersionsOk: all types must have a version recorded (granted or rejected)
     const allVersionsOk = CONSENT_TYPES.every((t) => byType[t].version === POLICY_VERSION);
 
-    return { hasAnyRecord: true, latest, byType, hasAnyRejected, missingTypes, allVersionsOk };
+    return { hasAnyRecord: true, latest, byType, missingTypes, allVersionsOk };
   }
 
-  function writeLocalStorageSnapshot(granted = true) {
+  function writeLocalStorageSnapshot(analyticsGranted = true) {
     try {
       const saveObj: Record<string, string> = {};
       CONSENT_TYPES.forEach((t) => (saveObj[t] = POLICY_VERSION));
@@ -119,8 +118,13 @@ export default function ConsentModal() {
       localStorage.setItem(LEGACY_KEY, POLICY_VERSION);
 
       const full = {
-        accepted: CONSENT_TYPES.map((type) => ({ type, version: POLICY_VERSION, granted, details: {} })),
-        accepted_types: CONSENT_TYPES,
+        accepted: CONSENT_TYPES.map((type) => ({
+          type,
+          version: POLICY_VERSION,
+          granted: type === "cookies_policy" ? analyticsGranted : true,
+          details: {},
+        })),
+        accepted_types: analyticsGranted ? CONSENT_TYPES : ["terms_of_service", "privacy_policy"],
         client_timestamp: new Date().toISOString(),
         created_by_authenticated: !!firebaseUser,
         details: { ip_masked: "" },
@@ -138,14 +142,21 @@ export default function ConsentModal() {
     } catch {}
   }
 
-  // Estado inicial checkbox newsletter
+  // Init newsletter checkbox from user data
   useEffect(() => {
     if (user && typeof (user as any).newsletterConsent !== "undefined") {
       setNewsletterChecked(Boolean((user as any).newsletterConsent));
     }
   }, [user]);
 
-  // Sincronización por evento
+  // Focus first button when modal opens
+  useEffect(() => {
+    if (show) {
+      setTimeout(() => rejectButtonRef.current?.focus(), 50);
+    }
+  }, [show]);
+
+  // Sync consent event
   useEffect(() => {
     const onConsentUpdated = (ev: Event) => {
       try {
@@ -156,7 +167,6 @@ export default function ConsentModal() {
       }
       setShow(false);
       setLoading(false);
-      // marcar que ya hemos procesado el evento / inicializado
       setInitialized(true);
     };
 
@@ -168,11 +178,10 @@ export default function ConsentModal() {
         window.removeEventListener("consent:updated", onConsentUpdated as EventListener);
       }
     };
-    // no dependas de show/flags para no reordenar hooks
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser]);
 
-  // Chequeo principal
+  // Main consent check
   useEffect(() => {
     if (userLoading) return;
 
@@ -202,7 +211,9 @@ export default function ConsentModal() {
           const data = await res.json();
           const norm = normalizeConsents(data);
 
-          if (!norm.hasAnyRecord || norm.hasAnyRejected || !norm.allVersionsOk || norm.missingTypes.length > 0) {
+          // Show modal only if user has never made a choice or policy version changed
+          // Do NOT re-show just because user previously rejected optional cookies
+          if (!norm.hasAnyRecord || !norm.allVersionsOk || norm.missingTypes.length > 0) {
             setShow(true);
             setInitialized(true);
             return;
@@ -248,8 +259,92 @@ export default function ConsentModal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser, userLoading, t]);
 
-  // Aceptar
-  const handleAccept = async () => {
+  // Focus trap + Escape key
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      handleReject();
+      return;
+    }
+    if (e.key === "Tab") {
+      const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reject non-essential: only accept terms + privacy, reject cookies/analytics
+  const handleReject = async () => {
+    setLoading(true);
+
+    const accepted = CONSENT_TYPES.map((type) => ({
+      type,
+      version: POLICY_VERSION,
+      granted: type !== "cookies_policy",
+      details: {},
+    }));
+
+    if (!firebaseUser) {
+      try {
+        writeLocalStorageSnapshot(false);
+        emitConsentUpdated?.(false, { accepted_types: ["terms_of_service", "privacy_policy"] });
+      } catch {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: false, accepted_types: ["terms_of_service", "privacy_policy"] } }));
+          try { localStorage.setItem(LAST_UPDATE_KEY, String(Date.now())); } catch {}
+        }
+      }
+      setShow(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const token = await firebaseUser.getIdToken();
+      const res = await fetch("/api/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          accepted,
+          user_id: firebaseUser.uid,
+          details: {},
+          origin: window.location.origin,
+          ref: document.referrer || "",
+          path: window.location.pathname,
+          client_timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!res.ok) {
+        console.error(t("consent.modal.errors.saveConsent"), await res.text());
+      } else {
+        writeLocalStorageSnapshot(false);
+        try {
+          emitConsentUpdated?.(false, { accepted_types: ["terms_of_service", "privacy_policy"] });
+        } catch {
+          window.dispatchEvent(new CustomEvent("consent:updated", { detail: { analytics: false } }));
+          try { localStorage.setItem(LAST_UPDATE_KEY, String(Date.now())); } catch {}
+        }
+      }
+      setShow(false);
+    } catch (err) {
+      console.error(t("consent.modal.errors.requestError"), err);
+      setShow(false); // dismiss anyway to avoid blocking
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Accept all
+  const handleAcceptAll = async () => {
     setLoading(true);
 
     const accepted = CONSENT_TYPES.map((type) => ({
@@ -295,7 +390,6 @@ export default function ConsentModal() {
         setShow(true);
       } else {
         writeLocalStorageSnapshot(true);
-
         try {
           emitConsentUpdated?.(true, { accepted_types: CONSENT_TYPES });
         } catch {
@@ -303,7 +397,7 @@ export default function ConsentModal() {
           try { localStorage.setItem(LAST_UPDATE_KEY, String(Date.now())); } catch {}
         }
 
-        // newsletter independiente de consents
+        // Newsletter independent of consents
         try {
           if (typeof setNewsletterConsent === "function") {
             if (newsletterChecked) {
@@ -326,53 +420,117 @@ export default function ConsentModal() {
     }
   };
 
-  // ✅ llama SIEMPRE al hook; sólo condiciona su efecto
   useBodyScrollLock(show && !loading && !skipModalRoute);
 
-  // No renderices nada hasta que la comprobación inicial haya terminado.
-  // Esto evita cualquier "flash" del modal.
   if (skipModalRoute || !initialized || !show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999]">
-      <div className="bg-[var(--background)] text-[var(--text)] p-6 rounded-lg max-w-lg w-full shadow-lg">
-        <h2 className="text-xl font-bold mb-4">{t("consent.modal.title")}</h2>
-        <p className="mb-4">
-          {t("consent.modal.message")}{" "}
-          <a href="/consent/terms" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
-            {t("consent.modal.terms")}
-          </a>
-          ,{" "}
-          <a href="/consent/privacy" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
-            {t("consent.modal.privacy")}
-          </a>{" "}
-          {t("and")}{" "}
-          <a href="/consent/cookies" target="_blank" className="text-[var(--highlight)] underline" rel="noreferrer">
-            {t("consent.modal.cookies")}
-          </a>
-          .
-        </p>
+    // Non-blocking backdrop: pointer-events-none on outer so user can interact with page behind
+    <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-[99999] pointer-events-none">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="consent-modal-title"
+        onKeyDown={handleKeyDown}
+        className="pointer-events-auto bg-[var(--background)] text-[var(--foreground)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl border border-gray-200 outline-none"
+        tabIndex={-1}
+      >
+        {/* Header */}
+        <div className="p-6 pb-4 border-b border-gray-100">
+          <h2 id="consent-modal-title" className="text-lg font-bold">
+            {t("consent.modal.title")}
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {t("consent.modal.message")}
+          </p>
+        </div>
 
-        {firebaseUser && user && (
-          <label className="flex items-center gap-2 mb-4 text-sm">
+        {/* Consent categories */}
+        <div className="p-6 space-y-4">
+          {/* Necessary — always on */}
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 w-5 h-5 rounded flex items-center justify-center bg-[var(--highlight)] flex-shrink-0">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">{t("consent.modal.categories.necessary.title")}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t("consent.modal.categories.necessary.description")}</p>
+            </div>
+          </div>
+
+          {/* Analytics — optional */}
+          <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={newsletterChecked}
-              onChange={(e) => setNewsletterChecked(e.target.checked)}
-              className="w-4 h-4"
-              aria-label={t("consent.modal.newsletterLabel") || "Suscribirme al newsletter"}
+              checked={analyticsChecked}
+              onChange={(e) => setAnalyticsChecked(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-[var(--highlight)] flex-shrink-0"
+              aria-label={t("consent.modal.categories.analytics.title")}
             />
-            <span>{t("consent.modal.newsletterLabel") || "Quiero recibir el newsletter"}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">{t("consent.modal.categories.analytics.title")}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t("consent.modal.categories.analytics.description")}</p>
+            </div>
           </label>
-        )}
 
-        <button
-          onClick={handleAccept}
-          className="bg-[var(--highlight)] text-[var(--text2)] px-4 py-2 rounded hover:bg-[var(--highlight-dark)] disabled:opacity-60"
-          disabled={loading}
-        >
-          {loading ? t("consent.modal.acceptingButton") : t("consent.modal.acceptButton")}
-        </button>
+          {/* Newsletter — optional, only if logged in */}
+          {firebaseUser && user && (
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={newsletterChecked}
+                onChange={(e) => setNewsletterChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[var(--highlight)] flex-shrink-0"
+                aria-label={t("consent.modal.categories.newsletter.title")}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">{t("consent.modal.categories.newsletter.title")}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t("consent.modal.categories.newsletter.description")}</p>
+              </div>
+            </label>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="px-6 pb-6 flex flex-col sm:flex-row gap-3">
+          <button
+            ref={rejectButtonRef}
+            onClick={handleReject}
+            disabled={loading}
+            className="flex-1 py-2.5 px-4 rounded-full border-2 border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            {t("consent.modal.rejectButton")}
+          </button>
+          <button
+            onClick={handleAcceptAll}
+            disabled={loading}
+            className="flex-1 py-2.5 px-4 rounded-full text-sm font-semibold text-[var(--text2)] transition-colors disabled:opacity-50"
+            style={{ background: "linear-gradient(to right, var(--highlight), var(--highlight-dark))" }}
+          >
+            {loading ? t("consent.modal.acceptingButton") : t("consent.modal.acceptButton")}
+          </button>
+        </div>
+
+        {/* Links */}
+        <div className="px-6 pb-5 text-center">
+          <p className="text-xs text-gray-400">
+            {t("consent.modal.links.prefix")}{" "}
+            <a href="/consent/cookies" target="_blank" rel="noreferrer" className="underline hover:text-[var(--highlight)]">
+              {t("consent.modal.cookies")}
+            </a>
+            {t("consent.modal.links.separator")}
+            <a href="/consent/privacy" target="_blank" rel="noreferrer" className="underline hover:text-[var(--highlight)]">
+              {t("consent.modal.privacy")}
+            </a>
+            {t("consent.modal.links.separator")}
+            <a href="/consent/terms" target="_blank" rel="noreferrer" className="underline hover:text-[var(--highlight)]">
+              {t("consent.modal.terms")}
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

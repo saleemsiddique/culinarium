@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import NextLink from 'next/link';
 import { useUser } from '@/context/user-context';
@@ -489,12 +490,15 @@ const RecipeListPage: React.FC = () => {
                            border border-[var(--primary)]"
               >
                 {recipe.img_url && (
-                  <img
-                    src={recipe.img_url}
-                    alt={recipe.titulo}
-                    className="w-full h-48 object-cover"
-                    onError={(e: any) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x200/${encodeURIComponent('E67E22')}/${encodeURIComponent('FFFFFF')}?text=Culinarium`; }}
-                  />
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={recipe.img_url}
+                      alt={recipe.titulo}
+                      fill
+                      className="object-cover"
+                      unoptimized={recipe.img_url.startsWith('data:')}
+                    />
+                  </div>
                 )}
                 {!recipe.img_url && (
                   <div className="w-full h-48 bg-[var(--highlight)]/20 flex items-center justify-center text-[var(--foreground)] text-xl font-bold rounded-t-2xl">

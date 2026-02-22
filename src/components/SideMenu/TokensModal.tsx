@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Zap, X } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import { CustomUser } from "@/context/user-context";
 import TokenPurchaseCards from "@/components/TokenPurchaseCards";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
@@ -13,11 +13,14 @@ interface TokensModalProps {
 }
 
 export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
-  useBodyScrollLock(true); // Bloquea el scroll mientras el modal esté montado
+  useBodyScrollLock(true);
 
   const extra = user?.extra_tokens || 0;
   const monthly = user?.monthly_tokens || 0;
+  const totalRecipes = Math.floor((extra + monthly) / 10);
   const { t } = useTranslation();
+  const isActiveSubscriber = user?.isSubscribed &&
+    (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -28,10 +31,14 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"> {/* Cambiado p-6 a p-4 para mejor ajuste en móvil */}
-      {/* Modal container - Aumentado el tamaño máximo y altura */}
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tokens-modal-title"
+    >
       <div
-        className="rounded-3xl p-6 md:p-8 w-full max-w-7xl max-h-[95vh] shadow-2xl relative flex flex-col"
+        className="rounded-3xl p-6 md:p-8 w-full max-w-lg max-h-[95vh] shadow-2xl relative flex flex-col"
         style={{ backgroundColor: 'var(--background)' }}
       >
         {/* Header */}
@@ -39,26 +46,23 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
           <div className="flex items-center gap-4">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center shadow-md"
-              style={{
-                background: 'linear-gradient(135deg, var(--highlight) 0%, var(--highlight-dark) 100%)'
-              }}
+              style={{ background: 'linear-gradient(135deg, var(--highlight) 0%, var(--highlight-dark) 100%)' }}
             >
-              <Zap className="w-8 h-8" style={{ color: 'var(--text2)' }} />
+              <ShoppingBag className="w-8 h-8" style={{ color: 'var(--text2)' }} />
             </div>
             <div>
               <h2
+                id="tokens-modal-title"
                 className="text-2xl font-bold mb-1"
                 style={{ color: 'var(--foreground)' }}
               >
                 {t("tokens.modal.title")}
               </h2>
-              <p
-                className="text-sm opacity-80"
-                style={{ color: 'var(--foreground)' }}
-              >
+              <p className="text-sm opacity-80" style={{ color: 'var(--foreground)' }}>
                 {t("tokens.modal.currentTokens")}{" "}
-                <span className="font-semibold">{extra} {t("tokens.modal.extra")}</span> +{" "}
-                <span className="font-semibold">{monthly} {t("tokens.modal.monthly")}</span>
+                <span className="font-semibold text-lg" style={{ color: 'var(--highlight)' }}>
+                  {isActiveSubscriber ? '∞' : totalRecipes}
+                </span>
               </p>
             </div>
           </div>
@@ -72,58 +76,24 @@ export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
           </button>
         </div>
 
-        {/* Contenido - Añadido overflow-y-auto y flex-grow para desplazamiento */}
-        <div className="flex-grow overflow-y-auto p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-            <TokenPurchaseCards
-              user={user}
-              count={30}
-              price={0.99}
-              label={t("tokens.modal.packages.30.label")}
-              priceId="price_1RwHKLRpBiBhmezmK1AybT5C"
-              labelPromo={t("tokens.modal.packages.30.promo")}
-              promoType="limited"
-            />
-            <TokenPurchaseCards
-              user={user}
-              count={60}
-              price={1.99}
-              label={t("tokens.modal.packages.60.label")}
-              priceId="price_1RwHL6RpBiBhmezmsEhJyMC1"
-            />
-            <TokenPurchaseCards
-              user={user}
-              count={120}
-              price={3.49}
-              label={t("tokens.modal.packages.120.label")}
-              priceId="price_1RwHLWRpBiBhmezmY3vPGDxT"
-            />
-            <TokenPurchaseCards
-              user={user}
-              count={250}
-              price={6.49}
-              label={t("tokens.modal.packages.250.label")}
-              priceId="price_1RwHLrRpBiBhmezmFamEW9Ct"
-            />
-            <TokenPurchaseCards
-              user={user}
-              count={600}
-              price={13.99}
-              label={t("tokens.modal.packages.600.label")}
-              priceId="price_1RwHMCRpBiBhmezmRzyb4DAm"
-              labelPromo={t("tokens.modal.packages.600.promo")}
-              promoType="popular"
-            />
-            <TokenPurchaseCards
-              user={user}
-              count={1200}
-              price={24.99}
-              label={t("tokens.modal.packages.1200.label")}
-              priceId="price_1RwHMbRpBiBhmezmgyMbGrJq"
-              labelPromo={t("tokens.modal.packages.1200.promo")}
-              promoType="value"
-            />
+        {/* Single pack */}
+        <div className="flex-grow overflow-y-auto">
+          <div className="flex justify-center p-4">
+            <div className="w-full max-w-sm">
+              <TokenPurchaseCards
+                user={user}
+                count={150}
+                price={4.99}
+                label={t("tokens.modal.packages.150.label")}
+                priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PAYG || "price_1RwHMbRpBiBhmezmgyMbGrJq"}
+                labelPromo={t("tokens.modal.packages.150.promo")}
+                promoType="popular"
+              />
+            </div>
           </div>
+          <p className="text-center text-sm opacity-60 mt-4 px-4" style={{ color: 'var(--foreground)' }}>
+            Las recetas no caducan y se acumulan con tu plan actual
+          </p>
         </div>
       </div>
     </div>

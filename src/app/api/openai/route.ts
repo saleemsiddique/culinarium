@@ -4,12 +4,23 @@
 // app/api/openai/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { auth } from '@/lib/firebase-admin';
+import { auth, db } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Costo en tokens por generar una receta
 const TOKENS_PER_RECIPE = 10;
+
+// Timeout de 30 segundos para la llamada a OpenAI
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('OpenAI request timeout after 30s')), ms)
+    ),
+  ]);
+}
 
 export async function POST(request: NextRequest) {
     const languageCode = request.headers.get("accept-language")?.split(",")[0] || "es";
@@ -30,6 +41,21 @@ export async function POST(request: NextRequest) {
     } catch (authError) {
       console.error('Error al verificar el token de autenticación:', authError);
       return NextResponse.json({ error: 'Token de autenticación inválido' }, { status: 401 });
+    }
+
+    // Validar tokens en servidor ANTES de llamar a OpenAI
+    const userDoc = await db.collection('user').doc(uid).get();
+    if (!userDoc.exists) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+    const userData = userDoc.data();
+    const totalTokens = (userData?.monthly_tokens || 0) + (userData?.extra_tokens || 0);
+    if (totalTokens < TOKENS_PER_RECIPE) {
+      return NextResponse.json({
+        error: 'Tokens insuficientes',
+        required: TOKENS_PER_RECIPE,
+        available: totalTokens
+      }, { status: 402 });
     }
 
     const body = await request.json();
@@ -54,7 +80,16 @@ export async function POST(request: NextRequest) {
 
 **INSTRUCCIÓN IMPORTANTE - DIFICULTAD:**
 - El usuario ha indicado el nivel de dificultad deseado en la clave "difficulty". Debes reflejar ese nivel en la salida usando la clave "dificultad" con uno de estos valores exactos: "Principiante", "Intermedio" o "Chef".
-- Ajusta la complejidad de las técnicas, el número de pasos y el lenguaje en las instrucciones para que correspondan al nivel elegido.
+- Ajusta la complejidad y el número de pasos según el nivel:
+  - "Principiante": máximo 6 pasos, técnicas simples, lenguaje muy claro
+  - "Intermedio": entre 6 y 10 pasos, técnicas moderadas
+  - "Chef": 10 o más pasos, técnicas avanzadas, máximo detalle culinario
+
+**INSTRUCCIÓN IMPORTANTE - TÍTULO:**
+- El título debe ser creativo, evocador y apetitoso. Evita títulos genéricos como "Pasta con tomate". En su lugar, usa títulos como "Tagliatelle al ragù de champiñones con hierbas provenzales". El título debe hacer desear la receta al leerlo.
+
+**INSTRUCCIÓN IMPORTANTE - TEMPERATURAS:**
+- Todas las temperaturas en la receta deben expresarse siempre en grados Celsius (°C), nunca en Fahrenheit.
 
 **REGLA CRÍTICA — USO DE UTENSILIOS (leer antes que todo):**
 - Si el objeto de entrada incluye la clave "utensils" y esta es un array no vacío, considera que ESA es la lista completa de utensilios y equipos disponibles para cocinar. Bajo ninguna circunstancia añadas pasos que requieran utensilios o equipos que no estén en esa lista.
@@ -140,7 +175,7 @@ export async function POST(request: NextRequest) {
 4.  **Detalle de Instrucciones (Paso a Paso):**
     Las instrucciones ('instrucciones') deben ser **extremadamente detalladas y precisas**. Para cada paso, incluye:
     * **Cantidades y Unidades:** Especifica cantidades exactas (ej: "2 cucharadas de", "500 gramos de") para los ingredientes usados en ese paso.
-    * **Temperatura y Tiempos:** Incluye temperaturas de cocción (ej: "precalienta el horno a 180°C"), tiempos de cocción/preparación (ej: "cocina por 10 minutos", "reposar por 30 segundos").
+    * **Temperatura y Tiempos:** Incluye temperaturas de cocción en Celsius (ej: "precalienta el horno a 180°C"), tiempos de cocción/preparación (ej: "cocina por 10 minutos", "reposar por 30 segundos").
     * **Utensilios:** Menciona utensilios clave si son relevantes (ej: "en una sartén grande", "usando una batidora"). **IMPORTANTE:** sólo menciona utensilios que estén en la lista "utensils" enviada por el usuario, salvo el caso de un único utensilio declarado como "OPCIONAL" (ver regla de utensilios).
     * **Técnicas Culinarias:** Describe la técnica (ej: "saltear", "dorar", "reducir", "cortar en cubos pequeños") y adapta la técnica a los utensilios disponibles.
     * **Especias y Condimentos:** Detalla qué especias/condimentos se usan y en qué momento.
@@ -160,7 +195,7 @@ export async function POST(request: NextRequest) {
     * Las listas ('ingredientes', 'instrucciones', 'restricciones', 'excluidos') deben ser vacías si no hay datos válidos.
     * Asegúrate de que el JSON de salida sea **siempre válido** (comillas dobles para claves y valores de string, comas correctas, corchetes y llaves balanceados).
     * Deja la url_img vacia, de momento se le añadira en otro proceso mas tarde.
-        
+
 7.  **Momento del Día ('momento_del_dia'):**
     * Este campo debe contener el valor de 'mealTime' proporcionado en los datos de entrada del usuario. Si 'mealTime' no está presente o es nulo, este campo debe ser null.
 
@@ -173,22 +208,26 @@ ${JSON.stringify(body, null, 2)}
     - Si el input incluye requisitos de macronutrientes (modo básico o valores Pro: calorías y porcentajes), y **NO** existe ninguna indicación para ignorarlos (ver la sección "INSTRUCCIÓN CRÍTICA SOBRE MACRONUTRIENTES" al inicio), **adapta la receta lo más fielmente posible** a esos requisitos, pero **prioriza la seguridad y la coherencia culinaria**. Puedes hacer **modificaciones ligeras** (por ejemplo ajustar un % unos puntos, o añadir/ajustar un ingrediente pequeño) cuando sea necesario para que la receta sea segura y practicable.
     - **Conversión a gramos:** convierte siempre los porcentajes a gramos y añádelos al output solo si estás utilizando realmente los macros para construir la receta. Usa: **proteínas 4 kcal/g, carbohidratos 4 kcal/g, grasas 9 kcal/g**. Calcula gramos = round((%/100 * kcal) / kcalPorGramo).
     - **Uso práctico de los macros en la receta:** utiliza las preferencias de macros para:
-      - Priorizar ingredientes (más fuente proteica si sube proteína; más cereales/tubérculos si suben carbs; más frutos secos/aceite si suben grasas).  
-      - Ajustar cantidades y pasos (ej.: porciones de proteína, método de cocción para conservar proteína, salsas ligeras vs. cremosas).  
+      - Priorizar ingredientes (más fuente proteica si sube proteína; más cereales/tubérculos si suben carbs; más frutos secos/aceite si suben grasas).
+      - Ajustar cantidades y pasos (ej.: porciones de proteína, método de cocción para conservar proteína, salsas ligeras vs. cremosas).
       - Si con los ingredientes dados es imposible alcanzar las proporciones sin romper la receta, **propón 1 ingrediente opcional** (p.ej. "añadir 100 g de pechuga de pollo") y menciónalo en descripcion.
     - **Validación final:** antes de devolver el JSON, asegura que los valores de macronutrientes (si existen) cumplen los límites arriba indicados y que las conversiones a gramos son enteros. Nunca devuelvas macros que sean manifestamente peligrosos o imposibles.
 
 **OBJETIVO FINAL:** Genera una receta útil y lista para cocinar con la máxima precisión, detalle y un toque creativo, adhiriéndote estrictamente al formato JSON.
 `;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
-      messages: [
-        { role: 'system', content: 'Eres un ayudante de recetas experto, preciso y que sigue instrucciones al pie de la letra.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: "json_object" },
-    });
+    const completion = await withTimeout(
+      openai.chat.completions.create({
+        model: 'gpt-4-turbo',
+        messages: [
+          { role: 'system', content: 'Eres un ayudante de recetas experto, preciso y que sigue instrucciones al pie de la letra.' },
+          { role: 'user', content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000,
+      }),
+      30000
+    );
 
     const text = completion.choices[0].message?.content ?? '{}';
     let data;
@@ -210,9 +249,18 @@ ${JSON.stringify(body, null, 2)}
       );
     }
 
+    // Incrementar contador global de recetas generadas (fire-and-forget)
+    db.collection('stats').doc('global').set(
+      { total_recipes: FieldValue.increment(1) },
+      { merge: true }
+    ).catch(() => {/* non-critical */});
+
     return NextResponse.json(data);
   } catch (err: any) {
     console.error('Error en /api/openai:', err);
+    if (err.message?.includes('timeout')) {
+      return NextResponse.json({ error: 'La generación de receta tardó demasiado. Por favor inténtalo de nuevo.' }, { status: 504 });
+    }
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

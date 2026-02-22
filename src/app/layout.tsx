@@ -33,6 +33,10 @@ export const metadata = {
   metadataBase: new URL("https://culinarium.io"),
   alternates: {
     canonical: "/",
+    languages: {
+      "es": "https://culinarium.io",
+      "en": "https://culinarium.io",
+    },
   },
   openGraph: {
     title: "Culinarium – Generador de recetas con IA",
@@ -64,13 +68,65 @@ export const metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://culinarium.io/#organization",
+      "name": "Culinarium",
+      "url": "https://culinarium.io",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://culinarium.io/Logo-Culinarium.png"
+      },
+      "sameAs": ["https://twitter.com/CulinariumOfficial"]
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://culinarium.io/#webapp",
+      "name": "Culinarium – Generador de recetas con IA",
+      "url": "https://culinarium.io",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "description": "Genera recetas personalizadas con IA según tus ingredientes, utensilios disponibles, restricciones dietéticas y estilo de cocina.",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Plan Gratuito",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "description": "5 recetas al mes"
+        },
+        {
+          "@type": "Offer",
+          "name": "Culinarium Premium",
+          "price": "9.99",
+          "priceCurrency": "EUR",
+          "description": "Recetas ilimitadas con todas las funciones avanzadas",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "9.99",
+            "priceCurrency": "EUR",
+            "unitCode": "MON"
+          }
+        }
+      ]
+    }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link rel="stylesheet" href="global.css" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className="antialiased flex flex-col h-screen">
         <UserProvider>

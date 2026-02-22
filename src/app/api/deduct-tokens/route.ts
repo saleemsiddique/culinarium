@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cantidad de tokens inválida' }, { status: 400 });
     }
 
-    // Get and verify the authentication token
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Token de autenticación requerido' }, { status: 401 });
@@ -28,71 +27,75 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token de autenticación inválido' }, { status: 401 });
     }
 
-    // Get the user's current token data
     const userRef = db.collection('user').doc(uid);
-    const userDoc = await userRef.get();
 
-    if (!userDoc.exists) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
+    // Usar Firestore transaction para evitar race condition
+    // Dos requests simultáneos no pueden consumir los mismos tokens
+    const result = await db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userRef);
 
-    const userData = userDoc.data();
-    if (!userData) {
-      return NextResponse.json({ error: 'Datos de usuario no válidos' }, { status: 404 });
-    }
+      if (!userDoc.exists) {
+        throw new Error('Usuario no encontrado');
+      }
 
-    const currentMonthlyTokens = userData.monthly_tokens || 0;
-    const currentExtraTokens = userData.extra_tokens || 0;
-    const totalTokens = currentMonthlyTokens + currentExtraTokens;
+      const userData = userDoc.data();
+      if (!userData) {
+        throw new Error('Datos de usuario no válidos');
+      }
 
-    // Check if user has enough tokens
-    if (totalTokens < amount) {
-      return NextResponse.json({ 
-        error: 'Tokens insuficientes',
-        required: amount,
-        available: totalTokens 
-      }, { status: 400 });
-    }
+      const currentMonthlyTokens = userData.monthly_tokens || 0;
+      const currentExtraTokens = userData.extra_tokens || 0;
+      const totalTokens = currentMonthlyTokens + currentExtraTokens;
 
-    // Deduct tokens - monthly tokens first, then extra tokens
-    let remainingToDeduct = amount;
-    let newMonthlyTokens = currentMonthlyTokens;
-    let newExtraTokens = currentExtraTokens;
+      if (totalTokens < amount) {
+        throw new Error(`Tokens insuficientes: disponible=${totalTokens}, requerido=${amount}`);
+      }
 
-    if (remainingToDeduct > 0 && newMonthlyTokens > 0) {
-      const deductFromMonthly = Math.min(remainingToDeduct, newMonthlyTokens);
-      newMonthlyTokens -= deductFromMonthly;
-      remainingToDeduct -= deductFromMonthly;
-    }
+      let remainingToDeduct = amount;
+      let newMonthlyTokens = currentMonthlyTokens;
+      let newExtraTokens = currentExtraTokens;
 
-    if (remainingToDeduct > 0 && newExtraTokens > 0) {
-      const deductFromExtra = Math.min(remainingToDeduct, newExtraTokens);
-      newExtraTokens -= deductFromExtra;
-      remainingToDeduct -= deductFromExtra;
-    }
+      if (remainingToDeduct > 0 && newMonthlyTokens > 0) {
+        const deductFromMonthly = Math.min(remainingToDeduct, newMonthlyTokens);
+        newMonthlyTokens -= deductFromMonthly;
+        remainingToDeduct -= deductFromMonthly;
+      }
 
-    // Update the user document with new token values
-    await userRef.update({
-      monthly_tokens: newMonthlyTokens,
-      extra_tokens: newExtraTokens,
+      if (remainingToDeduct > 0 && newExtraTokens > 0) {
+        const deductFromExtra = Math.min(remainingToDeduct, newExtraTokens);
+        newExtraTokens -= deductFromExtra;
+      }
+
+      transaction.update(userRef, {
+        monthly_tokens: newMonthlyTokens,
+        extra_tokens: newExtraTokens,
+      });
+
+      return { newMonthlyTokens, newExtraTokens };
     });
-
-    // console.log(`✅ Tokens deducidos para usuario ${uid}: ${amount} tokens. Nuevos valores: monthly=${newMonthlyTokens}, extra=${newExtraTokens}`);
 
     return NextResponse.json({
       message: 'Tokens deducidos correctamente',
       deducted: amount,
       updatedUser: {
-        monthly_tokens: newMonthlyTokens,
-        extra_tokens: newExtraTokens,
+        monthly_tokens: result.newMonthlyTokens,
+        extra_tokens: result.newExtraTokens,
       }
     });
 
   } catch (error: any) {
     console.error('Error al descontar tokens:', error);
-    return NextResponse.json({ 
+
+    if (error.message?.includes('Tokens insuficientes')) {
+      return NextResponse.json({ error: 'Tokens insuficientes' }, { status: 400 });
+    }
+    if (error.message === 'Usuario no encontrado') {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    return NextResponse.json({
       error: 'Error interno del servidor al descontar tokens',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

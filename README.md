@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Culinarium
 
-## Getting Started
+Generador de recetas con IA. De tus ingredientes a una receta personalizada en 10 segundos.
 
-First, run the development server:
+## Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Auth + DB**: Firebase Auth + Firestore
+- **AI**: OpenAI GPT-4 Turbo (recetas) + DALL-E 3 (imágenes)
+- **Pagos**: Stripe (subscripciones + pay-as-you-go)
+- **Email**: Resend
+- **Estilos**: Tailwind CSS 4 + DaisyUI 5
+- **Animaciones**: Framer Motion
+- **i18n**: react-i18next (ES / EN)
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copia `.env.local.example` a `.env.local` y rellena las variables.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno requeridas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_FIREBASE_*              Firebase config
+FIREBASE_SERVICE_ACCOUNT_KEY        Firebase Admin (JSON en base64)
+OPENAI_API_KEY                      OpenAI
+STRIPE_SECRET_KEY                   Stripe (backend)
+STRIPE_WEBHOOK_SECRET               Stripe webhook
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY  Stripe (frontend)
+STRIPE_PRICE_PREMIUM                Price ID suscripción Premium (€9.99/mes)
+STRIPE_PRICE_PAYG                   Price ID pack recetas (€4.99)
+NEXT_PUBLIC_STRIPE_PRICE_PREMIUM    (mismo, accesible en cliente)
+NEXT_PUBLIC_STRIPE_PRICE_PAYG       (mismo, accesible en cliente)
+RESEND_API_KEY                      Resend email
+NEXT_PUBLIC_POLICY_VERSION          Versión del consentimiento (ej: 1.0.5)
+```
 
-## Learn More
+## Planes de precios
 
-To learn more about Next.js, take a look at the following resources:
+| Plan | Precio | Recetas |
+|------|--------|---------|
+| Gratuito | €0 | 5/mes |
+| Pay-as-you-go | €4.99 único | +15 recetas |
+| Premium | €9.99/mes | Ilimitadas |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel. Configura las variables de entorno en el dashboard de Vercel.

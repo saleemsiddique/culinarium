@@ -235,6 +235,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const linkAnonymousConsent = async (fbUser: FirebaseUser) => {
+    try {
+      const stored = localStorage.getItem("culinarium_cookie_consent");
+      const anonymousId = stored ? JSON.parse(stored)?.user_id : null;
+      if (anonymousId && anonymousId !== fbUser.uid) {
+        const idToken = await fbUser.getIdToken();
+        await fetch("/api/consent/link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ anonymous_id: anonymousId }),
+        });
+      }
+    } catch {
+      // non-critical, silently ignore
+    }
+  };
+
   const login = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = result.user;
@@ -252,6 +269,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // ✅ Verificar y resetear tokens si es necesario
     docData = await checkAndResetMonthlyTokens(docData);
     updateLastActive(firebaseUser.uid).catch(console.error);
+    linkAnonymousConsent(firebaseUser).catch(console.error);
 
     setUser(docData);
   };
@@ -438,6 +456,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     setUser(userData);
+    linkAnonymousConsent(userInfo).catch(console.error);
 
     return {
       user: userData,

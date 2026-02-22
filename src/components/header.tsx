@@ -78,8 +78,12 @@ export default function Header() {
   // Lógica para determinar si mostrar la cabecera en general
   const shouldHideHeader = isMobile && !isMobileProfilePage && !isAuthPage && pathname !== '/';
 
-  // Calcular el total de tokens
+  // Calcular el total de tokens y recetas
   const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
+  const totalRecipes = Math.floor(totalTokens / 10);
+  const isActiveSubscriber = user?.isSubscribed &&
+    (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');
+  const recipesDisplay = isActiveSubscriber ? '∞' : String(totalRecipes);
 
   // Clases mejoradas para el botón especial (Empezar)
   const specialButtonClasses =
@@ -169,7 +173,11 @@ export default function Header() {
                           </p>
                         </div>
                         <p className="text-sm italic mb-4">
-                          {t("header.tokens.popup.total")}: <span className="font-bold text-[var(--highlight)] text-xl">{totalTokens}</span>
+                          {t("header.tokens.popup.total")}: <span className="font-bold text-[var(--highlight)] text-xl">
+                            {isActiveSubscriber
+                              ? t("header.tokens.unlimited")
+                              : `${totalRecipes} ${t("header.tokens.recipes", { count: totalRecipes })}`}
+                          </span>
                         </p>
                         <button onClick={() => { setDrawerOpen(false); setShowTokens(true); }} className="w-full">
                           <motion.div
@@ -274,7 +282,8 @@ export default function Header() {
                     onMouseLeave={() => setShowTokensPopup(false)}
                   >
                     <span className="text-[var(--foreground)] font-semibold text-sm md:text-base mr-2">
-                      Tokens: <span className="text-[var(--highlight)] font-bold text-lg">{totalTokens}</span>
+                      <span className="text-[var(--highlight)] font-bold text-lg">{recipesDisplay}</span>{" "}
+                      {isActiveSubscriber ? t("header.tokens.unlimited") : t("header.tokens.recipes", { count: totalRecipes })}
                     </span>
                     <span className="text-[var(--highlight)] text-xl">✨</span>
 
@@ -300,7 +309,12 @@ export default function Header() {
                         </div>
                         <div className="h-px bg-gray-200 my-3" />
                         <p className="flex justify-between items-center text-base font-semibold">
-                          <span>{t("header.tokens.popup.total")}</span> <span className="text-[var(--highlight)] font-bold">{totalTokens}</span>
+                          <span>{t("header.tokens.popup.total")}</span>
+                          <span className="text-[var(--highlight)] font-bold">
+                            {isActiveSubscriber
+                              ? t("header.tokens.unlimited")
+                              : `${totalRecipes} ${t("header.tokens.recipes", { count: totalRecipes })}`}
+                          </span>
                         </p>
                         <motion.button
                           onClick={() => {

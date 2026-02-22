@@ -4,22 +4,22 @@ export async function GET() {
   const baseUrl = "https://culinarium.io";
 
   const routes = [
-    "", // home
-    "kitchen", // misma importancia que home
-    "kitchen/recipes/list",
-    "auth/login",
-    "auth/register",
+    { path: "", priority: "1.0", changefreq: "weekly" },
+    { path: "kitchen", priority: "0.9", changefreq: "monthly" },
+    { path: "kitchen/recipes/list", priority: "0.8", changefreq: "monthly" },
+    { path: "consent/privacy", priority: "0.5", changefreq: "monthly" },
+    { path: "consent/terms", priority: "0.5", changefreq: "monthly" },
+    { path: "consent/cookies", priority: "0.5", changefreq: "monthly" },
   ];
 
   const urls = routes
     .map(
-      (route) => `
+      ({ path, priority, changefreq }) => `
     <url>
-      <loc>${baseUrl}/${route}</loc>
+      <loc>${baseUrl}/${path}</loc>
       <lastmod>${new Date().toISOString()}</lastmod>
-      <priority>${
-        route === "" || route === "kitchen" ? "1.0" : "0.8"
-      }</priority>
+      <changefreq>${changefreq}</changefreq>
+      <priority>${priority}</priority>
     </url>`
     )
     .join("");

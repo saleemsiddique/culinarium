@@ -337,6 +337,7 @@
       "monthly": "Monthly:",
       "extra": "Extra:",
       "total": "Total:",
+      "unlimited": "Unlimited ∞",
       "buy": "Buy More Tokens!",
       "buyMore": "Buy more tokens",
       "premium": {
@@ -523,32 +524,15 @@
   },
   "tokens": {
     "modal": {
-      "title": "Buy Extra Tokens",
-      "currentTokens": "Current tokens:",
+      "title": "Recipe Packs",
+      "currentTokens": "Available recipes:",
       "extra": "extra",
       "monthly": "monthly",
       "close": "Close",
       "packages": {
-        "30": {
-          "label": "Occasional use (3 recipes)",
-          "promo": "Offer"
-        },
-        "60": {
-          "label": "Casual use (6 recipes)"
-        },
-        "120": {
-          "label": "Weekly use (12 recipes)"
-        },
-        "250": {
-          "label": "Frequent use (25 recipes)"
-        },
-        "600": {
-          "label": "Intensive use (60 recipes)",
+        "150": {
+          "label": "15 extra recipes",
           "promo": "Most Popular"
-        },
-        "1200": {
-          "label": "Professional use (120 recipes)",
-          "promo": "Best Value"
         }
       },
       "promoTypes": {
@@ -556,7 +540,7 @@
         "limited": "Offer",
         "popular": "Most Popular",
         "value": "Best Value",
-        "perToken": "per token"
+        "perToken": "per recipe"
       }
     }
   },
@@ -567,7 +551,7 @@
       "subscribed": {
         "title": "You're already a Premium subscriber!",
         "thankYou": "Thank you for being a Premium subscriber!",
-        "message": "You keep your tokens and access to all premium features.",
+        "message": "You have unlimited recipes and access to all premium features.",
         "renewal": "Your subscription will automatically renew on {{date}}.",
         "close": "Close",
         "manage": "Manage Subscription"
@@ -575,12 +559,18 @@
       "notSubscribed": {
         "greeting": "Hello {{name}}, unlock all advanced features.",
         "greetingFallback": "Hello there, unlock all advanced features.",
-        "price": "€7.99/month",
+        "price": "€9.99/month",
+        "priceAnnual": "€79.99/year",
+        "priceAnnualPerMonth": "€6.67/mo",
+        "billingMonthly": "Monthly",
+        "billingAnnual": "Annual",
+        "annualSave": "Save 33%",
         "cancel": "Cancel",
         "features": [
-          "300 monthly tokens (30 recipes)",
-          "Access to exclusive premium forms",
-          "Priority in recipe generation",
+          "Unlimited recipes per month",
+          "Custom dietary restrictions",
+          "Cooking styles (Japanese, Spanish...)",
+          "Advanced macronutrient control",
           "24/7 priority support",
           "Early access to new features"
         ]
@@ -1134,13 +1124,32 @@
   },
   "consent": {
     "modal": {
-      "title": "Policy and Terms",
-      "message": "By continuing to use this site, you confirm that you accept our",
+      "title": "Culinarium & your privacy",
+      "message": "We use cookies and process data to provide the service. You can accept all or only what's necessary.",
       "terms": "Terms and Conditions",
-      "privacy": "Privacy Policy", 
+      "privacy": "Privacy Policy",
       "cookies": "Cookies Policy",
-      "acceptButton": "Accept",
-      "acceptingButton": "Accepting...",
+      "acceptButton": "Accept all",
+      "acceptingButton": "Saving...",
+      "rejectButton": "Reject non-essential",
+      "categories": {
+        "necessary": {
+          "title": "Necessary (always active)",
+          "description": "Authentication, session and terms of use. Required for the service to work."
+        },
+        "analytics": {
+          "title": "Analytics (optional)",
+          "description": "Vercel Analytics to measure performance and improve the app."
+        },
+        "newsletter": {
+          "title": "Newsletter (optional)",
+          "description": "Receive weekly recipes and Culinarium news by email."
+        }
+      },
+      "links": {
+        "prefix": "See:",
+        "separator": " · "
+      },
       "errors": {
         "checkConsent": "Error checking consent:",
         "saveConsent": "Error saving consent:",
@@ -1186,30 +1195,55 @@
         "description": "Perfect for starting to explore AI cooking.",
         "price": "0€",
         "features": [
-          "5 free recipes per month (50 tokens)",
-          "Basic recipe creation",
-          "Limited functionalities",
-          "No dietary restrictions",
-          "No specific cooking styles"
+          "5 recipes per month",
+          "Basic recipes with ingredients and time",
+          "Diner count and difficulty selector",
+          "Automatic image per recipe",
+          "Recipe history"
+        ]
+      },
+      "payg": {
+        "title": "Pay-as-you-go",
+        "description": "When you need more recipes, no commitment.",
+        "price": "€4.99",
+        "priceNote": "one-time",
+        "features": [
+          "+15 recipes at once",
+          "Recipes never expire",
+          "No monthly subscription",
+          "Same features as your current plan",
+          "Perfect for occasional cooks"
         ]
       },
       "premium": {
         "title": "Premium",
         "description": "Unlock your culinary potential without limits!",
-        "price": "7.99€",
+        "price": "€9.99",
         "features": [
-          "30 recipes per month (300 tokens)",
-          "All premium functionalities",
+          "Unlimited recipes per month",
+          "Everything in the free plan",
           "Custom dietary restrictions",
           "Cooking styles (Japanese, Spanish...)",
-          "Priority support",
-          "Early access to new features"
+          "Advanced macronutrient control",
+          "24/7 priority support"
         ]
       }
     },
+    "annual": {
+      "toggleMonthly": "Monthly",
+      "toggleAnnual": "Annual",
+      "save": "Save 33%",
+      "twoMonthsFree": "2 months free",
+      "perYear": "/year",
+      "perMonthEquiv": "€6.67/mo",
+      "priceAnnual": "€79.99",
+      "priceMonthly": "€9.99"
+    },
     "common": {
       "perMonth": "/month",
-      "getStarted": "Get Started"
+      "getStarted": "Start for free",
+      "buyNow": "Buy now",
+      "subscribe": "Subscribe"
     }
   },
   "faq": {

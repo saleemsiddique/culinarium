@@ -333,26 +333,29 @@
       "myProfile": "Mi Perfil"
     },
     "tokens": {
-      "title": "Tus Tokens",
+      "title": "Tus Recetas",
       "monthly": "Mensuales:",
       "extra": "Extras:",
       "total": "Total:",
-      "buy": "¡Comprar Más Tokens!",
-      "buyMore": "Comprar más tokens",
+      "recipes": "{{count}} receta",
+      "recipes_plural": "{{count}} recetas",
+      "unlimited": "Ilimitadas ∞",
+      "buy": "¡Comprar Más Recetas!",
+      "buyMore": "Comprar más recetas",
       "premium": {
         "subscribe": "¡Hacerme Premium!",
         "current": "Tu Plan Premium",
         "subscribeButton": "Suscribirse a Premium"
       },
       "popup": {
-        "title": "Tus Tokens",
+        "title": "Tus Recetas",
         "monthly": "Mensuales:",
         "extra": "Extras:",
         "total": "Total:"
       }
     },
     "auth": {
-      "getStarted": "Empezar"
+      "getStarted": "Empezar gratis"
     }
   },
   "sideMenu": {
@@ -523,32 +526,15 @@
   },
   "tokens": {
     "modal": {
-      "title": "Comprar Tokens Extra",
-      "currentTokens": "Tokens actuales:",
+      "title": "Paquetes de Recetas",
+      "currentTokens": "Recetas disponibles:",
       "extra": "extra",
       "monthly": "mensuales",
       "close": "Cerrar",
       "packages": {
-        "30": {
-          "label": "Uso puntual (3 recetas)",
-          "promo": "Oferta"
-        },
-        "60": {
-          "label": "Uso ocasional (6 recetas)"
-        },
-        "120": {
-          "label": "Uso semanal (12 recetas)"
-        },
-        "250": {
-          "label": "Uso frecuente (25 recetas)"
-        },
-        "600": {
-          "label": "Uso intensivo (60 recetas)",
+        "150": {
+          "label": "15 recetas extra",
           "promo": "Más Popular"
-        },
-        "1200": {
-          "label": "Uso profesional (120 recetas)",
-          "promo": "Mejor Valor"
         }
       },
       "promoTypes": {
@@ -556,7 +542,7 @@
         "limited": "Oferta",
         "popular": "Más Popular",
         "value": "Mejor Valor",
-        "perToken": "por token"
+        "perToken": "por receta"
       }
     }
   },
@@ -567,7 +553,7 @@
       "subscribed": {
         "title": "¡Ya eres un suscriptor Premium!",
         "thankYou": "¡Gracias por ser un suscriptor Premium!",
-        "message": "Mantienes tus tokens y acceso a todas las funcionalidades premium.",
+        "message": "Tienes recetas ilimitadas y acceso a todas las funcionalidades premium.",
         "renewal": "Tu suscripción se renovará automáticamente el {{date}}.",
         "close": "Cerrar",
         "manage": "Gestionar Suscripción"
@@ -575,12 +561,18 @@
       "notSubscribed": {
         "greeting": "Hola {{name}}, desbloquea todas las funciones avanzadas.",
         "greetingFallback": "Hola, desbloquea todas las funciones avanzadas.",
-        "price": "€7.99/mes",
+        "price": "€9,99/mes",
+        "priceAnnual": "€79,99/año",
+        "priceAnnualPerMonth": "€6,67/mes",
+        "billingMonthly": "Mensual",
+        "billingAnnual": "Anual",
+        "annualSave": "Ahorra 33%",
         "cancel": "Cancelar",
         "features": [
-          "300 tokens mensuales (30 recetas)",
-          "Acceso a formularios premium exclusivos",
-          "Prioridad en generación de recetas",
+          "Recetas ilimitadas al mes",
+          "Restricciones dietéticas personalizadas",
+          "Estilos de cocina (japonesa, española...)",
+          "Control de macronutrientes avanzado",
           "Soporte prioritario 24/7",
           "Acceso anticipado a nuevas funciones"
         ]
@@ -715,30 +707,30 @@
   "onboarding": {
     "steps": [
       {
-        "title": "👋 Bienvenido",
-        "text": "Gracias por unirte a nuestra aplicación. Te mostraremos lo esencial.",
+        "title": "👋 Bienvenido a Culinarium",
+        "text": "Genera recetas personalizadas con IA a partir de los ingredientes que tienes en casa. En 10 segundos, tienes tu receta lista con imagen incluida.",
         "image": "/onboarding/step1.jpg"
       },
       {
-        "title": "🥘 Tokens y Recetas",
-        "text": "¡Los tokens son tu recurso más valioso! Cada vez que crees una receta gastarás tokens, y siempre podrás ver el coste de tokens indicado antes de crearla.",
+        "title": "🍳 Así funciona",
+        "text": "Dinos qué tienes en la nevera, cuánto tiempo tienes y para cuántas personas. ¡La IA hace el resto! También puedes indicar los utensilios que tienes disponibles.",
         "image": "/onboarding/step2.jpg"
       },
       {
-        "title": "🔄 Renovación",
-        "text": "Tus tokens se renuevan automáticamente cada mes, en la misma fecha en que te uniste o activaste tu plan premium.",
+        "title": "🎁 Tienes 5 recetas gratis",
+        "text": "Tu plan gratuito incluye 5 recetas al mes. Si quieres más, puedes comprar un pack de 15 recetas por €4.99 o suscribirte a Premium por €9.99/mes para recetas ilimitadas.",
         "image": "/onboarding/step3.jpg"
       },
       {
-        "title": "🚀 Listo",
-        "text": "Ya conoces lo básico, hora de cocinar.",
+        "title": "🚀 ¡A cocinar!",
+        "text": "Ya lo sabes todo. Ahora rellena el formulario con tus ingredientes y genera tu primera receta. ¡Buen provecho!",
         "image": "/onboarding/step4.jpg"
       }
     ],
     "buttons": {
       "back": "Atrás",
       "next": "Siguiente",
-      "finish": "Finalizar"
+      "finish": "¡Generar mi primera receta!"
     }
   },
   "payments": {
@@ -1134,13 +1126,32 @@
   },
   "consent": {
     "modal": {
-      "title": "Política y Condiciones",
-      "message": "Al continuar usando este sitio, confirmas que aceptas nuestros",
+      "title": "Culinarium y tu privacidad",
+      "message": "Usamos cookies y procesamos datos para ofrecerte el servicio. Puedes aceptar todo o solo lo necesario.",
       "terms": "Términos y Condiciones",
-      "privacy": "Política de Privacidad", 
+      "privacy": "Política de Privacidad",
       "cookies": "Política de Cookies",
-      "acceptButton": "Aceptar",
-      "acceptingButton": "Aceptando...",
+      "acceptButton": "Aceptar todo",
+      "acceptingButton": "Guardando...",
+      "rejectButton": "Rechazar no esenciales",
+      "categories": {
+        "necessary": {
+          "title": "Necesario (siempre activo)",
+          "description": "Autenticación, sesión y términos de uso. Imprescindible para el funcionamiento."
+        },
+        "analytics": {
+          "title": "Analytics (opcional)",
+          "description": "Vercel Analytics para medir el rendimiento y mejorar la app."
+        },
+        "newsletter": {
+          "title": "Newsletter (opcional)",
+          "description": "Recibir recetas semanales y novedades de Culinarium por email."
+        }
+      },
+      "links": {
+        "prefix": "Ver:",
+        "separator": " · "
+      },
       "errors": {
         "checkConsent": "Error al verificar el consentimiento:",
         "saveConsent": "Error al guardar el consentimiento:",
@@ -1180,36 +1191,61 @@
       "title": "Elige el plan que te llevará a otro nivel",
       "subtitle": "¿Listo para empezar? Elige tu plan y comienza a cocinar con la magia de la IA."
     },
+    "annual": {
+      "toggleMonthly": "Mensual",
+      "toggleAnnual": "Anual",
+      "save": "Ahorra 33%",
+      "twoMonthsFree": "2 meses gratis",
+      "perYear": "/año",
+      "perMonthEquiv": "€6,67/mes",
+      "priceAnnual": "79,99€",
+      "priceMonthly": "9,99€"
+    },
     "plans": {
       "free": {
         "title": "Gratis",
         "description": "Ideal para empezar a explorar la cocina con IA.",
         "price": "0€",
         "features": [
-          "5 recetas gratis al mes (50 tokens)",
-          "Creación de recetas básicas",
-          "Funcionalidades restringidas",
-          "Sin restricciones dietéticas",
-          "Sin estilos de cocina específicos"
+          "5 recetas al mes",
+          "Recetas básicas con ingredientes y tiempo",
+          "Selector de comensales y dificultad",
+          "Imagen automática por receta",
+          "Historial de recetas"
+        ]
+      },
+      "payg": {
+        "title": "Pay-as-you-go",
+        "description": "Cuando necesitas más recetas, sin compromiso.",
+        "price": "4,99€",
+        "priceNote": "pago único",
+        "features": [
+          "+15 recetas de una vez",
+          "Las recetas no caducan",
+          "Sin suscripción mensual",
+          "Mismas funciones de tu plan actual",
+          "Ideal para cocineros ocasionales"
         ]
       },
       "premium": {
         "title": "Premium",
         "description": "¡Desbloquea tu potencial culinario sin límites!",
-        "price": "7,99€",
+        "price": "9,99€",
         "features": [
-          "30 recetas al mes (300 tokens)",
-          "Todas las funcionalidades premium",
+          "Recetas ilimitadas al mes",
+          "Todo lo del plan gratuito",
           "Restricciones dietéticas personalizadas",
           "Estilos de cocina (japonesa, española...)",
-          "Soporte prioritario",
-          "Acceso anticipado a nuevas funciones"
+          "Control de macronutrientes avanzado",
+          "Soporte prioritario 24/7"
         ]
       }
     },
     "common": {
       "perMonth": "/mes",
-      "getStarted": "Empezar"
+      "getStarted": "Empezar gratis",
+      "buyNow": "Comprar ahora",
+      "subscribe": "Suscribirse"
     }
   },
   "faq": {
@@ -1228,8 +1264,20 @@
         "answer": "Absolutamente. Culinarium soporta múltiples tipos de dietas, incluyendo vegetariana, vegana, keto, sin gluten y más."
       },
       {
+        "question": "¿Funciona en español?",
+        "answer": "Sí, Culinarium funciona completamente en español. Puedes generar recetas en español o en inglés según el idioma de tu navegador."
+      },
+      {
+        "question": "¿Puedo cancelar la suscripción en cualquier momento?",
+        "answer": "Sí, puedes cancelar en cualquier momento desde tu perfil. Seguirás teniendo acceso a Premium hasta el final del período ya pagado, sin cargos adicionales."
+      },
+      {
         "question": "¿Hay recetas en varios idiomas?",
         "answer": "Actualmente solo están disponibles en español e inglés."
+      },
+      {
+        "question": "¿Caducan los packs Pay-as-you-go?",
+        "answer": "No, las recetas que obtienes con los packs de pago único no caducan nunca. Se acumulan con las recetas de tu plan actual y puedes usarlas cuando quieras."
       },
       {
         "question": "¿Qué pasa si se me acaban los tokens?",
