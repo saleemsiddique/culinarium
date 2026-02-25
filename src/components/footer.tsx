@@ -40,7 +40,7 @@ export default function Footer() {
             {/* Socials and Brand */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               {/* Brand and Slogan */}
-              <div className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text">
+              <div className="font-display text-4xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-amber-500 text-transparent bg-clip-text">
                 Culinarium
               </div>
               <p className="mt-2 text-sm text-gray-400 italic">

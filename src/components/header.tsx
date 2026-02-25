@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser, CustomUser } from '@/context/user-context';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen, Menu, X, User } from 'lucide-react';
+import { Plus, BookOpen, Menu, X, User, Sparkles, ChefHat, Crown } from 'lucide-react';
 import { TokensModal } from "./SideMenu/TokensModal";
 import { PremiumModal } from "./SideMenu/PremiumModal";
 import { useTranslation } from "react-i18next";
 
-// Definición de las props para los iconos de Lucide-React
 interface LucideIconProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
   size?: number | string;
@@ -19,7 +18,6 @@ interface LucideIconProps extends React.SVGProps<SVGSVGElement> {
   absoluteStrokeWidth?: boolean;
 }
 
-// Componente para los elementos del menú móvil
 const MobileMenuItem: React.FC<{ href: string; icon: React.ReactNode; label: string; onClick: () => void }> = ({ href, icon, label, onClick }) => {
   const pathname = usePathname();
   const isActive = pathname === href || (href === '/kitchen/recipes/list' && pathname.startsWith('/kitchen/recipes/list'));
@@ -28,17 +26,17 @@ const MobileMenuItem: React.FC<{ href: string; icon: React.ReactNode; label: str
     <Link href={href} passHref>
       <motion.div
         onClick={onClick}
-        className={`flex items-center gap-4 py-3 px-4 rounded-lg transition-colors duration-200 cursor-pointer w-full justify-start
+        className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-colors duration-200 cursor-pointer w-full justify-start
           ${isActive
-            ? 'bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)] shadow-md'
-            : 'bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--primary)]/10'
+            ? 'bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white shadow-md'
+            : 'bg-white/60 text-[var(--foreground)] hover:bg-white'
           }
         `}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        {React.cloneElement(icon as React.ReactElement<LucideIconProps>, { className: `w-8 h-8 ${isActive ? 'text-[var(--text2)]' : 'text-[var(--foreground)]'}` })}
-        <span className="text-xl font-semibold">{label}</span>
+        {React.cloneElement(icon as React.ReactElement<LucideIconProps>, { className: `w-6 h-6 ${isActive ? 'text-white' : 'text-[var(--foreground)]'}` })}
+        <span className="text-base font-semibold">{label}</span>
       </motion.div>
     </Link>
   );
@@ -50,59 +48,45 @@ export default function Header() {
   const isLoggedIn = !!user;
   const { t } = useTranslation();
 
-  // Estados para el menú móvil y la responsividad
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // Estados para los modales a pantalla completa
   const [showTokens, setShowTokens] = useState(false);
   const [showPremium, setShowPremium] = useState(false);
-  // Estado para el popup de tokens en escritorio
   const [showTokensPopup, setShowTokensPopup] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Hook para detectar el tamaño de la ventana y actualizar el estado dinámicamente
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
     handleResize();
     window.addEventListener('resize', handleResize);
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Lógica para determinar si estamos en una página de perfil en móvil
   const isMobileProfilePage = isMobile && pathname.startsWith('/profile');
   const isAuthPage = isMobile && pathname.startsWith('/auth');
-
-  // Lógica para determinar si mostrar la cabecera en general
   const shouldHideHeader = isMobile && !isMobileProfilePage && !isAuthPage && pathname !== '/';
 
-  // Calcular el total de tokens y recetas
   const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
   const totalRecipes = Math.floor(totalTokens / 10);
+  const monthlyRecipes = Math.floor((user?.monthly_tokens || 0) / 10);
+  const extraRecipes = Math.floor((user?.extra_tokens || 0) / 10);
   const isActiveSubscriber = user?.isSubscribed &&
     (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');
-  const recipesDisplay = isActiveSubscriber ? '∞' : String(totalRecipes);
-
-  // Clases mejoradas para el botón especial (Empezar)
-  const specialButtonClasses =
-    "px-6 py-2 rounded-full text-lg font-semibold shadow-lg transition-all duration-300 cursor-pointer " +
-    "bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)] " +
-    "hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)]";
+  const recipesDisplay = isActiveSubscriber ? '\u221E' : String(totalRecipes);
+  const isLowRecipes = !isActiveSubscriber && totalRecipes <= 2;
 
   return (
     <>
-      {/* Modales a pantalla completa */}
       {showTokens && <TokensModal user={user as CustomUser | null} onClose={() => setShowTokens(false)} />}
       {showPremium && <PremiumModal user={user as CustomUser | null} onClose={() => setShowPremium(false)} onSubscribe={() => setShowPremium(false)} />}
 
       <header
-        className={`w-full backdrop-blur-md bg-white/80 shadow-xl fixed top-0 left-0 z-50 transition-all duration-300
+        className={`w-full backdrop-blur-xl bg-white/85 border-b border-[var(--border-subtle)] fixed top-0 left-0 z-50 transition-all duration-300
           ${shouldHideHeader ? 'hidden' : ''}
         `}
       >
-        {/* Botón flotante y drawer animado para páginas de perfil en móvil */}
+        {/* Mobile profile page drawer */}
         {isMobileProfilePage && (
           <>
             <AnimatePresence>
@@ -112,11 +96,11 @@ export default function Header() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="fixed top-4 left-4 z-50 bg-[var(--highlight)] text-[var(--text2)] rounded-full p-3 shadow-lg transition"
+                  className="fixed top-4 left-4 z-50 bg-[var(--highlight)] text-white rounded-full p-3 shadow-lg transition"
                   onClick={() => setDrawerOpen(true)}
                   aria-label={t("header.menu.open")}
                 >
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5" />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -131,83 +115,84 @@ export default function Header() {
                   transition={{ type: "tween", duration: 0.3 }}
                   className="fixed top-0 left-0 w-screen h-screen z-40 bg-[var(--background)] md:hidden flex flex-col"
                 >
-                  {/* Contenido del drawer */}
-                  <div className="flex justify-between items-center p-4">
+                  <div className="flex justify-between items-center p-5 border-b border-[var(--border-subtle)]">
                     <Link href={isLoggedIn ? '/kitchen' : '/'}>
-                      <motion.h1
-                        className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer"
-                        whileHover={{ scale: 1.05, color: 'var(--highlight)' }}
-                        transition={{ duration: 0.2 }}
-                      >
+                      <span className="font-display text-2xl font-bold tracking-tight text-[var(--foreground)]">
                         Culinarium
-                      </motion.h1>
+                      </span>
                     </Link>
                     <button
-                      className="text-[var(--muted)] hover:text-[var(--foreground)] transition "
+                      className="p-2 rounded-lg hover:bg-black/5 transition"
                       onClick={() => setDrawerOpen(false)}
-                      aria-label="Cerrar menú"
+                      aria-label={t("header.menu.close")}
                     >
-                      <X className="w-8 h-8" />
+                      <X className="w-6 h-6 text-[var(--foreground)]" />
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-4 flex-grow overflow-y-auto items-center">
-                    <MobileMenuItem href="/kitchen" icon={<Plus />} label="Nueva Receta" onClick={() => setDrawerOpen(false)} />
-                    <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label="Mis Recetas" onClick={() => setDrawerOpen(false)} />
-                    <MobileMenuItem href="/profile" icon={<User />} label="Mi Perfil" onClick={() => setDrawerOpen(false)} />
+                  <div className="flex flex-col gap-2 p-5 flex-grow overflow-y-auto">
+                    <MobileMenuItem href="/kitchen" icon={<Plus />} label={t("header.menu.newRecipe")} onClick={() => setDrawerOpen(false)} />
+                    <MobileMenuItem href="/kitchen/recipes/list" icon={<BookOpen />} label={t("header.menu.myRecipes")} onClick={() => setDrawerOpen(false)} />
+                    <MobileMenuItem href="/profile" icon={<User />} label={t("header.menu.myProfile")} onClick={() => setDrawerOpen(false)} />
 
                     {user && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.4 }}
-                        className="mt-8 p-6 bg-[var(--primary)] rounded-xl shadow-xl text-[var(--text2)] text-center w-full max-w-sm border-2 border-[var(--highlight)]"
+                        className="mt-6 p-5 bg-[var(--primary)] rounded-2xl text-white"
                       >
-                        <h3 className="text-xl font-bold mb-3">{t("header.tokens.popup.title")}</h3>
-                        <div className="space-y-2 mb-4">
-                          <p className="flex justify-between items-center text-lg">
-                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                        <h3 className="font-display text-lg font-bold mb-3">{t("header.tokens.popup.title")}</h3>
+                        <div className="space-y-2 mb-4 text-sm">
+                          <p className="flex justify-between items-center">
+                            <span className="text-white/70">{t("header.tokens.popup.monthly")}</span>
+                            <span className="font-bold text-[var(--highlight)]">{monthlyRecipes}</span>
                           </p>
-                          <p className="flex justify-between items-center text-lg">
-                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                          <p className="flex justify-between items-center">
+                            <span className="text-white/70">{t("header.tokens.popup.extra")}</span>
+                            <span className="font-bold text-[var(--highlight)]">{extraRecipes}</span>
                           </p>
                         </div>
-                        <p className="text-sm italic mb-4">
-                          {t("header.tokens.popup.total")}: <span className="font-bold text-[var(--highlight)] text-xl">
+                        <div className="h-px bg-white/20 my-3" />
+                        <p className="flex justify-between items-center text-sm font-semibold">
+                          <span>{t("header.tokens.popup.total")}</span>
+                          <span className="text-[var(--highlight)] font-bold text-lg">
                             {isActiveSubscriber
                               ? t("header.tokens.unlimited")
-                              : `${totalRecipes} ${t("header.tokens.recipes", { count: totalRecipes })}`}
+                              : t("header.tokens.recipes", { count: totalRecipes })}
                           </span>
                         </p>
-                        <button onClick={() => { setDrawerOpen(false); setShowTokens(true); }} className="w-full">
+                        <button onClick={() => { setDrawerOpen(false); setShowTokens(true); }} className="w-full mt-4">
                           <motion.div
-                            className="w-full py-3 rounded-full text-lg font-bold shadow-lg transition-all duration-300
-                                       bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                                       hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)] focus:outline-none focus:ring-4 focus:ring-[var(--highlight)] text-center"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            className="w-full py-3 rounded-xl text-sm font-bold shadow-md text-center transition-all duration-300
+                                       bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white
+                                       hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)]"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             role="button"
                             tabIndex={0}
                           >
                             {t("header.tokens.buy")}
                           </motion.div>
                         </button>
-                        {/* Nuevo botón para el modal de Premium en móvil */}
-                        <motion.button
-                          onClick={() => {
-                            setShowPremium(true);
-                            setDrawerOpen(false); // Cierra el drawer al abrir el modal
-                          }}
-                          className="w-full py-3 mt-4 rounded-full text-lg font-bold shadow-lg transition-all duration-300
-                                     bg-gradient-to-r from-yellow-400 to-yellow-600 text-white
-                                     hover:from-yellow-500 hover:to-yellow-700 focus:outline-none focus:ring-4 focus:ring-yellow-500 text-center"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          {user?.isSubscribed ? t("header.tokens.premium.currentPlan") : t("header.tokens.premium.subscribeButton")}
-                        </motion.button>
+                        {user && !user.isSubscribed && (
+                          <motion.button
+                            onClick={() => {
+                              setShowPremium(true);
+                              setDrawerOpen(false);
+                            }}
+                            className="w-full py-3 mt-3 rounded-xl text-sm font-bold shadow-md text-center transition-all duration-300
+                                       bg-gradient-to-r from-amber-400 to-amber-500 text-white
+                                       hover:from-amber-500 hover:to-amber-600"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <span className="flex items-center justify-center gap-2">
+                              <Crown className="w-4 h-4" />
+                              {t("header.tokens.premium.subscribeButton")}
+                            </span>
+                          </motion.button>
+                        )}
                       </motion.div>
                     )}
                   </div>
@@ -217,30 +202,29 @@ export default function Header() {
           </>
         )}
 
-        {/* Contenido del Header para escritorio o móvil en otras páginas */}
+        {/* Main header content */}
         {!isMobileProfilePage && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <Link href={isLoggedIn ? '/kitchen' : '/'}>
-                <motion.h1
-                  className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer"
-                  whileHover={{ scale: 1.05, color: 'var(--highlight)' }}
-                  transition={{ duration: 0.2 }}
-                >
+              {/* Logo */}
+              <Link href={isLoggedIn ? '/kitchen' : '/'} className="flex items-center gap-2">
+                <ChefHat className="w-7 h-7 text-[var(--highlight)]" strokeWidth={2} />
+                <span className="font-display text-2xl md:text-[1.65rem] font-bold tracking-tight text-[var(--foreground)]">
                   Culinarium
-                </motion.h1>
+                </span>
               </Link>
 
-              <nav className="flex items-center gap-6">
-                <ul className="hidden md:flex items-center gap-6">
+              <nav className="flex items-center gap-4">
+                <ul className="hidden md:flex items-center gap-1">
                   <li>
                     <Link href={isLoggedIn ? '/kitchen' : '/'} passHref>
                       <motion.span
-                        className={`text-[var(--foreground)] hover:text-[var(--highlight)] font-medium transition-colors duration-200 cursor-pointer
-                          ${pathname === (isLoggedIn ? '/kitchen' : '/') ? 'underline decoration-[var(--highlight)] underline-offset-4' : ''
-                        }`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 cursor-pointer inline-block
+                          ${pathname === (isLoggedIn ? '/kitchen' : '/')
+                            ? 'bg-[var(--highlight)]/10 text-[var(--highlight)]'
+                            : 'text-[var(--foreground)]/70 hover:text-[var(--foreground)] hover:bg-black/[0.03]'
+                          }`}
+                        whileTap={{ scale: 0.97 }}
                       >
                         {t("header.menu.home")}
                       </motion.span>
@@ -250,11 +234,12 @@ export default function Header() {
                     <li>
                       <Link href="/profile" passHref>
                         <motion.span
-                          className={`text-[var(--foreground)] hover:text-[var(--highlight)] font-medium transition-colors duration-200 cursor-pointer
-                            ${pathname === '/profile' ? 'underline decoration-[var(--highlight)] underline-offset-4' : ''
-                          }`}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 cursor-pointer inline-block
+                            ${pathname === '/profile'
+                              ? 'bg-[var(--highlight)]/10 text-[var(--highlight)]'
+                              : 'text-[var(--foreground)]/70 hover:text-[var(--foreground)] hover:bg-black/[0.03]'
+                            }`}
+                          whileTap={{ scale: 0.97 }}
                         >
                           {t("header.menu.myProfile")}
                         </motion.span>
@@ -263,10 +248,13 @@ export default function Header() {
                   )}
                 </ul>
 
+                {/* CTA for non-logged users */}
                 {!isLoggedIn && (
-                  <Link href="/auth/login" passHref>
+                  <Link href="/auth/register" passHref>
                     <motion.button
-                      className={specialButtonClasses}
+                      className="px-5 py-2 rounded-full text-sm font-semibold shadow-sm transition-all duration-300 cursor-pointer
+                        bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white
+                        hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--highlight)]/50"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -275,79 +263,98 @@ export default function Header() {
                   </Link>
                 )}
 
+                {/* Recipe counter pill for logged users */}
                 {isLoggedIn && (
                   <div
-                    className="relative flex items-center bg-[var(--background)] p-2 rounded-full shadow-inner cursor-pointer border border-[var(--highlight)]"
+                    className={`relative flex items-center gap-2 bg-white px-3.5 py-2 rounded-full shadow-sm cursor-pointer border transition-all duration-300
+                      ${isLowRecipes
+                        ? 'border-[var(--highlight)] recipe-warning'
+                        : 'border-[var(--border-medium)] hover:border-[var(--highlight)]/40 hover:shadow-md'
+                      }`}
                     onMouseEnter={() => setShowTokensPopup(true)}
                     onMouseLeave={() => setShowTokensPopup(false)}
                   >
-                    <span className="text-[var(--foreground)] font-semibold text-sm md:text-base mr-2">
-                      <span className="text-[var(--highlight)] font-bold text-lg">{recipesDisplay}</span>{" "}
-                      {isActiveSubscriber ? t("header.tokens.unlimited") : t("header.tokens.recipes", { count: totalRecipes })}
+                    <Sparkles className="w-4 h-4 text-[var(--highlight)]" />
+                    <span className="text-sm font-semibold text-[var(--foreground)]">
+                      <span className={`font-bold ${isLowRecipes ? 'text-[var(--highlight)]' : 'text-[var(--foreground)]'}`}>
+                        {recipesDisplay}
+                      </span>
+                      {' '}
+                      <span className="text-[var(--foreground)]/60 font-normal hidden sm:inline">
+                        {isActiveSubscriber ? t("header.tokens.unlimited") : (totalRecipes === 1 ? 'receta' : 'recetas')}
+                      </span>
                     </span>
-                    <span className="text-[var(--highlight)] text-xl">✨</span>
 
-                    {/* El popup de tokens, solo visible en escritorio */}
-                    {showTokensPopup && !isMobile && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 p-4
-                                   bg-white rounded-lg shadow-xl border border-gray-200
-                                   text-[var(--foreground)] z-50"
-                      >
-                        <h3 className="text-lg font-bold mb-2 text-center">{t("header.tokens.popup.title")}</h3>
-                        <div className="space-y-2">
-                          <p className="flex justify-between items-center text-sm">
-                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
-                          </p>
-                          <p className="flex justify-between items-center text-sm">
-                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
-                          </p>
-                        </div>
-                        <div className="h-px bg-gray-200 my-3" />
-                        <p className="flex justify-between items-center text-base font-semibold">
-                          <span>{t("header.tokens.popup.total")}</span>
-                          <span className="text-[var(--highlight)] font-bold">
-                            {isActiveSubscriber
-                              ? t("header.tokens.unlimited")
-                              : `${totalRecipes} ${t("header.tokens.recipes", { count: totalRecipes })}`}
-                          </span>
-                        </p>
-                        <motion.button
-                          onClick={() => {
-                            setShowTokensPopup(false);
-                            setShowTokens(true);
-                          }}
-                          className="mt-4 w-full py-2 text-sm font-bold shadow-md text-center rounded-full transition-all duration-300
-                                     bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                                     hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)]"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                    {/* Desktop popup */}
+                    <AnimatePresence>
+                      {showTokensPopup && !isMobile && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full mt-2 right-0 w-72 p-5
+                                     bg-white rounded-2xl shadow-xl border border-[var(--border-subtle)]
+                                     text-[var(--foreground)] z-50"
                         >
-                          {t("header.tokens.buyMore")}
-                        </motion.button>
+                          <h3 className="font-display text-base font-bold mb-3">{t("header.tokens.popup.title")}</h3>
+                          <div className="space-y-2.5">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-[var(--foreground)]/60">{t("header.tokens.popup.monthly")}</span>
+                              <span className="font-semibold text-[var(--foreground)]">{monthlyRecipes}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-[var(--foreground)]/60">{t("header.tokens.popup.extra")}</span>
+                              <span className="font-semibold text-[var(--foreground)]">{extraRecipes}</span>
+                            </div>
+                          </div>
+                          <div className="h-px bg-[var(--border-subtle)] my-3" />
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-semibold">{t("header.tokens.popup.total")}</span>
+                            <span className="text-[var(--highlight)] font-bold text-lg">
+                              {isActiveSubscriber
+                                ? t("header.tokens.unlimited")
+                                : t("header.tokens.recipes", { count: totalRecipes })}
+                            </span>
+                          </div>
 
-                        {/* Botón de suscripción Premium (sólo si no está suscrito) */}
-                        {user && !user.isSubscribed && (
-                          <motion.button
-                            onClick={() => {
-                              setShowTokensPopup(false);
-                              setShowPremium(true);
-                            }}
-                            className="mt-2 w-full py-2 text-sm font-bold shadow-md text-center rounded-full transition-all duration-300
-                                       bg-gradient-to-r from-yellow-400 to-yellow-600 text-white
-                                       hover:from-yellow-500 hover:to-yellow-700"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            {t("header.tokens.premium.subscribeButton")}
-                          </motion.button>
-                        )}
-                      </motion.div>
-                    )}
+                          <div className="mt-4 space-y-2">
+                            <motion.button
+                              onClick={() => {
+                                setShowTokensPopup(false);
+                                setShowTokens(true);
+                              }}
+                              className="w-full py-2.5 text-sm font-semibold text-center rounded-xl transition-all duration-300
+                                         bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white
+                                         hover:shadow-md"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              {t("header.tokens.buyMore")}
+                            </motion.button>
+
+                            {user && !user.isSubscribed && (
+                              <motion.button
+                                onClick={() => {
+                                  setShowTokensPopup(false);
+                                  setShowPremium(true);
+                                }}
+                                className="w-full py-2.5 text-sm font-semibold text-center rounded-xl transition-all duration-300
+                                           bg-gradient-to-r from-amber-400 to-amber-500 text-white
+                                           hover:shadow-md"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                              >
+                                <span className="flex items-center justify-center gap-1.5">
+                                  <Crown className="w-3.5 h-3.5" />
+                                  {t("header.tokens.premium.subscribeButton")}
+                                </span>
+                              </motion.button>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
               </nav>

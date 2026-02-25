@@ -60,6 +60,12 @@
       }
     }
   },
+  "cta": {
+    "title": "\u00BFListo para empezar a cocinar mejor?",
+    "description": "\u00DAnete a miles de cocineros que ya generan recetas \u00FAnicas cada d\u00EDa con inteligencia artificial.",
+    "button": "Crear mi cuenta gratis",
+    "subtext": "Sin tarjeta de cr\u00E9dito \u00B7 5 recetas gratis al mes"
+  },
   "footer": {
     "brand": {
       "slogan": "Descubre un mundo de sabores."
@@ -345,6 +351,7 @@
       "premium": {
         "subscribe": "¡Hacerme Premium!",
         "current": "Tu Plan Premium",
+        "currentPlan": "Tu Plan Premium",
         "subscribeButton": "Suscribirse a Premium"
       },
       "popup": {
@@ -1245,7 +1252,10 @@
       "perMonth": "/mes",
       "getStarted": "Empezar gratis",
       "buyNow": "Comprar ahora",
-      "subscribe": "Suscribirse"
+      "subscribe": "Suscribirse",
+      "recommended": "Recomendado",
+      "cancelAnytime": "Cancela cuando quieras",
+      "securePayment": "Pago seguro con Stripe"
     }
   },
   "faq": {

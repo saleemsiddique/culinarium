@@ -133,7 +133,7 @@ La landing muestra `KitchenContent` (el formulario de cocina) como primer bloque
 ### Estructura propuesta
 
 ```
-[HERO] → [DEMO/FEATURES] → [SOCIAL PROOF] → [PRICING] → [FAQ] → [CTA FINAL]
+[DEMO/FEATURES] → [SOCIAL PROOF] → [PRICING] → [FAQ] → [CTA FINAL]
 ```
 
 ### 5a. Hero Section (`hero.tsx`)

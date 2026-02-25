@@ -60,6 +60,12 @@
       }
     }
   },
+  "cta": {
+    "title": "Ready to start cooking better?",
+    "description": "Join thousands of cooks already generating unique recipes every day with artificial intelligence.",
+    "button": "Create my free account",
+    "subtext": "No credit card required \u00B7 5 free recipes per month"
+  },
   "footer": {
     "brand": {
       "slogan": "Discover a world of flavors."
@@ -333,20 +339,23 @@
       "myProfile": "My Profile"
     },
     "tokens": {
-      "title": "Your Tokens",
+      "title": "Your Recipes",
       "monthly": "Monthly:",
       "extra": "Extra:",
       "total": "Total:",
-      "unlimited": "Unlimited ∞",
-      "buy": "Buy More Tokens!",
-      "buyMore": "Buy more tokens",
+      "recipes": "{{count}} recipe",
+      "recipes_plural": "{{count}} recipes",
+      "unlimited": "Unlimited \u221E",
+      "buy": "Buy More Recipes!",
+      "buyMore": "Buy more recipes",
       "premium": {
         "subscribe": "Become Premium!",
         "current": "Your Premium Plan",
+        "currentPlan": "Your Premium Plan",
         "subscribeButton": "Subscribe to Premium"
       },
       "popup": {
-        "title": "Your Tokens",
+        "title": "Your Recipes",
         "monthly": "Monthly:",
         "extra": "Extra:",
         "total": "Total:"
@@ -360,9 +369,9 @@
     "new": "New",
     "recipes": "Recipes",
     "tokens": {
-      "button": "View Tokens",
+      "button": "View Recipes",
       "buy": "Buy",
-      "lowIndicator": "Low tokens"
+      "lowIndicator": "Low recipes"
     },
     "premium": {
       "button": "Premium",
@@ -1243,7 +1252,10 @@
       "perMonth": "/month",
       "getStarted": "Start for free",
       "buyNow": "Buy now",
-      "subscribe": "Subscribe"
+      "subscribe": "Subscribe",
+      "recommended": "Recommended",
+      "cancelAnytime": "Cancel anytime",
+      "securePayment": "Secure payment with Stripe"
     }
   },
   "faq": {
