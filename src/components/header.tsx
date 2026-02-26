@@ -289,8 +289,9 @@ export default function Header() {
                     onMouseLeave={() => setShowTokensPopup(false)}
                   >
                     <span className="text-[var(--foreground)] font-semibold text-sm md:text-base mr-2">
-                      <span className="text-[var(--highlight)] font-bold text-lg">{recipesDisplay}</span>{" "}
-                      {isActiveSubscriber ? t("header.tokens.unlimited") : t("header.tokens.recipes", { count: totalRecipes })}
+                      {isActiveSubscriber
+                        ? t("header.tokens.unlimited")
+                        : t("header.tokens.recipes", { count: totalRecipes })}
                     </span>
                     <Sparkles className="w-5 h-5 text-[var(--highlight)]" aria-label="Recetas disponibles" />
 

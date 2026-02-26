@@ -1,86 +1,90 @@
 # Culinarium — Project Overview
 
+> Actualizado: 2026-02-26
+
 ## Stack Técnico
 
 | Capa | Tecnología |
 |------|-----------|
 | Framework | Next.js 15.3.4 (App Router) |
 | Estilos | Tailwind CSS 4 + DaisyUI 5 |
+| Tipografía | Fraunces (serif, display) + Plus Jakarta Sans (body) via next/font/google |
 | Auth | Firebase Authentication (email/password + Google) |
 | DB | Firestore (Firebase Admin SDK en servidor) |
-| IA recetas | OpenAI GPT-4 Turbo (json_object mode) |
+| IA recetas | OpenAI GPT-4 Turbo (json_object mode, max_tokens: 2000, timeout: 30s) |
 | IA imágenes | DALL-E 3 (fallback: gpt-image-1) |
 | Pagos | Stripe (Checkout hosted, Webhooks, SetupIntents) |
-| Email | Resend (`6.2.0-preview` — actualizar a estable) |
+| Email | Resend (estable) |
 | Analytics | Vercel Analytics (gated por consentimiento) |
 | Deploy | Vercel |
 | i18n | react-i18next, locales en `/public/locales/{es,en}/translation.json` |
+| Iconos | lucide-react + @mdi/react (NO emojis como iconos) |
 
-## Funcionalidades Principales
+## Modelo de Negocio
 
-- Generador de recetas personalizado (ingredientes, utensilios, restricciones, macros, estilo cocina, dificultad)
-- Imagen automática con DALL-E 3 para cada receta generada
-- Sistema de tokens: 10 tokens = 1 receta; monthly + extra tokens
-- Plan Gratuito: 50 tokens/mes (5 recetas)
-- Plan Premium: €7.99/mes → migrar a €9.99/mes con 300 tokens (30 recetas)
-- Packs de tokens extra: 6 SKUs → simplificar a 1 pack €4.99 (150 tokens = 15 recetas)
-- Historial de recetas con filtros (ingrediente, tipo, fecha)
-- Perfil de usuario con facturación y gestión de tarjetas
-- Sistema de consentimiento GDPR con cookies, analytics y newsletter separados
-- Onboarding modal de 4 pasos para nuevos usuarios
+| Plan | Precio | Recetas/mes | Extras |
+|------|--------|-------------|--------|
+| Gratuito | €0 | 5 | Ingredientes, tiempo, dificultad, meal time, comensales |
+| Pay-as-you-go | €4.99 único | +15 | Mismas features del plan activo |
+| Premium | €9.99/mes | Ilimitadas | + restricciones, cocina, macros avanzados |
+| Premium Anual | €79.99/año | Ilimitadas | Todo Premium |
 
-## Estructura de Datos Firestore
+**Internamente:** 10 tokens = 1 receta. Free: 50 monthly_tokens. Premium: 9999 monthly_tokens. PAYG: 150 extra_tokens.
+
+## Estructura del Formulario (KitchenContent)
+
+Refactorizado en Feb 2026 de un mega-componente de 1609 líneas a:
 
 ```
-user/{uid}/
-  - email, firstName, lastName
-  - monthly_tokens: number (reset mensual)
-  - extra_tokens: number
-  - isSubscribed: boolean
-  - subscriptionStatus: string
-  - subscriptionId: string
-  - stripeCustomerId: string
-  - lastRenewal: Timestamp
-  - created_at: Timestamp
-  - created_recipes: number (contador)
-
-user/{uid}/subscripcion/{id}/
-  - subscriptionId, status, planName, price, tokensIncluded
-  - createdAt, updatedAt, endsAt, lastRenewal
-
-user/{uid}/token_purchases/{id}/
-  - productName, tokensAmount, sessionId, priceId, price, status, createdAt
+src/
+├── app/kitchen/KitchenContent.tsx          ← Orquestador (~150 líneas)
+├── components/kitchenForm/
+│   ├── IngredientSection.tsx               ← Input + tags + sugerencias
+│   ├── MealTimeSelector.tsx                ← 4 botones horizontales
+│   ├── QuickOptions.tsx                    ← Tiempo + dificultad + comensales
+│   ├── AdvancedOptionsPanel.tsx            ← Tabs: Restricciones/Cocina/Macros/Utensilios
+│   ├── ControlMacronutrientes.tsx          ← Control macros (sin cambios)
+│   ├── GenerateButton.tsx                  ← Botón submit con estados
+│   ├── LoadingOverlay.tsx                  ← Overlay con tips rotativos
+│   └── FormTag.tsx                         ← Chip reutilizable
+├── hooks/
+│   ├── useRecipeForm.ts                    ← TODO el estado + lógica del formulario
+│   └── useIngredientHistory.tsx            ← Sin cambios
+├── utils/
+│   └── image-compression.ts               ← Funciones de canvas/compresión
+└── types/
+    └── kitchen.ts                          ← Interfaces TypeScript
 ```
 
-## Archivos Clave
+## Archivos Clave API
 
 | Ruta | Descripción |
 |------|-------------|
-| `src/app/api/openai/route.ts` | Generación de recetas con GPT-4 Turbo |
+| `src/app/api/openai/route.ts` | Generación de recetas (GPT-4 Turbo, timeout 30s) |
 | `src/app/api/recipe-image/route.ts` | Imagen con DALL-E 3 |
-| `src/app/api/stripe-webhook/route.ts` | Manejo eventos Stripe |
+| `src/app/api/stripe-webhook/route.ts` | Manejo eventos Stripe (con idempotencia) |
 | `src/app/api/deduct-tokens/route.ts` | Descuento de tokens (transacción Firestore) |
 | `src/context/user-context.tsx` | Estado global de usuario |
-| `src/components/ConsentModal.tsx` | Modal GDPR |
-| `src/components/pricing.tsx` | Página de precios |
-| `src/components/onboarding.tsx` | Onboarding 4 pasos |
 
-## Deuda Técnica Detectada
+## Stripe Price IDs
 
-### Crítica (bloquea lanzamiento)
-- `resend` en versión preview (`6.2.0-preview`) — actualizar a estable
-- Múltiples endpoints sin autenticación (ver security-audit)
-- Race condition en `/api/deduct-tokens`
-- Webhook Stripe sin idempotencia
+| Variable env | Descripción | Precio |
+|---|---|---|
+| `STRIPE_PRICE_PREMIUM` | Premium mensual | €9.99/mes |
+| `STRIPE_PRICE_PREMIUM_ANNUAL` | Premium anual | €79.99/año |
+| `STRIPE_PRICE_PAYG` | Pack 15 recetas | €4.99 único |
+| `price_1RwHJCRpBiBhmezm4D1fPQt5` | Legacy Premium (mantener en webhook) | €7.99/mes |
 
-### Alta
-- Abstracción "tokens" confusa → migrar a "recetas" en UI
-- Onboarding no se muestra automáticamente (ya arreglado en AuthForm/SocialAuth)
-- PremiumModal con precio hardcodeado €7.99
-- CTA landing va a `/auth/login` en vez de `/auth/register`
+## Convenciones
 
-### Media
-- `next.config.ts` vacío — sin optimizaciones de imagen ni headers de seguridad
-- HTML `lang="en"` cuando el contenido es español
-- `og-image.png` referenciada pero no existe en `/public`
-- Ingredientes en `commonIngredients` tienen los idiomas cruzados (es↔en swapped)
+- **i18n**: todos los textos por i18n. Añadir en ambos `locales/es` y `locales/en`.
+- **Imágenes de recetas**: base64 data URL en Firestore → `<Image unoptimized />`.
+- **NO commitear**: `.env`, `google-services.json`, `GoogleService-Info.plist`.
+- **APIs**: no modificar sin confirmar — son producción.
+- **Tailwind v4**: usar `next/font/google` para fuentes, no `@import url()` en CSS.
+
+## Deuda Técnica Pendiente
+
+- [ ] Test E2E con Playwright (flujo registro → generar receta → upgrade)
+- [ ] Contador de recetas generadas en Firestore (para mostrar social proof en landing)
+- [ ] Modal post-primera-receta (`FirstRecipeModal.tsx`)

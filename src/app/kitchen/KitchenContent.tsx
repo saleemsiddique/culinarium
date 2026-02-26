@@ -27,7 +27,7 @@ const CulinariumForm: React.FC = () => {
     : false;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--background)] to-[var(--background)] pt-[5%] py-10 flex items-start justify-center font-sans">
+    <div className="min-h-screen bg-[var(--background)] pt-20 pb-6 lg:pt-20 lg:pb-4 flex items-start justify-center font-sans">
       {form.showOnboarding && <Onboarding onClose={form.handleFinishOnboarding} />}
 
       <Head>
@@ -36,89 +36,103 @@ const CulinariumForm: React.FC = () => {
       </Head>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="w-full max-w-2xl mx-auto px-4"
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6"
       >
-        {/* Compact card */}
+        {/* Wide card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <form ref={form.formRef} onSubmit={form.handleSubmit} className="p-5 sm:p-6 space-y-6">
-            {/* 1. Ingredients — the protagonist */}
-            <IngredientSection
-              ingredients={form.ingredients}
-              currentIngredient={form.currentIngredient}
-              ingredientError={form.ingredientError}
-              showSuggestions={form.showSuggestions}
-              setShowSuggestions={form.setShowSuggestions}
-              ingredientHistory={form.ingredientHistory}
-              getSuggestions={form.getSuggestions}
-              handleAddIngredient={form.handleAddIngredient}
-              handleRemoveIngredient={form.handleRemoveIngredient}
-              handleSelectSuggestion={form.handleSelectSuggestion}
-              handleInputChange={form.handleInputChange}
-            />
+          <form ref={form.formRef} onSubmit={form.handleSubmit}>
 
-            {/* Divider */}
-            <div className="border-t border-[var(--primary)]/10" />
+            {/* Desktop: 2-column layout / Mobile: single column */}
+            <div className="lg:grid lg:grid-cols-2 lg:divide-x lg:divide-[var(--primary)]/10">
 
-            {/* 2. Meal time — 4 horizontal buttons */}
-            <MealTimeSelector
-              mealTime={form.mealTime}
-              mealTimeError={form.mealTimeError}
-              onSelect={form.handleSetMealTime}
-            />
+              {/* LEFT COLUMN: Ingredients + Meal time + Quick options */}
+              <div className="p-5 sm:p-6 space-y-5">
+                {/* 1. Ingredients — the protagonist */}
+                <IngredientSection
+                  ingredients={form.ingredients}
+                  currentIngredient={form.currentIngredient}
+                  ingredientError={form.ingredientError}
+                  showSuggestions={form.showSuggestions}
+                  setShowSuggestions={form.setShowSuggestions}
+                  ingredientHistory={form.ingredientHistory}
+                  getSuggestions={form.getSuggestions}
+                  handleAddIngredient={form.handleAddIngredient}
+                  handleRemoveIngredient={form.handleRemoveIngredient}
+                  handleSelectSuggestion={form.handleSelectSuggestion}
+                  handleInputChange={form.handleInputChange}
+                />
 
-            {/* Divider */}
-            <div className="border-t border-[var(--primary)]/10" />
+                <div className="border-t border-[var(--primary)]/10" />
 
-            {/* 3. Quick options: Time + Difficulty + Diners */}
-            <QuickOptions
-              availableTime={form.availableTime}
-              setAvailableTime={form.setAvailableTime}
-              difficulty={form.difficulty}
-              setDifficulty={form.setDifficulty}
-              diners={form.diners}
-              setDiners={form.setDiners}
-              isSubscribed={!!user?.isSubscribed}
-              onRequestUpgrade={() => form.setShowTokens(true)}
-            />
+                {/* 2. Meal time — 4 horizontal buttons */}
+                <MealTimeSelector
+                  mealTime={form.mealTime}
+                  mealTimeError={form.mealTimeError}
+                  onSelect={form.handleSetMealTime}
+                />
 
-            {/* Divider */}
-            <div className="border-t border-[var(--primary)]/10" />
+                <div className="border-t border-[var(--primary)]/10" />
 
-            {/* 4. Advanced options tabs */}
-            <AdvancedOptionsPanel
-              dietaryRestrictions={form.dietaryRestrictions}
-              onDietaryChange={form.handleDietaryChange}
-              excludedIngredients={form.excludedIngredients}
-              currentExcluded={form.currentExcluded}
-              setCurrentExcluded={form.setCurrentExcluded}
-              handleAddExcluded={form.handleAddExcluded}
-              handleRemoveExcluded={form.handleRemoveExcluded}
-              cuisineStyle={form.cuisineStyle}
-              setCuisineStyle={form.setCuisineStyle}
-              macros={form.macros}
-              handleMacrosChange={form.handleMacrosChange}
-              utensilsList={form.utensilsList}
-              utensils={form.utensils}
-              toggleUtensil={form.toggleUtensil}
-              isSubscribed={!!user?.isSubscribed}
-              onRequestUpgrade={() => form.setShowTokens(true)}
-            />
+                {/* 3. Quick options: Time + Difficulty + Diners */}
+                <QuickOptions
+                  availableTime={form.availableTime}
+                  setAvailableTime={form.setAvailableTime}
+                  difficulty={form.difficulty}
+                  setDifficulty={form.setDifficulty}
+                  diners={form.diners}
+                  setDiners={form.setDiners}
+                  isSubscribed={!!user?.isSubscribed}
+                  onRequestUpgrade={() => form.setShowTokens(true)}
+                />
+              </div>
 
-            {/* 5. Generate button */}
-            <GenerateButton
-              status={form.status}
-              loadingUser={form.loadingUser}
-              hasRecipes={hasRecipes}
-              tokenCost={form.calculateTokenCost()}
-              onGetMoreRecipes={() => form.setShowTokens(true)}
-            />
+              {/* RIGHT COLUMN: Advanced options + Generate button */}
+              <div className="p-5 sm:p-6 flex flex-col">
+                {/* Mobile divider (hidden on lg) */}
+                <div className="border-t border-[var(--primary)]/10 mb-5 lg:hidden" />
 
-            {form.status === "error" && form.error && (
-              <p className="text-red-500 text-sm text-center">{form.error}</p>
-            )}
+                {/* 4. Advanced options tabs */}
+                <div className="flex-1">
+                  <AdvancedOptionsPanel
+                    dietaryRestrictions={form.dietaryRestrictions}
+                    onDietaryChange={form.handleDietaryChange}
+                    excludedIngredients={form.excludedIngredients}
+                    currentExcluded={form.currentExcluded}
+                    setCurrentExcluded={form.setCurrentExcluded}
+                    handleAddExcluded={form.handleAddExcluded}
+                    handleRemoveExcluded={form.handleRemoveExcluded}
+                    cuisineStyle={form.cuisineStyle}
+                    setCuisineStyle={form.setCuisineStyle}
+                    macros={form.macros}
+                    handleMacrosChange={form.handleMacrosChange}
+                    utensilsList={form.utensilsList}
+                    utensils={form.utensils}
+                    toggleUtensil={form.toggleUtensil}
+                    isSubscribed={!!user?.isSubscribed}
+                    onRequestUpgrade={() => form.setShowTokens(true)}
+                  />
+                </div>
+
+                {/* 5. Generate button — pushed to bottom */}
+                <div className="mt-5">
+                  <GenerateButton
+                    status={form.status}
+                    loadingUser={form.loadingUser}
+                    hasRecipes={hasRecipes}
+                    tokenCost={form.calculateTokenCost()}
+                    onGetMoreRecipes={() => form.setShowTokens(true)}
+                  />
+
+                  {form.status === "error" && form.error && (
+                    <p className="text-red-500 text-sm text-center mt-2">{form.error}</p>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </form>
         </div>
       </motion.div>
