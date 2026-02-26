@@ -3,8 +3,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { Hand, UtensilsCrossed, Gift, Rocket } from "lucide-react";
 
-const STEP_ICONS = ["👋", "🍳", "🎁", "🚀"];
+const STEP_ICONS = [Hand, UtensilsCrossed, Gift, Rocket];
 
 export default function Onboarding({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -41,6 +42,8 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
   const current = steps[step];
   if (!current) return null;
 
+  const StepIcon = STEP_ICONS[step] || UtensilsCrossed;
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4">
       <motion.div
@@ -52,7 +55,7 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
         style={{ maxHeight: "90vh" }}
       >
         {/* Top gradient banner */}
-        <div className="h-2 w-full" style={{ background: "linear-gradient(to right, var(--highlight), var(--highlight-dark))" }} />
+        <div className="h-2 w-full bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)]" />
 
         {/* Skip button */}
         {step < steps.length - 1 && (
@@ -75,8 +78,7 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
             >
               {i === step ? (
                 <span
-                  className="flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-bold shadow-md"
-                  style={{ background: "linear-gradient(135deg, var(--highlight), var(--highlight-dark))" }}
+                  className="flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-bold shadow-md bg-gradient-to-br from-[var(--highlight)] to-[var(--highlight-dark)]"
                 >
                   {i + 1}
                 </span>
@@ -101,7 +103,7 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
               transition={{ duration: 0.22, ease: "easeInOut" }}
               className="px-6 pb-4 pt-3 flex flex-col items-center text-center"
             >
-              {/* Image or emoji fallback */}
+              {/* Image or icon fallback */}
               <div className="w-full rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center"
                 style={{ minHeight: 180 }}
               >
@@ -117,11 +119,13 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
                     />
                   </div>
                 ) : (
-                  <span className="text-7xl py-8">{STEP_ICONS[step] || "🍽️"}</span>
+                  <div className="flex items-center justify-center py-8 w-full bg-gradient-to-br from-[var(--highlight)]/20 to-[var(--primary)]/10 rounded-2xl">
+                    <StepIcon className="w-16 h-16 text-[var(--highlight)]" aria-hidden="true" />
+                  </div>
                 )}
               </div>
 
-              <h2 className="text-xl font-bold text-gray-800 mb-2 leading-tight">
+              <h2 className="font-display text-xl font-bold text-gray-800 mb-2 leading-tight">
                 {current.title}
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed max-w-sm">
@@ -146,8 +150,8 @@ export default function Onboarding({ onClose }: { onClose: () => void }) {
 
           <button
             onClick={goNext}
-            className="flex-1 py-3 px-5 rounded-full text-sm font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: "linear-gradient(to right, var(--highlight), var(--highlight-dark))" }}
+            className="flex-1 py-3 px-5 rounded-full text-sm font-bold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]
+                       bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)]"
           >
             {step < steps.length - 1 ? t("onboarding.buttons.next") : t("onboarding.buttons.finish")}
           </button>

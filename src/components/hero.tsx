@@ -1,98 +1,114 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-
-// Placeholder for ButtonPrimary and ButtonSecondary
-// These components now use the CSS variables for consistent theming.
-const ButtonPrimary = ({ route, description, className = '' }: { route: string; description: string; className?: string }) => (
-  <motion.a
-    href={route}
-    className={`inline-block px-8 py-3 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg
-                bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-[var(--text2)]
-                hover:from-[var(--highlight-dark)] hover:to-[var(--highlight)]
-                focus:outline-none focus:ring-4 focus:ring-[var(--highlight)] ${className}`}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-  >
-    {description}
-  </motion.a>
-);
-
-const ButtonSecondary = ({ route, description, className = '' }: { route: string; description: string; className?: string }) => (
-  <motion.a
-    href={route}
-    className={`inline-block px-8 py-3 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg
-                border-2 border-[var(--text2)] text-[var(--text2)]
-                hover:bg-[var(--text2)] hover:text-[var(--primary)]
-                focus:outline-none focus:ring-4 focus:ring-[var(--text2)]/50 ${className}`}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-  >
-    {description}
-  </motion.a>
-);
-
+import { ChefHat, Sparkles, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function HeroSection() {
+  const { t } = useTranslation();
+
   return (
-    <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Video */}
       <video
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover"
         autoPlay
         muted
         loop
-        playsInline // Added for better mobile compatibility
+        playsInline
       >
-        {/* Ensure the video path is correct and accessible */}
         <source src="/test-video.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
       </video>
 
-      {/* Overlay for better text readability */}
-      {/* Using a darker overlay for better contrast with the warm palette */}
-      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-70 z-10"></div>
+      {/* Layered overlays for depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-[var(--foreground)]/90" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--foreground)]/30 to-transparent" />
 
-      {/* Content Container */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative text-center z-20 text-[var(--text2)] px-4 py-8 md:py-12 rounded-3xl backdrop-blur-sm bg-[var(--foreground)]/20 shadow-2xl max-w-4xl mx-auto"
-      >
-        {/* Main Title */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-          className="font-extrabold text-4xl md:text-7xl leading-tight mb-4"
-          style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }} // Added text shadow for readability
-        >
-          BIENVENIDO A CULINARIUM
-        </motion.div>
-
-        {/* Tagline */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
-          className="text-lg md:text-2xl font-light italic mb-8"
-          style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }} // Added text shadow
-        >
-          Tu próxima receta, a un clic de distancia
-        </motion.div>
-
-        {/* Buttons */}
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
+        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.6, ease: "easeOut" }}
-          className="mt-8 space-y-4 md:space-y-0 md:space-x-6 flex flex-col md:flex-row justify-center"
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8"
         >
-          <ButtonPrimary route={"/auth/login"} description={"Empezar"} />
-          <ButtonSecondary route={"#pricing"} description={"Ver Precios"} />
+          <Sparkles className="w-4 h-4 text-[var(--highlight)]" aria-hidden="true" />
+          <span className="text-sm font-medium text-white/90 tracking-wide">
+            {t("hero.badge", { defaultValue: "Potenciado por IA" })}
+          </span>
         </motion.div>
-      </motion.div>
-    </div>
+
+        {/* Main headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[0.95] tracking-tight mb-6"
+        >
+          {t("hero.title", { defaultValue: "Tu cocina," })}
+          <br />
+          <span className="bg-gradient-to-r from-[var(--highlight)] to-amber-400 bg-clip-text text-transparent">
+            {t("hero.titleHighlight", { defaultValue: "reinventada" })}
+          </span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed"
+        >
+          {t("hero.subtitle", { defaultValue: "Dinos qué tienes en la nevera y la IA creará recetas personalizadas para ti. Con foto incluida." })}
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <motion.a
+            href="/auth/register"
+            className="group inline-flex items-center gap-3 px-8 py-4 rounded-full font-semibold text-lg
+                       bg-gradient-to-r from-[var(--highlight)] to-[var(--highlight-dark)] text-white
+                       shadow-lg shadow-[var(--highlight)]/25 transition-all duration-300
+                       hover:shadow-xl hover:shadow-[var(--highlight)]/30"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <ChefHat className="w-5 h-5" aria-hidden="true" />
+            {t("hero.cta", { defaultValue: "Crear mi cuenta gratis" })}
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </motion.a>
+
+          <motion.a
+            href="#pricing"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-lg
+                       border-2 border-white/30 text-white backdrop-blur-sm
+                       hover:bg-white/10 hover:border-white/50 transition-all duration-300"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            {t("hero.ctaSecondary", { defaultValue: "Ver Precios" })}
+          </motion.a>
+        </motion.div>
+
+        {/* Trust line */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="mt-8 text-sm text-white/40"
+        >
+          {t("hero.trust", { defaultValue: "Sin tarjeta de crédito \u00B7 5 recetas gratis al mes" })}
+        </motion.p>
+      </div>
+
+      {/* Bottom gradient fade into page */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--background)] to-transparent" />
+    </section>
   );
 }

@@ -102,8 +102,6 @@ Busca y corrige TODOS los siguientes (grep por "token"):
 | `privacy` / `terms` - referencias técnicas a tokens | Mantener como están (son legales) | Solo cambiar los textos UI-facing |
 | `tokens.currentTokens` | "Recetas disponibles:" | OK, este ya está bien |
 
-**IMPORTANTE**: En los documentos legales (`privacy`, `terms`) puedes mantener "tokens" porque son términos técnicos del contrato. El objetivo es solo la UI que ve el usuario día a día.
-
 Haz lo mismo en `public/locales/en/translation.json`.
 
 ### Componentes con emojis como iconos (sustituir por iconos de librería)
@@ -133,28 +131,10 @@ La landing muestra `KitchenContent` (el formulario de cocina) como primer bloque
 ### Estructura propuesta
 
 ```
-[HERO] → [DEMO/FEATURES] → [SOCIAL PROOF] → [PRICING] → [FAQ] → [CTA FINAL]
+[DEMO/FEATURES] → [SOCIAL PROOF] → [PRICING] → [FAQ] → [CTA FINAL]
 ```
 
-### 5a. Hero Section (`hero.tsx`)
-
-**Objetivo**: Capturar atención en <3 segundos. Comunicar la propuesta de valor. Guiar al CTA.
-
-**Diseño**:
-- Fondo: el video existente (`/test-video.mp4`) + overlay gradiente dark (no sólido negro — usa `from-[#1a0a00]/80 via-[#2C3E50]/50 to-transparent`)
-- Título H1 grande en Fraunces: *"Convierte tus ingredientes en recetas increíbles"* (o lo que esté en i18n)
-- Subtítulo en Plus Jakarta Sans
-- DOS CTAs: "Empezar gratis" (→ `/auth/register`, naranja sólido) + "Ver cómo funciona" (scroll suave a demo, outline blanco)
-- **Trust indicators debajo del CTA**: `✓ Sin tarjeta de crédito · ✓ 5 recetas gratis cada mes · ✓ Cancela cuando quieras`
-- Contador animado: "Más de 10.000 recetas generadas" (número animado al entrar en viewport)
-- Ingrediente pills flotantes animadas (loop sutil): tomate, pollo, pasta, limón, etc. — posicionadas en el background con z-index intermedio
-
-**Animaciones**:
-- Entry: título aparece con `clipPath` reveal de izquierda a derecha (no fade simple)
-- Pills: flotan con `translateY` oscilatoria infinita con delays escalonados
-- CTA: pulso suave en el botón naranja cada 4s para llamar atención
-
-### 5b. Demo / Features Section (`infoBox.tsx`)
+### 5a. Demo / Features Section (`infoBox.tsx`)
 
 **Objetivo**: Mostrar QUÉ hace la app y generar deseo.
 
@@ -168,7 +148,7 @@ La landing muestra `KitchenContent` (el formulario de cocina) como primer bloque
 - Añadir número/stat visual a cada feature (ej: "15+ estilos culinarios", "5 niveles de macros")
 - Animación: cada card entra con `slideInFromLeft` / `slideInFromRight` alternado
 
-### 5c. Pricing (`pricing.tsx`)
+### 5b. Pricing (`pricing.tsx`)
 
 **Objetivo principal de conversión**: Que el usuario haga clic en "Premium".
 
@@ -184,7 +164,7 @@ La landing muestra `KitchenContent` (el formulario de cocina) como primer bloque
 - Añadir al menos 1-2 **testimonios breves** (placeholders) entre Pricing y FAQ: `"Generé 3 recetas con lo que tenía en la nevera. Increíble." — María G.`
 - CTA de cada plan debe llevar a `/auth/register`, NO a `/auth/login` — ya está así, verificar.
 
-### 5d. FAQ (`faq.tsx`)
+### 5c. FAQ (`faq.tsx`)
 
 **Diseño actual**: Accordion limpio, funciona bien.
 **Mejoras**:
@@ -192,7 +172,7 @@ La landing muestra `KitchenContent` (el formulario de cocina) como primer bloque
 - El botón final "Empezar ahora" debe ir a `/auth/register` (actualmente va a `/auth/login` — cambiar)
 - Fondo: ligeramente diferente al resto (quizás `var(--background)` con un patrón sutil de puntos o líneas en naranja muy tenue)
 
-### 5e. CTA Final Section (NUEVO — añadir antes del footer)
+### 5d. CTA Final Section (NUEVO — añadir antes del footer)
 
 **Objetivo**: Última oportunidad de conversión antes de salir.
 

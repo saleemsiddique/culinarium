@@ -1,0 +1,13 @@
+[    1671ms] [ERROR] Refused to apply style from 'http://localhost:3000/global.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled. @ http://localhost:3000/kitchen:0
+[    2568ms] [WARNING] You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS. @ https://js.stripe.com/basil/stripe.js:0
+[    5622ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/Logo-Culinarium.png:0
+[   43050ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   43051ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   43051ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   43059ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   43060ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   43061ms] [WARNING] Skipping auto-scroll behavior due to `position: sticky` or `position: fixed` on element: JSHandle@node @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1a6ee436._.js:145
+[   48897ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3000/_next/static/chunks/node_modules_%40firebase_auth_dist_esm2017_747280df._.js:9079
+[   48898ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3000/_next/static/chunks/node_modules_%40firebase_auth_dist_esm2017_747280df._.js:9079
+[  107034ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3000/_next/static/chunks/node_modules_%40firebase_auth_dist_esm2017_747280df._.js:9079
+[  107034ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.closed call. @ http://localhost:3000/_next/static/chunks/node_modules_%40firebase_auth_dist_esm2017_747280df._.js:9079

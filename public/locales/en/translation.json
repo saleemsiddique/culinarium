@@ -333,22 +333,22 @@
       "myProfile": "My Profile"
     },
     "tokens": {
-      "title": "Your Tokens",
+      "title": "Your Recipes",
       "monthly": "Monthly:",
       "extra": "Extra:",
       "total": "Total:",
       "unlimited": "Unlimited ∞",
-      "buy": "Buy More Tokens!",
-      "buyMore": "Buy more tokens",
+      "buy": "Buy More Recipes!",
+      "buyMore": "Buy more recipes",
       "premium": {
         "subscribe": "Become Premium!",
         "current": "Your Premium Plan",
         "subscribeButton": "Subscribe to Premium"
       },
       "popup": {
-        "title": "Your Tokens",
-        "monthly": "Monthly:",
-        "extra": "Extra:",
+        "title": "Your Available Recipes",
+        "monthly": "Plan recipes:",
+        "extra": "Extra recipes:",
         "total": "Total:"
       }
     },
@@ -360,9 +360,9 @@
     "new": "New",
     "recipes": "Recipes",
     "tokens": {
-      "button": "View Tokens",
+      "button": "View Recipes",
       "buy": "Buy",
-      "lowIndicator": "Low tokens"
+      "lowIndicator": "Low recipes"
     },
     "premium": {
       "button": "Premium",
@@ -491,7 +491,7 @@
     "actions": {
       "goToKitchen": "Go to Kitchen",
       "generateAnother": "I Want Another Recipe!",
-      "cost": "Cost: {{tokens}} tokens"
+      "cost": "Uses 1 recipe"
     },
     "loading": {
       "generatingImage": "Generating image..."
@@ -589,7 +589,7 @@
       },
       "success": {
         "title": "Payment Successful!",
-        "message": "Thank you for your purchase. Your tokens have been updated automatically.",
+        "message": "Thank you for your purchase. Your recipes have been updated automatically.",
         "button": "Go to Dashboard"
       },
       "failed": {
@@ -636,7 +636,7 @@
           "noSubscription": "No subscription"
         },
         "nextBilling": "Next billing",
-        "availableTokens": "Available tokens",
+        "availableTokens": "Available recipes",
         "cancel": "Cancel Subscription",
         "cancelNow": "Cancel Subscription Now",
         "reactivate": "Reactivate Subscription",
@@ -710,13 +710,13 @@
         "image": "/onboarding/step1.jpg"
       },
       {
-        "title": "🥘 Tokens and Recipes",
-        "text": "Tokens are your most valuable resource! Every time you create a recipe you'll spend tokens, and you'll always see the token cost indicated before creating it.",
+        "title": "🥘 Your Recipes",
+        "text": "Every time you create a recipe, it uses one of your available recipes. You'll always see how many you have left before generating.",
         "image": "/onboarding/step2.jpg"
       },
       {
         "title": "🔄 Renewal",
-        "text": "Your tokens are automatically renewed every month, on the same date you joined or activated your premium plan.",
+        "text": "Your recipes are automatically renewed every month, on the same date you joined or activated your premium plan.",
         "image": "/onboarding/step3.jpg"
       },
       {
@@ -734,7 +734,7 @@
   "payments": {
     "dashboard": {
       "title": "💳 Payment History",
-      "subtitle": "Manage your subscription and review your token purchases",
+      "subtitle": "Manage your subscription and review your recipe purchases",
       "loading": "Loading data...",
       "loginRequired": "Log in to view your history"
     },
@@ -751,11 +751,11 @@
       }
     },
     "tokens": {
-      "title": "💰 Token Purchases",
-      "subtitle": "History of all your token purchases",
+      "title": "Additional recipes purchased",
+      "subtitle": "History of recipe packs",
       "totalSpent": "Total spent: €{{amount}}",
       "date": "Date",
-      "tokens": "Tokens",
+      "tokens": "Recipes",
       "package": "Package",
       "status": "Status",
       "statusTypes": {
@@ -1038,23 +1038,37 @@
           "loadingUser": "Loading user...",
           "generating": "Generating Recipe...",
           "ready": "Generate My Recipe!",
-          "cost": "Cost: {{cost}} tokens"
+          "cost": "Uses 1 recipe"
         },
         "utensils": "Utensils"
       },
       "messages": {
-        "authError": "Please sign up to generate recipes and manage your tokens.",
-        "tokenError": "⚡ You need {{tokens}} tokens to {{action}}. You currently have {{current}} tokens. Buy more tokens from the side menu.",
-        "success": "Recipe {{action}} successfully! {{tokens}} tokens have been deducted.",
+        "authError": "Please sign up to generate recipes and manage your recipes.",
+        "tokenError": "You need available recipes to {{action}}. You currently have {{current}} left. Get more from the side menu.",
+        "success": "Recipe {{action}} successfully! 1 recipe has been used.",
         "duplicateIngredient": "Ingredient already added",
         "duplicateExcluded": "Ingredient to avoid already added",
         "usedBefore": "Used before",
         "generatingImage": "The image will be generated in the background."
       },
       "loading": {
-        "title": "Generating your Recipe...",
-        "subtitle": "The image will be generated in the background."
-      }
+        "title": "Cooking your recipe with AI...",
+        "subtitle": "The image will be generated in the background.",
+        "tips": [
+          "Selecting the best ingredients...",
+          "Calculating the perfect proportions...",
+          "Adding a touch of creativity...",
+          "Almost ready, flipping it over...",
+          "Plating with style..."
+        ]
+      },
+      "advancedTabs": {
+        "restrictions": "Restrictions",
+        "cuisine": "Cuisine",
+        "macros": "Macros",
+        "utensils": "Utensils"
+      },
+      "getMoreRecipes": "Get more recipes"
     }
   },
   "macronutrients": {
@@ -1266,16 +1280,16 @@
         "answer": "Currently they are only available in Spanish and English."
       },
       {
-        "question": "What happens if I run out of tokens?",
-        "answer": "You can purchase additional packages from your account at any time to continue generating recipes. You can also wait for the next time your current plan tokens reset, even if it's the free one."
+        "question": "What happens if I run out of recipes?",
+        "answer": "You can purchase additional packs from your account at any time to continue generating recipes. You can also wait for your recipes to renew on your current plan, even on the free one."
       },
       {
         "question": "Do you have a free version?",
-        "answer": "Yes, we offer a free plan that includes 50 monthly tokens so you can try our service."
+        "answer": "Yes, we offer a free plan that includes 5 recipes per month so you can try our service."
       },
       {
-        "question": "Are subscription tokens permanent?",
-        "answer": "No, the tokens you receive with your subscription are not transferable from one period to another. At the end of the subscription period, the token balance is reset and you receive the amount corresponding to the new period. Keep in mind that unused tokens are not refunded."
+        "question": "Are subscription recipes permanent?",
+        "answer": "No, the recipes you receive with your subscription do not carry over from one period to another. At the end of the subscription period, your balance resets and you receive the amount for the new period. Unused recipes are not refunded."
       },
       {
         "question": "How can I cancel my subscription?",
@@ -1283,7 +1297,7 @@
       },
       {
         "question": "Do you offer refunds?",
-        "answer": "We do not offer refunds. Once you buy tokens, they stay on the page for consumption."
+        "answer": "We do not offer refunds. Once you purchase recipes, they remain in your account for use."
       },
       {
         "question": "Do you offer technical support?",

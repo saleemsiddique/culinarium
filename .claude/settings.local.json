@@ -1,6 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(npm run:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "stripe"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

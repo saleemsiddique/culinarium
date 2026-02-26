@@ -348,9 +348,9 @@
         "subscribeButton": "Suscribirse a Premium"
       },
       "popup": {
-        "title": "Tus Recetas",
-        "monthly": "Mensuales:",
-        "extra": "Extras:",
+        "title": "Tus Recetas disponibles",
+        "monthly": "Recetas del plan:",
+        "extra": "Recetas extra:",
         "total": "Total:"
       }
     },
@@ -362,9 +362,9 @@
     "new": "Nueva",
     "recipes": "Recetas",
     "tokens": {
-      "button": "Ver Tokens",
+      "button": "Ver Recetas",
       "buy": "Comprar",
-      "lowIndicator": "Tokens bajos"
+      "lowIndicator": "Pocas recetas"
     },
     "premium": {
       "button": "Premium",
@@ -493,7 +493,7 @@
     "actions": {
       "goToKitchen": "Ir a la Cocina",
       "generateAnother": "¡Quiero otra Receta!",
-      "cost": "Costo: {{tokens}} tokens"
+      "cost": "Usa 1 receta"
     },
     "loading": {
       "generatingImage": "Generando imagen..."
@@ -591,7 +591,7 @@
       },
       "success": {
         "title": "¡Pago exitoso!",
-        "message": "Gracias por tu compra. Tus tokens se han actualizado automáticamente.",
+        "message": "Gracias por tu compra. Tus recetas se han actualizado automáticamente.",
         "button": "Ir al Dashboard"
       },
       "failed": {
@@ -638,7 +638,7 @@
           "noSubscription": "Sin suscripción"
         },
         "nextBilling": "Próxima facturación",
-        "availableTokens": "Tokens disponibles",
+        "availableTokens": "Recetas disponibles",
         "cancel": "Cancelar Suscripción",
         "cancelNow": "Cancelar Suscripción Ahora",
         "reactivate": "Reactivar Suscripción",
@@ -736,7 +736,7 @@
   "payments": {
     "dashboard": {
       "title": "💳 Historial de Pagos",
-      "subtitle": "Gestiona tu suscripción y revisa tus compras de tokens",
+      "subtitle": "Gestiona tu suscripción y revisa tus compras de recetas",
       "loading": "Cargando datos...",
       "loginRequired": "Inicia sesión para ver tu historial"
     },
@@ -753,11 +753,11 @@
       }
     },
     "tokens": {
-      "title": "💰 Compras de Tokens",
-      "subtitle": "Historial de todas tus compras de tokens",
+      "title": "Recetas adicionales compradas",
+      "subtitle": "Historial de paquetes de recetas",
       "totalSpent": "Total gastado: €{{amount}}",
       "date": "Fecha",
-      "tokens": "Tokens",
+      "tokens": "Recetas",
       "package": "Paquete",
       "status": "Estado",
       "statusTypes": {
@@ -1040,23 +1040,37 @@
           "loadingUser": "Cargando usuario...",
           "generating": "Generando Receta...",
           "ready": "¡Genera mi Receta!",
-          "cost": "Costo: {{cost}} tokens"
+          "cost": "Usa 1 receta"
         },
         "utensils": "Utensilios"
       },
       "messages": {
-        "authError": "Por favor, regístrate para generar recetas y gestionar tus tokens.",
-        "tokenError": "⚡ Necesitas {{tokens}} tokens para {{action}}. Tienes {{current}} tokens disponibles. Compra más tokens desde el menú lateral.",
-        "success": "¡Receta {{action}} exitosamente! Se han descontado {{tokens}} tokens.",
+        "authError": "Por favor, regístrate para generar recetas y gestionar tus recetas.",
+        "tokenError": "Necesitas recetas disponibles para {{action}}. Te quedan {{current}} recetas. Consigue más desde el menú lateral.",
+        "success": "¡Receta {{action}} exitosamente! Se ha usado 1 receta.",
         "duplicateIngredient": "Ingrediente ya añadido",
         "duplicateExcluded": "Ingrediente a evitar ya añadido",
         "usedBefore": "Usado antes",
         "generatingImage": "La imagen se generará en segundo plano."
       },
       "loading": {
-        "title": "Generando tu Receta...",
-        "subtitle": "La imagen se generará en segundo plano."
-      }
+        "title": "Cocinando tu receta con IA...",
+        "subtitle": "La imagen se generará en segundo plano.",
+        "tips": [
+          "Seleccionando los mejores ingredientes...",
+          "Calculando las proporciones perfectas...",
+          "Añadiendo un toque de creatividad...",
+          "Casi listo, dale la vuelta...",
+          "Emplatando con estilo..."
+        ]
+      },
+      "advancedTabs": {
+        "restrictions": "Restricciones",
+        "cuisine": "Cocina",
+        "macros": "Macros",
+        "utensils": "Utensilios"
+      },
+      "getMoreRecipes": "Obtén más recetas"
     }
   },
     "macronutrients": {
@@ -1280,16 +1294,16 @@
         "answer": "No, las recetas que obtienes con los packs de pago único no caducan nunca. Se acumulan con las recetas de tu plan actual y puedes usarlas cuando quieras."
       },
       {
-        "question": "¿Qué pasa si se me acaban los tokens?",
-        "answer": "Podrás comprar paquetes adicionales desde tu cuenta en cualquier momento para seguir generando recetas. O también puedes esperar a la siguiente vez que se reinicien los tokens de tu plan actual, aunque sea el gratuito."
+        "question": "¿Qué pasa si se me acaban las recetas?",
+        "answer": "Podrás comprar paquetes adicionales desde tu cuenta en cualquier momento para seguir generando recetas. O también puedes esperar a que se renueven las recetas de tu plan actual, aunque sea el gratuito."
       },
       {
         "question": "¿Tienen una versión gratuita?",
-        "answer": "Sí, ofrecemos un plan gratuito que incluye 50 tokens mensuales para que puedas probar nuestro servicio."
+        "answer": "Sí, ofrecemos un plan gratuito que incluye 5 recetas al mes para que puedas probar nuestro servicio."
       },
       {
-        "question": "¿Los tokens de la suscripción son permanentes?",
-        "answer": "No, los tokens que recibes con tu suscripción no son acumulables de un periodo a otro. Al finalizar el periodo de la suscripción, el saldo de tokens se restablece y recibes la cantidad correspondiente al nuevo periodo. Ten en cuenta que los tokens no utilizados no se reembolsan."
+        "question": "¿Las recetas de la suscripción son permanentes?",
+        "answer": "No, las recetas que recibes con tu suscripción no son acumulables de un periodo a otro. Al finalizar el periodo de la suscripción, el saldo se restablece y recibes la cantidad correspondiente al nuevo periodo. Ten en cuenta que las recetas no utilizadas no se reembolsan."
       },
       {
         "question": "¿Cómo puedo cancelar mi suscripción?",
@@ -1297,7 +1311,7 @@
       },
       {
         "question": "¿Ofrecen reembolsos?",
-        "answer": "No ofrecemos reembolsos. Una vez compras tokens, se quedan en la pagina para consumo."
+        "answer": "No ofrecemos reembolsos. Una vez compras recetas, se quedan en tu cuenta para su uso."
       },
       {
         "question": "¿Ofrecen soporte técnico?",

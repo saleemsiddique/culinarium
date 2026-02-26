@@ -10,7 +10,20 @@ import AnalyticsGate from "@/components/AnalyticsGate"; // eslint-disable-line @
 import I18nProvider from "@/context/i18n-context";
 import AppReadyProvider from "@/context/appready-context";
 import InAppBrowserGuard from "@/components/InAppBrowserGuard";
+import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google';
 export const dynamic = 'force-dynamic';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
 
 export const metadata = {
   title: "Culinarium – Generador de recetas con IA",
@@ -120,7 +133,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${fraunces.variable} ${plusJakarta.variable}`}>
       <head>
         <link rel="stylesheet" href="global.css" />
         <script

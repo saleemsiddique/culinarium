@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser, CustomUser } from '@/context/user-context';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen, Menu, X, User } from 'lucide-react';
+import { Plus, BookOpen, Menu, X, User, Sparkles, ChefHat } from 'lucide-react';
 import { TokensModal } from "./SideMenu/TokensModal";
 import { PremiumModal } from "./SideMenu/PremiumModal";
 import { useTranslation } from "react-i18next";
@@ -84,6 +84,7 @@ export default function Header() {
   const isActiveSubscriber = user?.isSubscribed &&
     (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');
   const recipesDisplay = isActiveSubscriber ? '∞' : String(totalRecipes);
+  const isLowRecipes = !isActiveSubscriber && totalRecipes <= 2;
 
   // Clases mejoradas para el botón especial (Empezar)
   const specialButtonClasses =
@@ -135,10 +136,11 @@ export default function Header() {
                   <div className="flex justify-between items-center p-4">
                     <Link href={isLoggedIn ? '/kitchen' : '/'}>
                       <motion.h1
-                        className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer"
+                        className="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer flex items-center gap-2"
                         whileHover={{ scale: 1.05, color: 'var(--highlight)' }}
                         transition={{ duration: 0.2 }}
                       >
+                        <ChefHat className="w-6 h-6 text-[var(--highlight)]" aria-hidden="true" />
                         Culinarium
                       </motion.h1>
                     </Link>
@@ -196,7 +198,7 @@ export default function Header() {
                         <motion.button
                           onClick={() => {
                             setShowPremium(true);
-                            setDrawerOpen(false); // Cierra el drawer al abrir el modal
+                            setDrawerOpen(false);
                           }}
                           className="w-full py-3 mt-4 rounded-full text-lg font-bold shadow-lg transition-all duration-300
                                      bg-gradient-to-r from-yellow-400 to-yellow-600 text-white
@@ -223,10 +225,11 @@ export default function Header() {
             <div className="flex justify-between items-center h-16">
               <Link href={isLoggedIn ? '/kitchen' : '/'}>
                 <motion.h1
-                  className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer"
+                  className="font-display text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)] cursor-pointer flex items-center gap-2"
                   whileHover={{ scale: 1.05, color: 'var(--highlight)' }}
                   transition={{ duration: 0.2 }}
                 >
+                  <ChefHat className="w-6 h-6 text-[var(--highlight)]" aria-hidden="true" />
                   Culinarium
                 </motion.h1>
               </Link>
@@ -264,7 +267,7 @@ export default function Header() {
                 </ul>
 
                 {!isLoggedIn && (
-                  <Link href="/auth/login" passHref>
+                  <Link href="/auth/register" passHref>
                     <motion.button
                       className={specialButtonClasses}
                       whileHover={{ scale: 1.02 }}
@@ -277,7 +280,11 @@ export default function Header() {
 
                 {isLoggedIn && (
                   <div
-                    className="relative flex items-center bg-[var(--background)] p-2 rounded-full shadow-inner cursor-pointer border border-[var(--highlight)]"
+                    className={`relative flex items-center bg-[var(--background)] p-2 rounded-full shadow-inner cursor-pointer border ${
+                      isLowRecipes
+                        ? 'border-[var(--highlight)] animate-pulse-glow'
+                        : 'border-[var(--highlight)]'
+                    }`}
                     onMouseEnter={() => setShowTokensPopup(true)}
                     onMouseLeave={() => setShowTokensPopup(false)}
                   >
@@ -285,7 +292,7 @@ export default function Header() {
                       <span className="text-[var(--highlight)] font-bold text-lg">{recipesDisplay}</span>{" "}
                       {isActiveSubscriber ? t("header.tokens.unlimited") : t("header.tokens.recipes", { count: totalRecipes })}
                     </span>
-                    <span className="text-[var(--highlight)] text-xl">✨</span>
+                    <Sparkles className="w-5 h-5 text-[var(--highlight)]" aria-label="Recetas disponibles" />
 
                     {/* El popup de tokens, solo visible en escritorio */}
                     {showTokensPopup && !isMobile && (
