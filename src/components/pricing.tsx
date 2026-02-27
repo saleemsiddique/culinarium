@@ -232,20 +232,22 @@ export default function Pricing() {
           </div>
         </motion.div>
 
-        {/* Testimonial placeholder */}
+        {/* Testimonials */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 max-w-xl mx-auto text-center"
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
         >
-          <blockquote className="text-lg text-orange-100/80 italic leading-relaxed">
-            &ldquo;{t("pricing.testimonial.quote", { defaultValue: "Gener\u00E9 3 recetas con lo que ten\u00EDa en la nevera. Incre\u00EDble." })}&rdquo;
-          </blockquote>
-          <p className="mt-3 text-sm text-white/40 font-medium">
-            {t("pricing.testimonial.author", { defaultValue: "\u2014 Mar\u00EDa G." })}
-          </p>
+          {(t("pricing.testimonials", { returnObjects: true }) as Array<{ quote: string; author: string }>).map((item, i) => (
+            <div key={i} className="bg-white/5 rounded-2xl p-6 text-center border border-white/10">
+              <blockquote className="text-base text-orange-100/80 italic leading-relaxed mb-3">
+                &ldquo;{item.quote}&rdquo;
+              </blockquote>
+              <p className="text-sm text-white/40 font-medium">{item.author}</p>
+            </div>
+          ))}
         </motion.div>
       </div>
     </div>

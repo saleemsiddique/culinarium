@@ -78,12 +78,10 @@ export default function Header() {
   // Lógica para determinar si mostrar la cabecera en general
   const shouldHideHeader = isMobile && !isMobileProfilePage && !isAuthPage && pathname !== '/';
 
-  // Calcular el total de tokens y recetas
-  const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
-  const totalRecipes = Math.floor(totalTokens / 10);
+  // Calcular el total de recetas disponibles
+  const totalRecipes = (user?.monthly_recipes || 0) + (user?.extra_recipes || 0);
   const isActiveSubscriber = user?.isSubscribed &&
     (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');
-  const recipesDisplay = isActiveSubscriber ? '∞' : String(totalRecipes);
   const isLowRecipes = !isActiveSubscriber && totalRecipes <= 2;
 
   // Clases mejoradas para el botón especial (Empezar)
@@ -168,10 +166,10 @@ export default function Header() {
                         <h3 className="text-xl font-bold mb-3">{t("header.tokens.popup.title")}</h3>
                         <div className="space-y-2 mb-4">
                           <p className="flex justify-between items-center text-lg">
-                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_recipes || 0}</span>
                           </p>
                           <p className="flex justify-between items-center text-lg">
-                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_recipes || 0}</span>
                           </p>
                         </div>
                         <p className="text-sm italic mb-4">
@@ -309,10 +307,10 @@ export default function Header() {
                         <h3 className="text-lg font-bold mb-2 text-center">{t("header.tokens.popup.title")}</h3>
                         <div className="space-y-2">
                           <p className="flex justify-between items-center text-sm">
-                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_recipes || 0}</span>
                           </p>
                           <p className="flex justify-between items-center text-sm">
-                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                            <span>{t("header.tokens.popup.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_recipes || 0}</span>
                           </p>
                         </div>
                         <div className="h-px bg-gray-200 my-3" />

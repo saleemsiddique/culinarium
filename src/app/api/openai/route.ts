@@ -3,21 +3,18 @@
 
 // app/api/openai/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { auth, db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// Costo en tokens por generar una receta
-const TOKENS_PER_RECIPE = 10;
-
-// Timeout de 30 segundos para la llamada a OpenAI
+// Timeout de 30 segundos para la llamada a Claude
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error('OpenAI request timeout after 30s')), ms)
+      setTimeout(() => reject(new Error('Claude request timeout after 30s')), ms)
     ),
   ]);
 }
@@ -43,18 +40,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token de autenticación inválido' }, { status: 401 });
     }
 
-    // Validar tokens en servidor ANTES de llamar a OpenAI
+    // Validar recetas disponibles ANTES de llamar a Claude (dual-read fallback)
     const userDoc = await db.collection('user').doc(uid).get();
     if (!userDoc.exists) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
     const userData = userDoc.data();
-    const totalTokens = (userData?.monthly_tokens || 0) + (userData?.extra_tokens || 0);
-    if (totalTokens < TOKENS_PER_RECIPE) {
+    const totalRecipes =
+      (userData?.monthly_recipes ?? Math.floor((userData?.monthly_tokens || 0) / 10)) +
+      (userData?.extra_recipes ?? Math.floor((userData?.extra_tokens || 0) / 10));
+    if (totalRecipes < 1) {
       return NextResponse.json({
-        error: 'Tokens insuficientes',
-        required: TOKENS_PER_RECIPE,
-        available: totalTokens
+        error: 'Recetas insuficientes',
+        available: totalRecipes
       }, { status: 402 });
     }
 
@@ -217,26 +215,26 @@ ${JSON.stringify(body, null, 2)}
 `;
 
     const completion = await withTimeout(
-      openai.chat.completions.create({
-        model: 'gpt-4-turbo',
-        messages: [
-          { role: 'system', content: 'Eres un ayudante de recetas experto, preciso y que sigue instrucciones al pie de la letra.' },
-          { role: 'user', content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 2000,
+      anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: 'Eres un ayudante de recetas experto, preciso y que sigue instrucciones al pie de la letra. Responde ÚNICAMENTE con JSON válido, sin texto adicional ni markdown.',
+        messages: [{ role: 'user', content: prompt }],
       }),
       30000
     );
 
-    const text = completion.choices[0].message?.content ?? '{}';
+    const text = completion.content[0].type === 'text' ? completion.content[0].text : '{}';
+    // Limpiar posibles marcadores de markdown que Claude pueda añadir
+    const cleanText = text.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+
     let data;
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(cleanText);
     } catch (parseError) {
-      console.error('Error al parsear la respuesta de IA:', parseError, 'Raw text:', text);
+      console.error('Error al parsear la respuesta de IA:', parseError, 'Raw text:', cleanText);
       return NextResponse.json(
-        { error: 'Respuesta de IA no es JSON válido', raw: text, parseError: (parseError as Error).message },
+        { error: 'Respuesta de IA no es JSON válido', raw: cleanText, parseError: (parseError as Error).message },
         { status: 502 }
       );
     }

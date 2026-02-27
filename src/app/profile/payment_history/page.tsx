@@ -130,7 +130,7 @@ export default function PaymentDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[var(--foreground)] opacity-90">
                   <div>
                     <div className="text-xs uppercase text-[var(--foreground)] opacity-60">{t("payments.tokens.tokens")}</div>
-                    <div className="font-medium">{row.tokensAmount}</div>
+                    <div className="font-medium">{row.recipesAmount}</div>
                   </div>
                   <div>
                     <div className="text-xs uppercase text-[var(--foreground)] opacity-60">{t("payments.tokens.package")}</div>

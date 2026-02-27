@@ -83,6 +83,10 @@ export function useRecipeForm() {
   // Tokens modal
   const [showTokens, setShowTokens] = useState(false);
 
+  // First recipe modal (Bloque 5b)
+  const [showFirstRecipeModal, setShowFirstRecipeModal] = useState(false);
+  const [pendingNavigate, setPendingNavigate] = useState(false);
+
   // Difficulty
   const [difficulty, setDifficulty] = useState<Difficulty>("Principiante");
 
@@ -123,7 +127,8 @@ export function useRecipeForm() {
     []
   );
 
-  const calculateTokenCost = (): number => 10;
+  // Costo en recetas por generación: 1 receta = 1 crédito
+  const calculateTokenCost = (): number => 1;
 
   // --- Effects ---
 
@@ -149,6 +154,14 @@ export function useRecipeForm() {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+
+  // Navigate to recipes when first recipe modal is closed
+  useEffect(() => {
+    if (pendingNavigate && !showFirstRecipeModal) {
+      setPendingNavigate(false);
+      router.push("/kitchen/recipes");
+    }
+  }, [pendingNavigate, showFirstRecipeModal, router]);
 
   // --- Handlers ---
 
@@ -235,6 +248,11 @@ export function useRecipeForm() {
     setMealTimeError(false);
   };
 
+  const handleCloseFirstRecipeModal = () => {
+    setShowFirstRecipeModal(false);
+    // El useEffect se encarga de navegar cuando el modal se cierre
+  };
+
   // --- Submit ---
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -263,22 +281,26 @@ export function useRecipeForm() {
       return;
     }
 
-    const isRegeneration = searchParams.get("regenerate") === "1";
-    const TOKENS_PER_RECIPE = isRegeneration ? 5 : calculateTokenCost();
-    const recipeType = isRegeneration
-      ? t("culinarium.form.actions.regenerate")
-      : t("culinarium.form.actions.generate");
+    const RECIPES_PER_GENERATION = calculateTokenCost();
+    const recipeType = t("culinarium.form.actions.generate");
 
-    if (!hasEnoughTokens(TOKENS_PER_RECIPE)) {
-      const currentTokens = (user.monthly_tokens || 0) + (user.extra_tokens || 0);
+    if (!hasEnoughTokens(RECIPES_PER_GENERATION)) {
+      const currentRecipes = (user.monthly_recipes || 0) + (user.extra_recipes || 0);
       setToastMessage(
         t("culinarium.form.messages.tokenError", {
-          tokens: TOKENS_PER_RECIPE, action: recipeType, current: currentTokens,
+          tokens: RECIPES_PER_GENERATION, action: recipeType, current: currentRecipes,
         })
       );
       setShowTokens(true);
       return;
     }
+
+    // Detectar si es la primera receta (tenía exactamente 5 y 0 extra = free tier inicio)
+    const isFirstRecipe =
+      (user.monthly_recipes || 0) === 5 &&
+      (user.extra_recipes || 0) === 0 &&
+      typeof window !== "undefined" &&
+      !localStorage.getItem("culinarium_first_recipe_shown");
 
     setIngredientError(false);
     setMealTimeError(false);
@@ -319,7 +341,7 @@ export function useRecipeForm() {
 
       if (!openaiRes.ok) {
         const errorData = await openaiRes.json();
-        throw new Error(errorData.error || `Error OpenAI: Status ${openaiRes.status}`);
+        throw new Error(errorData.error || `Error IA: Status ${openaiRes.status}`);
       }
       recipeDataFromAI = await openaiRes.json();
 
@@ -330,9 +352,9 @@ export function useRecipeForm() {
         );
       }
 
-      try { await deductTokens(TOKENS_PER_RECIPE); } catch (tokenError) {
-        console.error("Error al deducir tokens:", tokenError);
-        throw new Error("Error al procesar el pago de tokens. Por favor, intenta de nuevo.");
+      try { await deductTokens(RECIPES_PER_GENERATION); } catch (tokenError) {
+        console.error("Error al deducir receta:", tokenError);
+        throw new Error("Error al procesar el descuento de receta. Por favor, intenta de nuevo.");
       }
 
       const saveIdToken = await firebaseUser.getIdToken();
@@ -349,17 +371,22 @@ export function useRecipeForm() {
 
       const savedRecipeData = await saveRecipeRes.json();
       setStatus("success");
-      const actionMessage = isRegeneration ? "regenerada" : "generada";
-      setToastMessage(
-        t("culinarium.form.messages.success", { action: actionMessage, tokens: TOKENS_PER_RECIPE })
-      );
+      setToastMessage(t("culinarium.form.messages.success", { action: "generada", tokens: RECIPES_PER_GENERATION }));
 
       if (typeof window !== "undefined") {
         sessionStorage.setItem("generatedRecipe", JSON.stringify(recipeDataFromAI.receta));
       }
 
       setIsLoadingOverlayVisible(false);
-      router.push("/kitchen/recipes");
+
+      // Mostrar modal de primera receta o navegar directamente
+      if (isFirstRecipe) {
+        localStorage.setItem("culinarium_first_recipe_shown", "true");
+        setShowFirstRecipeModal(true);
+        setPendingNavigate(true);
+      } else {
+        router.push("/kitchen/recipes");
+      }
 
       generateImageInBackground(recipeDataFromAI.receta, firebaseUser, savedRecipeData.id);
     } catch (err: any) {
@@ -371,14 +398,18 @@ export function useRecipeForm() {
     }
   };
 
-  // Background image generation
+  // Background image generation — incluye auth token para tiering correcto
   const generateImageInBackground = async (
     recipe: any, fbUser: FirebaseUser, recipeId: string
   ) => {
     try {
+      const idToken = await fbUser.getIdToken();
       const imageRes = await fetch("/api/recipe-image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ recipe }),
       });
 
@@ -622,10 +653,14 @@ export function useRecipeForm() {
     isLoadingOverlayVisible,
     toastMessage,
 
-    // Tokens
+    // Tokens/Recipes
     showTokens,
     setShowTokens,
     calculateTokenCost,
+
+    // First recipe modal
+    showFirstRecipeModal,
+    handleCloseFirstRecipeModal,
 
     // Submit
     handleSubmit,

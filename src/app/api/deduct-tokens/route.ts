@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const { amount } = await request.json();
 
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: 'Cantidad de tokens inválida' }, { status: 400 });
+      return NextResponse.json({ error: 'Cantidad inválida' }, { status: 400 });
     }
 
     const authHeader = request.headers.get('Authorization');
@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
     const userRef = db.collection('user').doc(uid);
 
     // Usar Firestore transaction para evitar race condition
-    // Dos requests simultáneos no pueden consumir los mismos tokens
     const result = await db.runTransaction(async (transaction) => {
       const userDoc = await transaction.get(userRef);
 
@@ -43,58 +42,60 @@ export async function POST(request: NextRequest) {
         throw new Error('Datos de usuario no válidos');
       }
 
-      const currentMonthlyTokens = userData.monthly_tokens || 0;
-      const currentExtraTokens = userData.extra_tokens || 0;
-      const totalTokens = currentMonthlyTokens + currentExtraTokens;
+      // Dual-read fallback: monthly_recipes ?? floor(monthly_tokens / 10)
+      const currentMonthlyRecipes = userData.monthly_recipes ?? Math.floor((userData.monthly_tokens || 0) / 10);
+      const currentExtraRecipes = userData.extra_recipes ?? Math.floor((userData.extra_tokens || 0) / 10);
+      const totalRecipes = currentMonthlyRecipes + currentExtraRecipes;
 
-      if (totalTokens < amount) {
-        throw new Error(`Tokens insuficientes: disponible=${totalTokens}, requerido=${amount}`);
+      if (totalRecipes < amount) {
+        throw new Error(`Recetas insuficientes: disponible=${totalRecipes}, requerido=${amount}`);
       }
 
       let remainingToDeduct = amount;
-      let newMonthlyTokens = currentMonthlyTokens;
-      let newExtraTokens = currentExtraTokens;
+      let newMonthlyRecipes = currentMonthlyRecipes;
+      let newExtraRecipes = currentExtraRecipes;
 
-      if (remainingToDeduct > 0 && newMonthlyTokens > 0) {
-        const deductFromMonthly = Math.min(remainingToDeduct, newMonthlyTokens);
-        newMonthlyTokens -= deductFromMonthly;
+      // Deducir primero de monthly, luego de extra
+      if (remainingToDeduct > 0 && newMonthlyRecipes > 0) {
+        const deductFromMonthly = Math.min(remainingToDeduct, newMonthlyRecipes);
+        newMonthlyRecipes -= deductFromMonthly;
         remainingToDeduct -= deductFromMonthly;
       }
 
-      if (remainingToDeduct > 0 && newExtraTokens > 0) {
-        const deductFromExtra = Math.min(remainingToDeduct, newExtraTokens);
-        newExtraTokens -= deductFromExtra;
+      if (remainingToDeduct > 0 && newExtraRecipes > 0) {
+        const deductFromExtra = Math.min(remainingToDeduct, newExtraRecipes);
+        newExtraRecipes -= deductFromExtra;
       }
 
       transaction.update(userRef, {
-        monthly_tokens: newMonthlyTokens,
-        extra_tokens: newExtraTokens,
+        monthly_recipes: newMonthlyRecipes,
+        extra_recipes: newExtraRecipes,
       });
 
-      return { newMonthlyTokens, newExtraTokens };
+      return { newMonthlyRecipes, newExtraRecipes };
     });
 
     return NextResponse.json({
-      message: 'Tokens deducidos correctamente',
+      message: 'Receta deducida correctamente',
       deducted: amount,
       updatedUser: {
-        monthly_tokens: result.newMonthlyTokens,
-        extra_tokens: result.newExtraTokens,
+        monthly_recipes: result.newMonthlyRecipes,
+        extra_recipes: result.newExtraRecipes,
       }
     });
 
   } catch (error: any) {
-    console.error('Error al descontar tokens:', error);
+    console.error('Error al descontar receta:', error);
 
-    if (error.message?.includes('Tokens insuficientes')) {
-      return NextResponse.json({ error: 'Tokens insuficientes' }, { status: 400 });
+    if (error.message?.includes('Recetas insuficientes')) {
+      return NextResponse.json({ error: 'Recetas insuficientes' }, { status: 400 });
     }
     if (error.message === 'Usuario no encontrado') {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({
-      error: 'Error interno del servidor al descontar tokens',
+      error: 'Error interno del servidor al descontar receta',
       details: error.message
     }, { status: 500 });
   }

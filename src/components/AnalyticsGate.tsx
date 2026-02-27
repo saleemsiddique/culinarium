@@ -5,6 +5,8 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Script from "next/script";
+import { GA_MEASUREMENT_ID } from "@/lib/gtag";
 
 const DynamicAnalytics = dynamic(
   () => import("@vercel/analytics/react").then((m) => m.Analytics),
@@ -66,5 +68,29 @@ export default function AnalyticsGate() {
   }, []);
 
   if (!allowed) return null;
-  return <DynamicAnalytics />;
+  return (
+    <>
+      <DynamicAnalytics />
+      {GA_MEASUREMENT_ID && (
+        <>
+          <Script
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          />
+          <Script
+            id="gtag-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}', { page_path: window.location.pathname });
+              `,
+            }}
+          />
+        </>
+      )}
+    </>
+  );
 }

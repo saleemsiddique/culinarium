@@ -78,7 +78,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
   const { user } = useUser(); // CustomUser | null
   const { t } = useTranslation();
 
-  const totalTokens = (user?.monthly_tokens || 0) + (user?.extra_tokens || 0);
+  const totalTokens = (user?.monthly_recipes || 0) + (user?.extra_recipes || 0);
   const remainingTokens = totalTokens;
   const onOpenPremium = () => setShowPremium(true);
   const onOpenTokens = () => setShowTokens(true);
@@ -135,10 +135,10 @@ const SideMenu: React.FC<SideMenuProps> = ({ className = '' }) => {
               <h3 className="text-xl font-bold mb-3">{t("header.tokens.title")}</h3>
               <div className="space-y-2 mb-4">
                 <p className="flex justify-between items-center text-lg">
-                  <span>{t("header.tokens.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_tokens || 0}</span>
+                  <span>{t("header.tokens.monthly")}</span> <span className="font-bold text-[var(--highlight)]">{user?.monthly_recipes || 0}</span>
                 </p>
                 <p className="flex justify-between items-center text-lg">
-                  <span>{t("header.tokens.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_tokens || 0}</span>
+                  <span>{t("header.tokens.extra")}</span> <span className="font-bold text-[var(--highlight)]">{user?.extra_recipes || 0}</span>
                 </p>
               </div>
               <p className="text-sm italic mb-4">

@@ -15,9 +15,9 @@ interface TokensModalProps {
 export const TokensModal: React.FC<TokensModalProps> = ({ onClose, user }) => {
   useBodyScrollLock(true);
 
-  const extra = user?.extra_tokens || 0;
-  const monthly = user?.monthly_tokens || 0;
-  const totalRecipes = Math.floor((extra + monthly) / 10);
+  const extra = user?.extra_recipes || 0;
+  const monthly = user?.monthly_recipes || 0;
+  const totalRecipes = extra + monthly;
   const { t } = useTranslation();
   const isActiveSubscriber = user?.isSubscribed &&
     (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'cancel_at_period_end');

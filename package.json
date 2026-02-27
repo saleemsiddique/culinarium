@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "export:newsletter": "tsx scripts/export-newsletter-subscribers.ts",
-    "bulk:newsletter:force": "tsx scripts/bulk-force-newsletter-consent.ts"
+    "bulk:newsletter:force": "tsx scripts/bulk-force-newsletter-consent.ts",
+    "migrate:tokens": "tsx scripts/migrate-tokens-to-recipes.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",

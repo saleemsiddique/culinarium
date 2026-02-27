@@ -41,49 +41,49 @@ export async function POST(request: NextRequest) {
     });
 
     // =============================================
-    // MAPA DE PRECIOS A TOKENS
+    // MAPA DE PRECIOS A RECETAS
     // =============================================
-    const PRICE_TO_TOKENS: Record<string, { type: string; tokens: number; name: string; isSubscription: boolean; price: number }> = {
+    const PRICE_TO_RECIPES: Record<string, { type: string; recipes: number; name: string; isSubscription: boolean; price: number }> = {
       // Premium legacy €7.99 (mantener para suscriptores existentes)
       price_1RwHJCRpBiBhmezm4D1fPQt5: {
         type: "subscription",
-        tokens: 300,
+        recipes: 30,
         name: "Culinarium Premium Legacy",
         isSubscription: true,
         price: 7.99,
       },
-      // Extra Tokens packs (legacy — archivar en Stripe pero mantener soporte)
-      price_1RwHKLRpBiBhmezmK1AybT5C: { type: "tokens", tokens: 30, name: "Pack 30 tokens", isSubscription: false, price: 0.99 },
-      price_1RwHL6RpBiBhmezmsEhJyMC1: { type: "tokens", tokens: 60, name: "Pack 60 Tokens", isSubscription: false, price: 1.99 },
-      price_1RwHLWRpBiBhmezmY3vPGDxT: { type: "tokens", tokens: 120, name: "Pack 120 Tokens", isSubscription: false, price: 3.49 },
-      price_1RwHLrRpBiBhmezmFamEW9Ct: { type: "tokens", tokens: 250, name: "Pack 250 Tokens", isSubscription: false, price: 6.49 },
-      price_1RwHMCRpBiBhmezmRzyb4DAm: { type: "tokens", tokens: 600, name: "Pack 600 Tokens", isSubscription: false, price: 13.99 },
-      price_1RwHMbRpBiBhmezmgyMbGrJq: { type: "tokens", tokens: 1200, name: "Pack 1200 Tokens", isSubscription: false, price: 24.99 },
+      // Extra Recipes packs (legacy — archivar en Stripe pero mantener soporte)
+      price_1RwHKLRpBiBhmezmK1AybT5C: { type: "recipes", recipes: 3, name: "Pack 3 recetas", isSubscription: false, price: 0.99 },
+      price_1RwHL6RpBiBhmezmsEhJyMC1: { type: "recipes", recipes: 6, name: "Pack 6 Recetas", isSubscription: false, price: 1.99 },
+      price_1RwHLWRpBiBhmezmY3vPGDxT: { type: "recipes", recipes: 12, name: "Pack 12 Recetas", isSubscription: false, price: 3.49 },
+      price_1RwHLrRpBiBhmezmFamEW9Ct: { type: "recipes", recipes: 25, name: "Pack 25 Recetas", isSubscription: false, price: 6.49 },
+      price_1RwHMCRpBiBhmezmRzyb4DAm: { type: "recipes", recipes: 60, name: "Pack 60 Recetas", isSubscription: false, price: 13.99 },
+      price_1RwHMbRpBiBhmezmgyMbGrJq: { type: "recipes", recipes: 120, name: "Pack 120 Recetas", isSubscription: false, price: 24.99 },
     };
 
     // Añadir nuevos precios desde variables de entorno si están definidos
     if (process.env.STRIPE_PRICE_PREMIUM) {
-      PRICE_TO_TOKENS[process.env.STRIPE_PRICE_PREMIUM] = {
+      PRICE_TO_RECIPES[process.env.STRIPE_PRICE_PREMIUM] = {
         type: "subscription",
-        tokens: 999,
+        recipes: 99,
         name: "Culinarium Premium",
         isSubscription: true,
         price: 9.99,
       };
     }
     if (process.env.STRIPE_PRICE_PAYG) {
-      PRICE_TO_TOKENS[process.env.STRIPE_PRICE_PAYG] = {
-        type: "tokens",
-        tokens: 150,
+      PRICE_TO_RECIPES[process.env.STRIPE_PRICE_PAYG] = {
+        type: "recipes",
+        recipes: 15,
         name: "Pack 15 Recetas",
         isSubscription: false,
         price: 4.99,
       };
     }
     if (process.env.STRIPE_PRICE_PREMIUM_ANNUAL) {
-      PRICE_TO_TOKENS[process.env.STRIPE_PRICE_PREMIUM_ANNUAL] = {
+      PRICE_TO_RECIPES[process.env.STRIPE_PRICE_PREMIUM_ANNUAL] = {
         type: "subscription",
-        tokens: 999,
+        recipes: 99,
         name: "Culinarium Premium Anual",
         isSubscription: true,
         price: 79.99,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // =============================================
-    // NUEVA SUSCRIPCIÓN O COMPRA DE TOKENS
+    // NUEVA SUSCRIPCIÓN O COMPRA DE RECETAS
     // =============================================
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
@@ -157,11 +157,11 @@ export async function POST(request: NextRequest) {
 
       if (lineItems.data.length > 0) {
         const priceId = lineItems.data[0].price?.id;
-        const productConfig = PRICE_TO_TOKENS[priceId as keyof typeof PRICE_TO_TOKENS];
+        const productConfig = PRICE_TO_RECIPES[priceId as keyof typeof PRICE_TO_RECIPES];
 
         if (productConfig) {
           if (productConfig.isSubscription) {
-            // NUEVA SUSCRIPCIÓN - Solo configurar, NO dar tokens aún (los da invoice.payment_succeeded)
+            // NUEVA SUSCRIPCIÓN - Solo configurar, NO dar recetas aún (las da invoice.payment_succeeded)
             const subsRef = db.collection("user").doc(userId).collection("subscripcion");
             const existingSub = await subsRef.limit(1).get();
 
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
               status: "active",
               planName: productConfig.name,
               price: productConfig.price,
-              tokensIncluded: productConfig.tokens,
+              recipesIncluded: productConfig.recipes,
               sessionId: session.id,
               updatedAt: new Date(),
               endsAt: oneMonthLater,
@@ -193,15 +193,15 @@ export async function POST(request: NextRequest) {
               stripeCustomerId: session.customer,
             });
           } else {
-            if (productConfig.tokens > 0) {
+            if (productConfig.recipes > 0) {
               await db.collection("user").doc(userId).update({
-                extra_tokens: FieldValue.increment(productConfig.tokens),
+                extra_recipes: FieldValue.increment(productConfig.recipes),
               });
             }
 
             await db.collection("user").doc(userId).collection("token_purchases").add({
               productName: productConfig.name,
-              tokensAmount: productConfig.tokens,
+              recipesAmount: productConfig.recipes,
               sessionId: session.id,
               priceId: priceId,
               price: productConfig.price,
@@ -290,22 +290,21 @@ export async function POST(request: NextRequest) {
         const userId = userDoc.id;
 
         if (invoice.parent?.subscription_details?.subscription) {
-          // Obtener el price ID de la suscripción para determinar tokens dinámicamente
-          let tokensToReset = 300; // valor por defecto
+          // Obtener el price ID de la suscripción para determinar recetas dinámicamente
+          let recipesToReset = 30; // valor por defecto (era 300 tokens / 10)
           try {
             const subscriptionId = invoice.parent.subscription_details.subscription as string;
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
             const priceId = subscription.items.data[0]?.price?.id;
-            if (priceId && PRICE_TO_TOKENS[priceId]) {
-              tokensToReset = PRICE_TO_TOKENS[priceId].tokens;
+            if (priceId && PRICE_TO_RECIPES[priceId]) {
+              recipesToReset = PRICE_TO_RECIPES[priceId].recipes;
             }
           } catch (err) {
-            console.warn("No se pudo obtener el price ID de la suscripción, usando 300:", err);
+            console.warn("No se pudo obtener el price ID de la suscripción, usando 30:", err);
           }
 
           await userDoc.ref.update({
-            monthly_tokens: tokensToReset,
-            tokens_reset_date: oneMonthLater,
+            monthly_recipes: recipesToReset,
             lastRenewal: new Date(),
           });
 
@@ -362,7 +361,7 @@ export async function POST(request: NextRequest) {
           subscriptionCanceled: false,
           isSubscribed: false,
           subscriptionStatus: "cancelled",
-          monthly_tokens: 50,
+          monthly_recipes: 5,
         });
 
         const subsRef = db.collection("user").doc(userId).collection("subscripcion");

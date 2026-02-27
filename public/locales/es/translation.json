@@ -579,8 +579,8 @@
       }
     }
   },
-  "checkout":{
-    "subscribe":"Suscribirse",
+  "checkout": {
+    "subscribe": "Suscribirse",
     "return": {
       "loading": "Verificando pago...",
       "processing": "Procesando pago...",
@@ -886,7 +886,7 @@
     "form": {
       "commonIngredients": {
         "chicken": "Chicken",
-        "beef": "Beef", 
+        "beef": "Beef",
         "fish": "Fish",
         "eggs": "Eggs",
         "milk": "Milk",
@@ -924,7 +924,7 @@
           "noLimit": "Prefiero no limitar",
           "options": {
             "15": "15 minutos",
-            "30": "30 minutos", 
+            "30": "30 minutos",
             "45": "45 minutos",
             "60": "1 hora",
             "90": "1 hora 30 minutos",
@@ -936,7 +936,7 @@
           "description": "Selecciona qué nivel prefieres que tenga la receta.",
           "levels": {
             "beginner": "Principiante",
-            "intermediate": "Intermedio", 
+            "intermediate": "Intermedio",
             "chef": "Chef"
           }
         },
@@ -948,7 +948,7 @@
               "emoji": "☕"
             },
             "lunch": {
-              "label": "Comida", 
+              "label": "Comida",
               "emoji": "🍲"
             },
             "dinner": {
@@ -977,7 +977,7 @@
           "empty": "¡Añade ingredientes que quieras evitar!",
           "options": {
             "vegetarian": "Vegetariano",
-            "vegan": "Vegano", 
+            "vegan": "Vegano",
             "glutenFree": "Sin Gluten",
             "lactoseFree": "Sin Lactosa",
             "keto": "Keto"
@@ -992,7 +992,7 @@
               "icon": "sushi"
             },
             "mexican": {
-              "label": "Mexicana", 
+              "label": "Mexicana",
               "icon": "taco"
             },
             "italian": {
@@ -1025,7 +1025,7 @@
             "oven": "Horno",
             "microwave": "Microondas",
             "airfryer": "Airfryer",
-            "pan": "Sartén", 
+            "pan": "Sartén",
             "pot": "Olla",
             "blender": "Batidora",
             "mixer": "Licuadora",
@@ -1073,7 +1073,7 @@
       "getMoreRecipes": "Obtén más recetas"
     }
   },
-    "macronutrients": {
+  "macronutrients": {
     "title": "Macronutrientes",
     "warning": "Usar responsablemente ⚠️",
     "modes": {
@@ -1088,7 +1088,7 @@
           "emoji": "🏋️"
         },
         "more_carbs": {
-          "label": "Más energía", 
+          "label": "Más energía",
           "emoji": "⚡"
         },
         "more_fats": {
@@ -1101,7 +1101,7 @@
       "calories": "Calorías",
       "caloriesLabel": "Calorías objetivo",
       "protein": "Proteínas 🥩",
-      "carbs": "Carbohidratos 🍚", 
+      "carbs": "Carbohidratos 🍚",
       "fats": "Grasas 🥑",
       "total": "Total",
       "approximate": "Valores aproximados",
@@ -1174,7 +1174,7 @@
       "newsletterLabel": "Quiero recibir el newsletter"
     }
   },
-  "and":" y ",
+  "and": " y ",
   "infoBox": {
     "badge": "Cocina Inteligente",
     "title": "Revoluciona tu forma de",
@@ -1260,7 +1260,21 @@
       "getStarted": "Empezar gratis",
       "buyNow": "Comprar ahora",
       "subscribe": "Suscribirse"
-    }
+    },
+    "testimonials": [
+      {
+        "quote": "Generé 3 recetas con lo que tenía en la nevera. Increíble cómo la IA lo combinó todo.",
+        "author": "— María G."
+      },
+      {
+        "quote": "Perfecto para cuando llegas a casa sin ideas. En segundos tienes una receta deliciosa.",
+        "author": "— Carlos M."
+      },
+      {
+        "quote": "Me sorprendió la calidad. Seguí la receta al pie de la letra y quedó mejor que en un restaurante.",
+        "author": "— Ana P."
+      }
+    ]
   },
   "faq": {
     "section": {
@@ -1351,5 +1365,15 @@
       "errorMsg": "No pudimos actualizar tu preferencia del newsletter. Inténtalo de nuevo.",
       "tryAgain": "Reintentar"
     }
+  },
+  "firstRecipeModal": {
+    "title": "¡Primera receta lista!",
+    "subtitle": "Acabas de generar tu primera receta con Culinarium. Nos alegra que estés aquí.",
+    "close": "Cerrar",
+    "remaining": "Te quedan",
+    "remainingLabel": "recetas gratuitas este mes",
+    "cta": "¿Quieres generar 15 recetas más? Consigue el Pack de recetas y cocina sin límites.",
+    "buyMore": "Conseguir más recetas",
+    "viewRecipe": "Ver mi receta"
   }
 }

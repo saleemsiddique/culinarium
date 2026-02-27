@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Plus } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Icon from "@mdi/react";
 import FormTag from "./FormTag";

@@ -9,6 +9,7 @@ import { CustomUser, useUser } from "@/context/user-context";
 import { useRecipeForm } from "@/hooks/useRecipeForm";
 import Onboarding from "@/components/onboarding";
 import { TokensModal } from "@/components/SideMenu/TokensModal";
+import FirstRecipeModal from "@/components/FirstRecipeModal";
 
 import IngredientSection from "@/components/kitchenForm/IngredientSection";
 import MealTimeSelector from "@/components/kitchenForm/MealTimeSelector";
@@ -23,7 +24,7 @@ const CulinariumForm: React.FC = () => {
   const form = useRecipeForm();
 
   const hasRecipes = form.user
-    ? ((form.user.monthly_tokens || 0) + (form.user.extra_tokens || 0)) >= 10
+    ? ((form.user.monthly_recipes || 0) + (form.user.extra_recipes || 0)) >= 1
     : false;
 
   return (
@@ -152,6 +153,14 @@ const CulinariumForm: React.FC = () => {
         <TokensModal
           user={user as CustomUser | null}
           onClose={() => form.setShowTokens(false)}
+        />
+      )}
+
+      {/* First recipe modal */}
+      {form.showFirstRecipeModal && (
+        <FirstRecipeModal
+          onClose={form.handleCloseFirstRecipeModal}
+          onGetMore={() => { form.handleCloseFirstRecipeModal(); form.setShowTokens(true); }}
         />
       )}
     </div>

@@ -101,7 +101,7 @@ function ProfileContent() {
     isError: false,
   });
 
-  const totalOfTokens = (user?.monthly_tokens ?? 0) + (user?.extra_tokens ?? 0);
+  const totalOfTokens = (user?.monthly_recipes ?? 0) + (user?.extra_recipes ?? 0);
 
   const handleLogout = async () => {
     try {
@@ -183,10 +183,12 @@ function ProfileContent() {
       });
       if (!response.ok) throw new Error("Error al cancelar la suscripción");
 
-      const subscriptionEndDate = user?.tokens_reset_date;
+      // Calcular próxima renovación a partir de lastRenewal + 30 días
+      const subscriptionEndDate = user?.lastRenewal
+        ? new Date(user.lastRenewal.toDate().getTime() + 30 * 24 * 60 * 60 * 1000)
+        : null;
       const formattedEndDate = subscriptionEndDate
-        ?.toDate()
-        .toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
+        ?.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
 
       const emailResponse = await fetch("/api/send-email", {
         method: "POST",

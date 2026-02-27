@@ -99,7 +99,9 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose, user }) => 
                   <p className="text-gray-600 text-sm mt-4">
                     <span className="font-semibold">
                       {t("premium.modal.subscribed.renewal", {
-                        date: user?.tokens_reset_date ? formatDate(user.tokens_reset_date.toDate()) : 'N/A'
+                        date: user?.lastRenewal
+                          ? formatDate(new Date(user.lastRenewal.toDate().getTime() + 30 * 24 * 60 * 60 * 1000))
+                          : 'N/A'
                       })}
                     </span>
                     .

@@ -6,6 +6,10 @@
       "env": {
         "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}"
       }
+    },
+    "firebase": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "firebase-tools@latest", "mcp"]
     }
   }
 }

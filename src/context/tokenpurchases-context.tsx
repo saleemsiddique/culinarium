@@ -5,7 +5,7 @@ import { db } from "@/lib/firebase";
 import { useUser } from "./user-context"; 
 
 interface TokenPurchase {
-  tokensAmount: number;
+  recipesAmount: number;
   productName: string;
   createdAt: Timestamp;
   price: string;
@@ -35,12 +35,22 @@ export function TokenPurchasesProvider({ children }: { children: ReactNode }) {
       try {
         const tokensRef = collection(db, "user", user.uid, "token_purchases"); // ← asegúrate de que coincide
         const snap = await getDocs(tokensRef);
-        const docs = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<TokenPurchase, "id">),
-        }));
-        // opcional: ordena por fecha
-        docs.sort((a, b) => b.tokensAmount - a.tokensAmount);
+        const docs = snap.docs.map((d) => {
+          const raw = d.data() as Record<string, unknown>;
+          // dual-read: soporta docs viejos (tokensAmount) y nuevos (recipesAmount)
+          const recipesAmount =
+            typeof raw.recipesAmount === "number"
+              ? raw.recipesAmount
+              : typeof raw.tokensAmount === "number"
+              ? raw.tokensAmount
+              : 0;
+          return {
+            id: d.id,
+            ...(raw as Omit<TokenPurchase, "id" | "recipesAmount">),
+            recipesAmount,
+          };
+        });
+        docs.sort((a, b) => b.recipesAmount - a.recipesAmount);
         setPurchases(docs);
       } catch (e) {
         console.error("Error fetching token purchases:", e);

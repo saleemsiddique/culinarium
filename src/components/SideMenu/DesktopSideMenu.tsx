@@ -11,9 +11,8 @@ interface DesktopSideMenuProps {
 }
 
 export const DesktopSideMenu: React.FC<DesktopSideMenuProps> = ({ onOpenTokens, onOpenPremium, className = "", user }) => {
-  const totalTokens = user ? user.monthly_tokens + user.extra_tokens : 0;
-  const tokensUsed = user ? Math.max(0, 30 - user.monthly_tokens) : 0;
-  const remainingTokens = totalTokens - tokensUsed;
+  const totalTokens = user ? (user.monthly_recipes || 0) + (user.extra_recipes || 0) : 0;
+  const remainingTokens = totalTokens;
 
   return (
     <aside className={`hidden md:flex fixed top-16 bottom-20 left-0 w-20 bg-white flex-col items-center justify-between py-6 border-r border-gray-200 ${className}`}>
