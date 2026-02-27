@@ -74,15 +74,6 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Normaliza datos de Firestore: soporta campos viejos (monthly_tokens) y nuevos (monthly_recipes)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeUserData(data: Record<string, any>): CustomUser {
-  return {
-    ...(data as CustomUser),
-    monthly_recipes: data.monthly_recipes ?? Math.floor((data.monthly_tokens || 0) / 10),
-    extra_recipes: data.extra_recipes ?? Math.floor((data.extra_tokens || 0) / 10),
-  };
-}
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CustomUser | null>(null);
@@ -145,8 +136,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const userSnapshot = await getDoc(userDocRef);
 
         if (userSnapshot.exists()) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let docData = normalizeUserData(userSnapshot.data() as Record<string, any>);
+          let docData = userSnapshot.data() as CustomUser;
           docData.uid = userSnapshot.id;
 
           docData = await checkAndResetMonthlyRecipes(docData);
@@ -175,8 +165,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const userSnapshot = await getDoc(userDocRef);
 
       if (userSnapshot.exists()) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const docData = normalizeUserData(userSnapshot.data() as Record<string, any>);
+        const docData = userSnapshot.data() as CustomUser;
         docData.uid = userSnapshot.id;
         setUser(docData);
       } else {
@@ -257,8 +246,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       throw new Error("Usuario no encontrado");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let docData = normalizeUserData(snapshot.data() as Record<string, any>);
+    let docData = snapshot.data() as CustomUser;
     docData.uid = snapshot.id;
 
     docData = await checkAndResetMonthlyRecipes(docData);
@@ -361,8 +349,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const docRef = doc(db, "user", userInfo.uid);
       await setDoc(docRef, userData);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      userData = normalizeUserData(userSnapshot.data() as Record<string, any>);
+      userData = userSnapshot.data() as CustomUser;
       userData.uid = userSnapshot.id;
       userData = await checkAndResetMonthlyRecipes(userData);
       updateLastActive(userData.uid).catch(console.error);

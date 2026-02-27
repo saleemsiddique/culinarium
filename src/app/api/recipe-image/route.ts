@@ -31,10 +31,8 @@ export async function POST(request: NextRequest) {
     }
     const userData = userDoc.data();
 
-    // Dual-read fallback para extra_recipes
-    const extraRecipes = userData?.extra_recipes ?? Math.floor((userData?.extra_tokens || 0) / 10);
-    const totalRecipes =
-      (userData?.monthly_recipes ?? Math.floor((userData?.monthly_tokens || 0) / 10)) + extraRecipes;
+    const extraRecipes = userData?.extra_recipes || 0;
+    const totalRecipes = (userData?.monthly_recipes || 0) + extraRecipes;
 
     if (totalRecipes <= 0) {
       return NextResponse.json({ error: 'Sin recetas disponibles' }, { status: 403 });

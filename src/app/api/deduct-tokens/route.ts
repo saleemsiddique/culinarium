@@ -42,9 +42,8 @@ export async function POST(request: NextRequest) {
         throw new Error('Datos de usuario no válidos');
       }
 
-      // Dual-read fallback: monthly_recipes ?? floor(monthly_tokens / 10)
-      const currentMonthlyRecipes = userData.monthly_recipes ?? Math.floor((userData.monthly_tokens || 0) / 10);
-      const currentExtraRecipes = userData.extra_recipes ?? Math.floor((userData.extra_tokens || 0) / 10);
+      const currentMonthlyRecipes = userData.monthly_recipes || 0;
+      const currentExtraRecipes = userData.extra_recipes || 0;
       const totalRecipes = currentMonthlyRecipes + currentExtraRecipes;
 
       if (totalRecipes < amount) {

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -8,8 +9,6 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { useUser } from "@/context/user-context";
 import { useIngredientHistory } from "@/hooks/useIngredientHistory";
 import { useTranslation } from "react-i18next";
-import i18n from "@/lib/i18n";
-import { compressDataUrlToJpeg } from "@/utils/image-compression";
 import type { Difficulty, MacroState, FormStatus } from "@/types/kitchen";
 import {
   mdiStove,
@@ -37,7 +36,7 @@ export function useRecipeForm() {
   // Firebase User State
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
-  const { user, hasEnoughTokens, deductTokens } = useUser();
+  const { user, hasEnoughTokens } = useUser();
 
   // Onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -310,137 +309,30 @@ export function useRecipeForm() {
     if (mealTime === null) { setMealTimeError(true); isValid = false; }
     if (!isValid) { setStatus("idle"); return; }
 
-    setStatus("loading");
-    setIsLoadingOverlayVisible(true);
-    setError(null);
-
-    let recipeDataFromAI: any = null;
     const selectedUtensils = Object.keys(utensils).filter((k) => utensils[k]);
 
-    try {
-      const formData = {
-        ingredients, mealTime, diners, dietaryRestrictions,
-        excludedIngredients, cuisineStyle, availableTime,
-        macronutrients: macros, utensils: selectedUtensils, difficulty,
-      };
+    const formData = {
+      ingredients, mealTime, diners, dietaryRestrictions,
+      excludedIngredients, cuisineStyle, availableTime,
+      macronutrients: macros, utensils: selectedUtensils, difficulty,
+    };
 
+    if (typeof window !== "undefined") {
+      try { sessionStorage.setItem("lastFormData", JSON.stringify(formData)); } catch { /* noop */ }
+      try { sessionStorage.setItem("pendingGenerationData", JSON.stringify(formData)); } catch { /* noop */ }
+    }
+
+    // Mark first recipe so RecipesContent can detect it
+    if (isFirstRecipe) {
       if (typeof window !== "undefined") {
-        try { sessionStorage.setItem("lastFormData", JSON.stringify(formData)); } catch { /* noop */ }
-      }
-
-      const idToken = await firebaseUser.getIdToken();
-      const openaiRes = await fetch("/api/openai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-          "Accept-Language": i18n.language,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!openaiRes.ok) {
-        const errorData = await openaiRes.json();
-        throw new Error(errorData.error || `Error IA: Status ${openaiRes.status}`);
-      }
-      recipeDataFromAI = await openaiRes.json();
-
-      if (recipeDataFromAI?.receta?.titulo?.startsWith("ERROR:")) {
-        throw new Error(
-          recipeDataFromAI.receta.descripcion ||
-          "La IA no pudo generar una receta válida con los ingredientes proporcionados."
-        );
-      }
-
-      try { await deductTokens(RECIPES_PER_GENERATION); } catch (tokenError) {
-        console.error("Error al deducir receta:", tokenError);
-        throw new Error("Error al procesar el descuento de receta. Por favor, intenta de nuevo.");
-      }
-
-      const saveIdToken = await firebaseUser.getIdToken();
-      const saveRecipeRes = await fetch("/api/recipes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipe: recipeDataFromAI.receta, idToken: saveIdToken }),
-      });
-
-      if (!saveRecipeRes.ok) {
-        const errorData = await saveRecipeRes.json();
-        throw new Error(errorData.error || `Error al guardar receta: Status ${saveRecipeRes.status}`);
-      }
-
-      const savedRecipeData = await saveRecipeRes.json();
-      setStatus("success");
-      setToastMessage(t("culinarium.form.messages.success", { action: "generada", tokens: RECIPES_PER_GENERATION }));
-
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("generatedRecipe", JSON.stringify(recipeDataFromAI.receta));
-      }
-
-      setIsLoadingOverlayVisible(false);
-
-      // Mostrar modal de primera receta o navegar directamente
-      if (isFirstRecipe) {
         localStorage.setItem("culinarium_first_recipe_shown", "true");
-        setShowFirstRecipeModal(true);
-        setPendingNavigate(true);
-      } else {
-        router.push("/kitchen/recipes");
+        sessionStorage.setItem("isFirstRecipe", "true");
       }
-
-      generateImageInBackground(recipeDataFromAI.receta, firebaseUser, savedRecipeData.id);
-    } catch (err: any) {
-      console.error("Error general en el proceso:", err);
-      setError(err.message);
-      setStatus("error");
-      setToastMessage(`Error: ${err.message}`);
-      setIsLoadingOverlayVisible(false);
     }
-  };
 
-  // Background image generation — incluye auth token para tiering correcto
-  const generateImageInBackground = async (
-    recipe: any, fbUser: FirebaseUser, recipeId: string
-  ) => {
-    try {
-      const idToken = await fbUser.getIdToken();
-      const imageRes = await fetch("/api/recipe-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ recipe }),
-      });
-
-      const imageData = await imageRes.json().catch(() => ({}));
-      if (imageRes.ok && imageData?.img_url) {
-        const compressedDataUrl = await compressDataUrlToJpeg(imageData.img_url, {
-          maxBytes: 1000_000, maxWidth: 1024, maxHeight: 1024,
-        });
-
-        const updatedRecipe = { ...recipe, img_url: compressedDataUrl };
-        const saveIdToken = await fbUser.getIdToken();
-        const updateRecipeRes = await fetch(`/api/recipes/${recipeId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recipe: updatedRecipe, idToken: saveIdToken }),
-        });
-
-        if (updateRecipeRes.ok) {
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem("generatedRecipe", JSON.stringify(updatedRecipe));
-          }
-        } else {
-          const errorData = await updateRecipeRes.json().catch(() => ({}));
-          console.warn("No se pudo actualizar la receta con la imagen:", errorData);
-        }
-      } else {
-        console.warn("No se pudo generar la imagen en segundo plano");
-      }
-    } catch (imgErr) {
-      console.error("Error generando imagen en segundo plano:", imgErr);
-    }
+    setStatus("loading");
+    // Navigate immediately — the stream will start from RecipesContent
+    router.push("/kitchen/recipes?generating=true");
   };
 
   // Auto-generate recipe from ?auto=1
